@@ -31,6 +31,10 @@
         {
           "id": "vibe-editor-template-page",
           "name": "template-page"
+        },
+        {
+          "id": "codeSnapshot",
+          "name": "코드 스냅샷"
         }
       ]
     },
@@ -49,6 +53,10 @@
         "view": "vibe-editor-template-page",
         "contents": "노션 없어요 노션 값 입력해주세요",
         "when": "config:vibe-editor.loginStatus == true"
+      },
+      {
+        "view": "codeSnapshot",
+        "contents": "코드 스냅샷 기능입니다."
       }
     ],
     "commands": [
@@ -71,6 +79,11 @@
         "command": "vibe-editor.exportDirectoryTree",
         "title": "디렉토리 구조 내보내기",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibe-editor.captureSnapshot",
+        "title": "📸 코드 스냅샷 촬영",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
@@ -79,6 +92,11 @@
           "command": "vibe-editor.copyCode",
           "when": "editorHasSelection",
           "group": "navigation"
+        },
+        {
+          "command": "vibe-editor.captureSnapshot",
+          "when": "editorHasSelection",
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [
