@@ -1,10 +1,16 @@
 import * as vscode from 'vscode'
 
 import { GithubLoginCommand, GoogleLoginCommand } from './commands/auth'
+import { CaptureSnapshotCommand } from './commands/captureSnapshot'
 import { CopyCodeCommand } from './commands/copyCode'
 import { DirectoryTreeCommand } from './commands/directoryTree'
 import { Configuration } from './configuration'
+import { setSnapshotProvider } from './services/snapshotService'
 import { IVSCodeAPI } from './types'
+import {
+  CodeSnapshotProvider,
+  registerSnapshotViewCommand,
+} from './views/codeSnapshotView'
 
 class VSCodeAPI implements IVSCodeAPI {
   public get env() {
@@ -52,11 +58,13 @@ export function activate(context: vscode.ExtensionContext): void {
     vscodeApi.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
   }
 
+  // 명령어 등록
   const commands = [
     new CopyCodeCommand(vscodeApi),
     new DirectoryTreeCommand(vscodeApi),
     new GoogleLoginCommand(vscodeApi),
     new GithubLoginCommand(vscodeApi),
+    new CaptureSnapshotCommand(context),
   ]
 
   commands.forEach((command) => {
@@ -66,6 +74,14 @@ export function activate(context: vscode.ExtensionContext): void {
     )
     context.subscriptions.push(disposable)
   })
+
+  // 코드 스냅샷 뷰 등록 및 전역 등록
+  const snapshotProvider = new CodeSnapshotProvider(context)
+  vscode.window.registerTreeDataProvider('codeSnapshot', snapshotProvider)
+  setSnapshotProvider(snapshotProvider) // ✅ 이 줄 추가됨
+
+  // 스냅샷 클릭 시 WebView 명령어 등록
+  registerSnapshotViewCommand(context)
 }
 
 export function deactivate(): void {
