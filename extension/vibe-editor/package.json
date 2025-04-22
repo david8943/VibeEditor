@@ -27,36 +27,50 @@
         {
           "id": "vibe-editor-viewer-page",
           "name": "login-page"
+        },
+        {
+          "id": "vibe-editor-template-page",
+          "name": "template-page"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "vibe-editor-viewer-page",
-        "contents": "In order to use git features, you can open a folder containing a git repository or clone from a URL.\n[Google Login](command:vibe-editor.googleLogin)\n[Gihub Login](command:vibe-editor.githubLogin)\nTo learn more about how to use git and source control in VS Code [read our docs](https://aka.ms/vscode-scm).",
-        "when": "true"
+        "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibe-editor.googleLogin)\n[GitHub Login](command:vibe-editor.githubLogin)",
+        "when": "config:vibe-editor.loginStatus == false"
+      },
+      {
+        "view": "vibe-editor-viewer-page",
+        "contents": "Vibe Editor에 로그인되었습니다.",
+        "when": "config:vibe-editor.loginStatus == true"
+      },
+      {
+        "view": "vibe-editor-template-page",
+        "contents": "노션 없어요 노션 값 입력해주세요",
+        "when": "config:vibe-editor.loginStatus == true"
       }
     ],
     "commands": [
       {
         "command": "vibe-editor.googleLogin",
-        "title": "googleLogin"
+        "title": "Google 로그인",
+        "category": "Vibe Editor"
       },
       {
         "command": "vibe-editor.githubLogin",
-        "title": "githubLogin"
-      },
-      {
-        "command": "vibe-editor.helloWorld",
-        "title": "Hello World"
+        "title": "GitHub 로그인",
+        "category": "Vibe Editor"
       },
       {
         "command": "vibe-editor.copyCode",
-        "title": "코드로 글 쓰기"
+        "title": "코드로 글 쓰기",
+        "category": "Vibe Editor"
       },
       {
         "command": "vibe-editor.exportDirectoryTree",
-        "title": "디렉토리 구조 내보내기"
+        "title": "디렉토리 구조 내보내기",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
@@ -74,6 +88,21 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "Vibe Editor",
+      "properties": {
+        "vibe-editor.loginStatus": {
+          "type": "boolean",
+          "default": false,
+          "description": "로그인 상태"
+        },
+        "vibe-editor.notionToken": {
+          "type": "string",
+          "default": "",
+          "description": "노션 API 토큰"
+        }
+      }
     }
   },
   "scripts": {
