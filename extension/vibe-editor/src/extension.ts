@@ -9,18 +9,18 @@ import * as fs from 'fs';
 function getDirectoryTree(dirPath: string, prefix = ''): string {
 	const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 	let result = '';
-  
+
 	for (const entry of entries) {
-	  const entryPath = path.join(dirPath, entry.name);
-	  result += `${prefix}${entry.name}\n`;
-  
-	  if (entry.isDirectory()) {
-		result += getDirectoryTree(entryPath, prefix + '  ');
-	  }
+		const entryPath = path.join(dirPath, entry.name);
+		result += `${prefix}${entry.name}\n`;
+
+		if (entry.isDirectory()) {
+			result += getDirectoryTree(entryPath, prefix + '  ');
+		}
 	}
-  
+
 	return result;
-  }
+}
 
 export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -39,37 +39,49 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
+	const googleLogin = vscode.commands.registerCommand('vibe-editor.googleLogin', () => {
+		vscode.window.showInformationMessage('googleLogin');
+	});
+
+	context.subscriptions.push(googleLogin);
+
+	const githubLogin = vscode.commands.registerCommand('vibe-editor.githubLogin', () => {
+		vscode.window.showInformationMessage('githubLogin');
+	});
+
+	context.subscriptions.push(githubLogin);
+
 	const copyCode = vscode.commands.registerCommand('vibe-editor.copyCode', async () => {
 		const editor = vscode.window.activeTextEditor;
-		if (!editor) {return;}
-	
+		if (!editor) { return; }
+
 		const selection = editor.selection;
 		const text = editor.document.getText(selection);
-	
+
 		if (text.trim()) {
-		  await vscode.env.clipboard.writeText(text);
-		  vscode.window.showInformationMessage('✅ 코드가 클립보드에 복사되었습니다!');
+			await vscode.env.clipboard.writeText(text);
+			vscode.window.showInformationMessage('✅ 코드가 클립보드에 복사되었습니다!');
 		} else {
-		  vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.');
+			vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.');
 		}
-	  });
-	
+	});
+
 	context.subscriptions.push(copyCode);
 
 	const showTextDocument = vscode.commands.registerCommand('vibe-editor.exportDirectoryTree', async (uri: vscode.Uri) => {
 		if (!uri || !uri.fsPath) {
-		  vscode.window.showWarningMessage('폴더를 선택하세요.');
-		  return;
+			vscode.window.showWarningMessage('폴더를 선택하세요.');
+			return;
 		}
-	
+
 		const treeText = getDirectoryTree(uri.fsPath);
 		const doc = await vscode.workspace.openTextDocument({
-		  content: treeText,
-		  language: 'plaintext'
+			content: treeText,
+			language: 'plaintext'
 		});
-	
+
 		await vscode.window.showTextDocument(doc);
-	  });
-	
+	});
+
 	context.subscriptions.push(showTextDocument);
 }

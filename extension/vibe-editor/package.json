@@ -9,14 +9,47 @@
   },
   "categories": [
     "Other"
-  ],"activationEvents": [],
+  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibe-editor-viewer",
+          "title": "vibe-editor-viewer",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vibe-editor-viewer": [
+        {
+          "id": "vibe-editor-viewer-page",
+          "name": "login-page"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "vibe-editor-viewer-page",
+        "contents": "In order to use git features, you can open a folder containing a git repository or clone from a URL.\n[Google Login](command:vibe-editor.googleLogin)\n[Gihub Login](command:vibe-editor.githubLogin)\nTo learn more about how to use git and source control in VS Code [read our docs](https://aka.ms/vscode-scm).",
+        "when": "true"
+      }
+    ],
     "commands": [
+      {
+        "command": "vibe-editor.googleLogin",
+        "title": "googleLogin"
+      },
+      {
+        "command": "vibe-editor.githubLogin",
+        "title": "githubLogin"
+      },
       {
         "command": "vibe-editor.helloWorld",
         "title": "Hello World"
-      }, 
+      },
       {
         "command": "vibe-editor.copyCode",
         "title": "코드로 글 쓰기"
@@ -26,7 +59,7 @@
         "title": "디렉토리 구조 내보내기"
       }
     ],
-     "menus": {
+    "menus": {
       "editor/context": [
         {
           "command": "vibe-editor.copyCode",
@@ -43,7 +76,6 @@
       ]
     }
   },
- 
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
