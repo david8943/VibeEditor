@@ -1,88 +1,73 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as vscode from 'vscode'
 
-function getDirectoryTree(dirPath: string, prefix = ''): string {
-	const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-	let result = '';
+import { GithubLoginCommand, GoogleLoginCommand } from './commands/auth'
+import { CopyCodeCommand } from './commands/copyCode'
+import { DirectoryTreeCommand } from './commands/directoryTree'
+import { Configuration } from './configuration'
+import { IVSCodeAPI } from './types'
 
-	for (const entry of entries) {
-		const entryPath = path.join(dirPath, entry.name);
-		result += `${prefix}${entry.name}\n`;
+class VSCodeAPI implements IVSCodeAPI {
+  public get env() {
+    return vscode.env
+  }
 
-		if (entry.isDirectory()) {
-			result += getDirectoryTree(entryPath, prefix + '  ');
-		}
-	}
+  public get workspace() {
+    return vscode.workspace
+  }
 
-	return result;
+  public showInformationMessage(message: string): void {
+    vscode.window.showInformationMessage(message)
+  }
+
+  public showWarningMessage(message: string): void {
+    vscode.window.showWarningMessage(message)
+  }
+
+  public showErrorMessage(message: string): void {
+    vscode.window.showErrorMessage(message)
+  }
+
+  public getActiveTextEditor() {
+    return vscode.window.activeTextEditor
+  }
+
+  public async openTextDocument(options: {
+    content: string
+    language: string
+  }) {
+    return vscode.workspace.openTextDocument(options)
+  }
+
+  public async showTextDocument(document: vscode.TextDocument) {
+    return vscode.window.showTextDocument(document)
+  }
 }
 
-export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vibe-editor" is now active!');
+export function activate(context: vscode.ExtensionContext): void {
+  const vscodeApi = new VSCodeAPI()
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vibe-editor.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+  // 로그인 상태 확인
+  const isLoggedIn = Configuration.get('loginStatus')
+  if (!isLoggedIn) {
+    vscodeApi.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
+  }
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
-	});
+  const commands = [
+    new CopyCodeCommand(vscodeApi),
+    new DirectoryTreeCommand(vscodeApi),
+    new GoogleLoginCommand(vscodeApi),
+    new GithubLoginCommand(vscodeApi),
+  ]
 
-	context.subscriptions.push(disposable);
+  commands.forEach((command) => {
+    const disposable = vscode.commands.registerCommand(
+      command.commandName,
+      command.execute.bind(command),
+    )
+    context.subscriptions.push(disposable)
+  })
+}
 
-	const googleLogin = vscode.commands.registerCommand('vibe-editor.googleLogin', () => {
-		vscode.window.showInformationMessage('googleLogin');
-	});
-
-	context.subscriptions.push(googleLogin);
-
-	const githubLogin = vscode.commands.registerCommand('vibe-editor.githubLogin', () => {
-		vscode.window.showInformationMessage('githubLogin');
-	});
-
-	context.subscriptions.push(githubLogin);
-
-	const copyCode = vscode.commands.registerCommand('vibe-editor.copyCode', async () => {
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) { return; }
-
-		const selection = editor.selection;
-		const text = editor.document.getText(selection);
-
-		if (text.trim()) {
-			await vscode.env.clipboard.writeText(text);
-			vscode.window.showInformationMessage('✅ 코드가 클립보드에 복사되었습니다!');
-		} else {
-			vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.');
-		}
-	});
-
-	context.subscriptions.push(copyCode);
-
-
-	
-
-	const showTextDocument = vscode.commands.registerCommand('vibe-editor.exportDirectoryTree', async (uri: vscode.Uri) => {
-		if (!uri || !uri.fsPath) {
-			vscode.window.showWarningMessage('폴더를 선택하세요.');
-			return;
-		}
-
-		const treeText = getDirectoryTree(uri.fsPath);
-		const doc = await vscode.workspace.openTextDocument({
-			content: treeText,
-			language: 'plaintext'
-		});
-
-		await vscode.window.showTextDocument(doc);
-	});
-
-	context.subscriptions.push(showTextDocument);
+export function deactivate(): void {
+  // 정리 작업이 필요한 경우 여기에 추가
 }
