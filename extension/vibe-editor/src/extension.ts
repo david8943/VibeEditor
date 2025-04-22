@@ -3,8 +3,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 
 function getDirectoryTree(dirPath: string, prefix = ''): string {
 	const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -67,6 +65,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(copyCode);
+
+
+	
 
 	const showTextDocument = vscode.commands.registerCommand('vibe-editor.exportDirectoryTree', async (uri: vscode.Uri) => {
 		if (!uri || !uri.fsPath) {
