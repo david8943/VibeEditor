@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { CodeSnapshot, Snapshot } from '../types/snapshot'
+import { Snapshot } from '../types/snapshot'
 import { SnapshotProvider } from '../views/codeSnapshotView'
 
 let codeProviderInstance: SnapshotProvider | undefined

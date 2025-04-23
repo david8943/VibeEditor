@@ -119,9 +119,19 @@
         "command": "vibe-editor.createTemplate",
         "title": "템플릿 생성",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.openContext",
+        "title": "컨텍스트 메뉴 열기"
       }
     ],
     "menus": {
+      "view/item/context": [
+        {
+          "command": "vibeEditor.openContext",
+          "when": "viewItem == vibeEditorCodeSnapshot"
+        }
+      ],
       "editor/context": [
         {
           "command": "vibeEditor.copyCode",
