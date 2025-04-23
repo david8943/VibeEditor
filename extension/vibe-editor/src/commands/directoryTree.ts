@@ -1,14 +1,14 @@
 import * as vscode from 'vscode'
 
 import { DirectoryTreeService } from '../services/directoryTreeService'
-import { ICommand, IVSCodeAPI } from '../types'
+import { ICommand } from '../types/command'
 
 export class DirectoryTreeCommand implements ICommand {
-  public static readonly commandName = 'vibe-editor.exportDirectoryTree'
+  public static readonly commandName = 'vibeEditor.exportDirectoryTreeSnapshot'
   private readonly directoryTreeService: DirectoryTreeService
 
-  constructor(private readonly vscodeApi: IVSCodeAPI) {
-    this.directoryTreeService = new DirectoryTreeService(vscodeApi)
+  constructor(context: vscode.ExtensionContext) {
+    this.directoryTreeService = new DirectoryTreeService(context)
   }
 
   public get commandName(): string {
@@ -17,16 +17,17 @@ export class DirectoryTreeCommand implements ICommand {
 
   public async execute(uri: vscode.Uri): Promise<void> {
     if (!uri?.fsPath) {
-      this.vscodeApi.showWarningMessage('폴더를 선택하세요.')
+      vscode.window.showWarningMessage('폴더를 선택하세요.')
       return
     }
 
-    const treeText = this.directoryTreeService.generateTree(uri.fsPath)
-    const doc = await this.vscodeApi.openTextDocument({
+    const treeText = await this.directoryTreeService.generateTree(uri.fsPath)
+
+    const doc = await vscode.workspace.openTextDocument({
       content: treeText,
       language: 'plaintext',
     })
 
-    await this.vscodeApi.showTextDocument(doc)
+    await vscode.window.showTextDocument(doc)
   }
 }
