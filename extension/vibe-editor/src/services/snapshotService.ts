@@ -3,15 +3,28 @@ import * as vscode from 'vscode'
 import { CodeSnapshot, Snapshot } from '../types/snapshot'
 import { SnapshotProvider } from '../views/codeSnapshotView'
 
-let providerInstance: SnapshotProvider | undefined
+let codeProviderInstance: SnapshotProvider | undefined
+let directoryProviderInstance: SnapshotProvider | undefined
+let logProviderInstance: SnapshotProvider | undefined
 
-export function setSnapshotProvider(provider: SnapshotProvider) {
-  providerInstance = provider
+export function setCodeSnapshotProvider(provider: SnapshotProvider) {
+  codeProviderInstance = provider
 }
 
-export function getSnapshotProvider(): SnapshotProvider | undefined {
-  return providerInstance
+export function setDirectorySnapshotProvider(provider: SnapshotProvider) {
+  directoryProviderInstance = provider
 }
+
+export function setLogSnapshotProvider(provider: SnapshotProvider) {
+  logProviderInstance = provider
+}
+
+export function refreshAllProviders() {
+  codeProviderInstance?.refresh()
+  directoryProviderInstance?.refresh()
+  logProviderInstance?.refresh()
+}
+
 export class SnapshotService {
   private context: vscode.ExtensionContext
 
@@ -58,6 +71,6 @@ export class SnapshotService {
       'workbench.view.extension.vibeEditorCodeSnapshot',
     )
 
-    getSnapshotProvider()?.refresh()
+    refreshAllProviders()
   }
 }

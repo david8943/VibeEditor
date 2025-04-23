@@ -9,7 +9,11 @@ import {
   SetNotionApiCommand,
 } from './commands'
 import { Configuration } from './configuration'
-import { setSnapshotProvider } from './services/snapshotService'
+import {
+  setCodeSnapshotProvider,
+  setDirectorySnapshotProvider,
+  setLogSnapshotProvider,
+} from './services/snapshotService'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
@@ -66,6 +70,7 @@ export function activate(context: vscode.ExtensionContext): void {
     context,
   )
   const logSnapshotProvider = new LogSnapshotProvider(context)
+
   vscode.window.registerTreeDataProvider(
     'vibeEditorCodeSnapshot',
     codeSnapshotProvider,
@@ -78,8 +83,11 @@ export function activate(context: vscode.ExtensionContext): void {
     'vibeEditorLogSnapshot',
     logSnapshotProvider,
   )
-  setSnapshotProvider(codeSnapshotProvider)
-  setSnapshotProvider(directoryTreeSnapshotProvider)
+
+  // 각 프로바이더 등록
+  setCodeSnapshotProvider(codeSnapshotProvider)
+  setDirectorySnapshotProvider(directoryTreeSnapshotProvider)
+  setLogSnapshotProvider(logSnapshotProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
