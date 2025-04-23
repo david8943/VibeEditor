@@ -114,6 +114,11 @@
         "command": "vibeEditor.setNotionApi",
         "title": "노션 PRIVATE API 키 설정",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibe-editor.createTemplate",
+        "title": "템플릿 생성",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
