@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { CodeSnapshot, Snapshot } from '../types/snapshot'
+import { Snapshot } from '../types/snapshot'
 
 class SnapshotItem extends vscode.TreeItem {
   constructor(public readonly snapshot: Snapshot) {
@@ -12,20 +12,10 @@ class SnapshotItem extends vscode.TreeItem {
       arguments: [snapshot],
     }
     this.iconPath = new vscode.ThemeIcon('symbol-snippet')
+    this.contextValue = 'vibeEditorCodeSnapshot' // ✅ 컨텍스트 메뉴 조건용
   }
 }
-class CodeSnapshotItem extends vscode.TreeItem {
-  constructor(public readonly snapshot: CodeSnapshot) {
-    super(snapshot.id, vscode.TreeItemCollapsibleState.None)
-    this.tooltip = `${snapshot.relativePath}:${snapshot.lineRange}`
-    this.command = {
-      command: 'vibeEditor.viewCodeSnapshot',
-      title: 'View Code Snapshot',
-      arguments: [snapshot],
-    }
-    this.iconPath = new vscode.ThemeIcon('symbol-snippet')
-  }
-}
+
 export class SnapshotProvider
   implements vscode.TreeDataProvider<vscode.TreeItem>
 {
@@ -48,10 +38,10 @@ export class SnapshotProvider
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
     const snapshots =
-      this.context.globalState.get<CodeSnapshot[]>('codeSnapshots') || []
+      this.context.globalState.get<Snapshot[]>('codeSnapshots') || []
     return snapshots
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((snapshot) => new CodeSnapshotItem(snapshot))
+      .map((snapshot) => new SnapshotItem(snapshot))
   }
 }
 
@@ -59,6 +49,7 @@ export class CodeSnapshotProvider extends SnapshotProvider {
   constructor(context: vscode.ExtensionContext) {
     super(context)
   }
+
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
     const snapshots =
       this.context.globalState.get<Snapshot[]>('snapshots') || []
@@ -73,6 +64,7 @@ export class DirectoryTreeSnapshotProvider extends SnapshotProvider {
   constructor(context: vscode.ExtensionContext) {
     super(context)
   }
+
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
     const snapshots =
       this.context.globalState.get<Snapshot[]>('snapshots') || []
@@ -87,6 +79,7 @@ export class LogSnapshotProvider extends SnapshotProvider {
   constructor(context: vscode.ExtensionContext) {
     super(context)
   }
+
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
     const snapshots =
       this.context.globalState.get<Snapshot[]>('snapshots') || []

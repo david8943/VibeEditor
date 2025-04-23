@@ -91,6 +91,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'vibeEditor.openContext',
+      (item: vscode.TreeItem) => {
+        vscode.window.showInformationMessage(`우클릭한 항목: ${item.label}`)
+        // TODO: Notion 업로드, 삭제 등의 기능 확장 가능
+      },
+    ),
+  )
+
   // 설정 변경 이벤트 구독
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
 }
