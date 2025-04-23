@@ -1,28 +1,32 @@
 import * as vscode from 'vscode'
 
-export interface CodeSnapshot {
-  id: string
-  filePath: string
-  relativePath: string
-  lineRange: string
-  content: string
-  createdAt: string
-}
+import { CodeSnapshot, Snapshot } from '../types/snapshot'
 
 class SnapshotItem extends vscode.TreeItem {
-  constructor(public readonly snapshot: CodeSnapshot) {
-    super(snapshot.id, vscode.TreeItemCollapsibleState.None)
-    this.tooltip = `${snapshot.relativePath}:${snapshot.lineRange}`
+  constructor(public readonly snapshot: Snapshot) {
+    super(snapshot.snapshotName, vscode.TreeItemCollapsibleState.None)
+    this.tooltip = `${snapshot.snapshotName}`
     this.command = {
-      command: 'vibe-editor.viewCodeSnapshot',
+      command: 'vibeEditor.viewCodeSnapshot',
       title: 'View Code Snapshot',
       arguments: [snapshot],
     }
     this.iconPath = new vscode.ThemeIcon('symbol-snippet')
   }
 }
-
-export class CodeSnapshotProvider
+class CodeSnapshotItem extends vscode.TreeItem {
+  constructor(public readonly snapshot: CodeSnapshot) {
+    super(snapshot.id, vscode.TreeItemCollapsibleState.None)
+    this.tooltip = `${snapshot.relativePath}:${snapshot.lineRange}`
+    this.command = {
+      command: 'vibeEditor.viewCodeSnapshot',
+      title: 'View Code Snapshot',
+      arguments: [snapshot],
+    }
+    this.iconPath = new vscode.ThemeIcon('symbol-snippet')
+  }
+}
+export class SnapshotProvider
   implements vscode.TreeDataProvider<vscode.TreeItem>
 {
   private _onDidChangeTreeData: vscode.EventEmitter<
@@ -32,7 +36,7 @@ export class CodeSnapshotProvider
     vscode.TreeItem | undefined | void
   > = this._onDidChangeTreeData.event
 
-  constructor(private context: vscode.ExtensionContext) {}
+  constructor(protected context: vscode.ExtensionContext) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire()
@@ -44,8 +48,50 @@ export class CodeSnapshotProvider
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
     const snapshots =
-      this.context.workspaceState.get<CodeSnapshot[]>('codeSnapshots') || []
+      this.context.globalState.get<CodeSnapshot[]>('codeSnapshots') || []
     return snapshots
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((snapshot) => new CodeSnapshotItem(snapshot))
+  }
+}
+
+export class CodeSnapshotProvider extends SnapshotProvider {
+  constructor(context: vscode.ExtensionContext) {
+    super(context)
+  }
+  getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
+    const snapshots =
+      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    return snapshots
+      .filter((snapshot) => snapshot.snapshotType === 'code')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((snapshot) => new SnapshotItem(snapshot))
+  }
+}
+
+export class DirectoryTreeSnapshotProvider extends SnapshotProvider {
+  constructor(context: vscode.ExtensionContext) {
+    super(context)
+  }
+  getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
+    const snapshots =
+      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    return snapshots
+      .filter((snapshot) => snapshot.snapshotType === 'directory')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((snapshot) => new SnapshotItem(snapshot))
+  }
+}
+
+export class LogSnapshotProvider extends SnapshotProvider {
+  constructor(context: vscode.ExtensionContext) {
+    super(context)
+  }
+  getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
+    const snapshots =
+      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    return snapshots
+      .filter((snapshot) => snapshot.snapshotType === 'log')
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
   }
@@ -54,11 +100,11 @@ export class CodeSnapshotProvider
 export function registerSnapshotViewCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      'vibe-editor.viewCodeSnapshot',
-      (snapshot: CodeSnapshot) => {
+      'vibeEditor.viewCodeSnapshot',
+      (snapshot: Snapshot) => {
         const panel = vscode.window.createWebviewPanel(
-          'codeSnapshot',
-          `📸 ${snapshot.id}`,
+          'captureCodeSnapshot',
+          `📸 ${snapshot.snapshotName}`,
           vscode.ViewColumn.One,
           { enableScripts: false },
         )
@@ -69,13 +115,13 @@ export function registerSnapshotViewCommand(context: vscode.ExtensionContext) {
   )
 }
 
-function getCodeWebviewHTML(snapshot: CodeSnapshot): string {
+function getCodeWebviewHTML(snapshot: Snapshot): string {
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>${snapshot.id}</title>
+      <title>${snapshot.snapshotName}</title>
       <style>
         body {
           font-family: monospace;
@@ -93,7 +139,7 @@ function getCodeWebviewHTML(snapshot: CodeSnapshot): string {
       </style>
     </head>
     <body>
-      <h3>${snapshot.relativePath} | ${snapshot.lineRange} | ${snapshot.createdAt}</h3>
+      <h3>${snapshot.snapshotName} | ${snapshot.createdAt}</h3>
       <pre>${snapshot.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
     </body>
     </html>
