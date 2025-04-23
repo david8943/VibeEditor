@@ -3,7 +3,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -16,109 +16,139 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "vibe-editor-viewer",
-          "title": "vibe-editor-viewer",
+          "id": "vibeEditorViewer",
+          "title": "vibeEditor",
           "icon": "media/icon.svg"
         }
       ]
     },
     "views": {
-      "vibe-editor-viewer": [
+      "vibeEditorViewer": [
         {
-          "id": "vibe-editor-viewer-page",
-          "name": "login-page"
+          "id": "vibeEditorViewerPage",
+          "name": "Vibe Editor"
         },
         {
-          "id": "vibe-editor-template-page",
-          "name": "template-page"
+          "id": "vibeEditorTemplatePage",
+          "name": "템플릿 목록"
         },
         {
-          "id": "codeSnapshot",
+          "id": "vibeEditorCodeSnapshot",
           "name": "코드 스냅샷"
+        },
+        {
+          "id": "vibeEditorDirectoryTreeSnapshot",
+          "name": "디렉토리 구조 시각화"
+        },
+        {
+          "id": "vibeEditorLogSnapshot",
+          "name": "로그 스냅 샷"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "vibe-editor-viewer-page",
-        "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibe-editor.googleLogin)\n[GitHub Login](command:vibe-editor.githubLogin)",
-        "when": "config:vibe-editor.loginStatus == false"
+        "view": "vibeEditorViewerPage",
+        "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibeEditor.googleLogin)\n[GitHub Login](command:vibeEditor.githubLogin)",
+        "when": "config:vibeEditor.loginStatus == false"
       },
       {
-        "view": "vibe-editor-viewer-page",
+        "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인되었습니다.",
-        "when": "config:vibe-editor.loginStatus == true"
+        "when": "config:vibeEditor.loginStatus == true"
       },
       {
-        "view": "vibe-editor-template-page",
-        "contents": "노션 없어요 노션 값 입력해주세요",
-        "when": "config:vibe-editor.loginStatus == true"
+        "view": "vibeEditorCodeSnapshot",
+        "contents": "코드 스냅샷입니다."
       },
       {
-        "view": "codeSnapshot",
-        "contents": "코드 스냅샷 기능입니다."
+        "view": "vibeEditorDirectoryTreeSnapshot",
+        "contents": "디렉토리 구조 시각화 스냅샷입니다."
+      },
+      {
+        "view": "vibeEditorLogSnapshot",
+        "contents": "로그 스냅샷입니다."
+      },
+      {
+        "contents": "노션 연동 정보가 없습니다.\n노션 PRIVATE API KEY를 입력해주세요.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
+        "when": "config:vibeEditor.loginStatus == true && config:vibeEditor.notionStatus == false"
+      },
+      {
+        "view": "vibeEditorTemplatePage",
+        "contents": "노션과 연동이 완료되었습니다.\n코드를 노션에 추가할 수 있습니다.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
+        "when": "config:vibeEditor.loginStatus == true && config:vibeEditor.notionStatus == true"
       }
     ],
     "commands": [
       {
-        "command": "vibe-editor.googleLogin",
+        "command": "vibeEditor.googleLogin",
         "title": "Google 로그인",
         "category": "Vibe Editor"
       },
       {
-        "command": "vibe-editor.githubLogin",
+        "command": "vibeEditor.githubLogin",
         "title": "GitHub 로그인",
         "category": "Vibe Editor"
       },
       {
-        "command": "vibe-editor.copyCode",
+        "command": "vibeEditor.copyCode",
         "title": "코드로 글 쓰기",
         "category": "Vibe Editor"
       },
       {
-        "command": "vibe-editor.exportDirectoryTree",
+        "command": "vibeEditor.exportDirectoryTreeSnapshot",
         "title": "디렉토리 구조 내보내기",
         "category": "Vibe Editor"
       },
       {
-        "command": "vibe-editor.captureSnapshot",
-        "title": "📸 코드 스냅샷 촬영",
+        "command": "vibeEditor.importLogSnapshot",
+        "title": "로그 스냅샷 가져오기",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.captureCodeSnapshot",
+        "title": "코드 스냅샷 촬영",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.setNotionApi",
+        "title": "노션 PRIVATE API 키 설정",
         "category": "Vibe Editor"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "vibe-editor.copyCode",
+          "command": "vibeEditor.copyCode",
           "when": "editorHasSelection",
-          "group": "navigation"
+          "group": "vibeEditor"
         },
         {
-          "command": "vibe-editor.captureSnapshot",
+          "command": "vibeEditor.captureCodeSnapshot",
           "when": "editorHasSelection",
-          "group": "navigation@2"
+          "group": "vibeEditor"
         }
       ],
       "explorer/context": [
         {
-          "command": "vibe-editor.exportDirectoryTree",
+          "command": "vibeEditor.exportDirectoryTreeSnapshot",
           "when": "explorerResourceIsFolder",
-          "group": "navigation"
+          "group": "vibeEditor"
         }
       ]
     },
     "configuration": {
       "title": "Vibe Editor",
       "properties": {
-        "vibe-editor.loginStatus": {
+        "vibeEditor.loginStatus": {
           "type": "boolean",
           "default": false,
           "description": "로그인 상태"
         },
-        "vibe-editor.notionToken": {
-          "type": "string",
-          "default": "",
-          "description": "노션 API 토큰"
+        "vibeEditor.notionStatus": {
+          "type": "boolean",
+          "default": false,
+          "description": "노션 연동 정보 활성 여부"
         }
       }
     }

@@ -1,42 +1,38 @@
-import { Configuration } from '../configuration'
-import { ICommand, IVSCodeAPI } from '../types'
+import * as vscode from 'vscode'
+
+import { AuthService } from '../services/authService'
+import { ICommand } from '../types/command'
 
 export class GoogleLoginCommand implements ICommand {
-  public static readonly commandName = 'vibe-editor.googleLogin'
+  public static readonly commandName = 'vibeEditor.googleLogin'
+  private authService: AuthService
 
-  constructor(private readonly vscodeApi: IVSCodeAPI) {}
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.authService = new AuthService(context)
+  }
 
   public get commandName(): string {
     return GoogleLoginCommand.commandName
   }
 
   public async execute(): Promise<void> {
-    try {
-      // TODO: 실제 Google 로그인 로직 구현
-      await Configuration.set('loginStatus', true)
-      this.vscodeApi.showInformationMessage('Google 로그인 성공')
-    } catch (error) {
-      this.vscodeApi.showErrorMessage('Google 로그인 실패')
-    }
+    await this.authService.googleLogin()
   }
 }
 
 export class GithubLoginCommand implements ICommand {
-  public static readonly commandName = 'vibe-editor.githubLogin'
+  public static readonly commandName = 'vibeEditor.githubLogin'
+  private authService: AuthService
 
-  constructor(private readonly vscodeApi: IVSCodeAPI) {}
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.authService = new AuthService(context)
+  }
 
   public get commandName(): string {
     return GithubLoginCommand.commandName
   }
 
   public async execute(): Promise<void> {
-    try {
-      // TODO: 실제 GitHub 로그인 로직 구현
-      await Configuration.set('loginStatus', true)
-      this.vscodeApi.showInformationMessage('GitHub 로그인 성공')
-    } catch (error) {
-      this.vscodeApi.showErrorMessage('GitHub 로그인 실패')
-    }
+    await this.authService.githubLogin()
   }
 }
