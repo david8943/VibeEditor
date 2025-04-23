@@ -50,7 +50,7 @@ export class AuthService {
 
       await vscode.env.openExternal(
         vscode.Uri.parse(
-          `https://localhost:8080/oauth2/authorization/${domain}?redirect_uri=http://localhost:${PORT}/callback`,
+          `http://localhost:8080/oauth2/authorization/${domain}?redirect_uri=http://localhost:${PORT}/callback`,
         ),
       )
     } catch (error) {
