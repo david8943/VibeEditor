@@ -3,7 +3,17 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 
 import { Snapshot } from '../types/snapshot'
+import { SnapshotProvider } from '../views/codeSnapshotView'
 
+let providerInstance: SnapshotProvider | undefined
+
+export function setSnapshotProvider(provider: SnapshotProvider) {
+  providerInstance = provider
+}
+
+export function getSnapshotProvider(): SnapshotProvider | undefined {
+  return providerInstance
+}
 export class DirectoryTreeService {
   private context: vscode.ExtensionContext
 
@@ -52,6 +62,7 @@ export class DirectoryTreeService {
         )
       }
 
+      getSnapshotProvider()?.refresh()
       return result
     } catch (error) {
       const errorMessage =
