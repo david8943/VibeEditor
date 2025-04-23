@@ -79,6 +79,7 @@ export function activate(context: vscode.ExtensionContext): void {
     logSnapshotProvider,
   )
   setSnapshotProvider(codeSnapshotProvider)
+  setSnapshotProvider(directoryTreeSnapshotProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
