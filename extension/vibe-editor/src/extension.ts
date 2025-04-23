@@ -75,13 +75,45 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(disposable)
   })
 
+  // Create Template 명령어 등록
+  const createTemplateDisposable = vscode.commands.registerCommand(
+    'vibe-editor.createTemplate',
+    () => {
+      const panel = vscode.window.createWebviewPanel(
+        'createTemplate',
+        'Create Template',
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+        },
+      )
+
+      panel.webview.html = getWebviewContent()
+    },
+  )
+  context.subscriptions.push(createTemplateDisposable)
+
   // 코드 스냅샷 뷰 등록 및 전역 등록
   const snapshotProvider = new CodeSnapshotProvider(context)
   vscode.window.registerTreeDataProvider('codeSnapshot', snapshotProvider)
-  setSnapshotProvider(snapshotProvider) // ✅ 이 줄 추가됨
+  setSnapshotProvider(snapshotProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
+}
+
+function getWebviewContent(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Template</title>
+</head>
+<body>
+  <h1>📝 템플릿 생성 창</h1>
+  <p>이곳에 나중에 React가 연결됩니다.</p>
+</body>
+</html>`
 }
 
 export function deactivate(): void {

@@ -84,6 +84,11 @@
         "command": "vibe-editor.captureSnapshot",
         "title": "📸 코드 스냅샷 촬영",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibe-editor.createTemplate",
+        "title": "템플릿 생성",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
