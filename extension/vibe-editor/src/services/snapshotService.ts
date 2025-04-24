@@ -73,4 +73,8 @@ export class SnapshotService {
 
     refreshAllProviders()
   }
+
+  async getSnapshots(): Promise<Snapshot[]> {
+    return this.context.globalState.get<Snapshot[]>('snapshots') || []
+  }
 }

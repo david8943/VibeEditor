@@ -3,11 +3,15 @@ import * as vscode from 'vscode'
 import {
   CaptureSnapshotCommand,
   CopyCodeCommand,
+  CreateTemplateCommand,
   DirectoryTreeCommand,
   GithubLoginCommand,
   GoogleLoginCommand,
+  LogoutCommand,
+  ResetTemplateCommand,
   SetNotionApiCommand,
 } from './commands'
+import { ShowTemplatePageCommand } from './commands/template'
 import { Configuration } from './configuration'
 import {
   setCodeSnapshotProvider,
@@ -15,27 +19,53 @@ import {
   setLogSnapshotProvider,
 } from './services/snapshotService'
 import {
+  TemplateProvider,
+  setTemplateProvider,
+} from './services/templateService'
+import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
   LogSnapshotProvider,
   registerSnapshotViewCommand,
 } from './views/codeSnapshotView'
 
-export function activate(context: vscode.ExtensionContext): void {
-  // 로그인 상태 확인
-  const isLoggedIn = Configuration.get('loginStatus')
-  if (!isLoggedIn) {
-    vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
-  }
+async function isLogin(context: vscode.ExtensionContext) {
+  const accessToken = context.secrets.get('accessToken')
 
-  // 명령어 등록
+  if (!accessToken) {
+    vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
+  } else {
+    vscode.commands.executeCommand('setContext', 'vibeEditor.loginStatus', true)
+  }
+}
+
+async function isNotion(context: vscode.ExtensionContext) {
+  const notionToken = context.secrets.get('notionToken')
+  if (!notionToken) {
+    vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
+  } else {
+    vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.notionStatus',
+      true,
+    )
+  }
+}
+
+export async function activate(
+  context: vscode.ExtensionContext,
+): Promise<void> {
   const commands = [
     new CopyCodeCommand(),
     new DirectoryTreeCommand(context),
     new SetNotionApiCommand(context),
     new GoogleLoginCommand(context),
     new GithubLoginCommand(context),
+    new LogoutCommand(context),
     new CaptureSnapshotCommand(context),
+    new CreateTemplateCommand(context),
+    new ResetTemplateCommand(context),
+    new ShowTemplatePageCommand(context),
   ]
 
   commands.forEach((command) => {
@@ -46,31 +76,15 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(disposable)
   })
 
-  // Create Template 명령어 등록
-  const createTemplateDisposable = vscode.commands.registerCommand(
-    'vibe-editor.createTemplate',
-    () => {
-      const panel = vscode.window.createWebviewPanel(
-        'createTemplate',
-        'Create Template',
-        vscode.ViewColumn.One,
-        {
-          enableScripts: true,
-        },
-      )
-
-      panel.webview.html = getWebviewContent()
-    },
-  )
-  context.subscriptions.push(createTemplateDisposable)
-
+  await isLogin(context)
+  await isNotion(context)
   // 코드 스냅샷 뷰 등록 및 전역 등록
   const codeSnapshotProvider = new CodeSnapshotProvider(context)
   const directoryTreeSnapshotProvider = new DirectoryTreeSnapshotProvider(
     context,
   )
   const logSnapshotProvider = new LogSnapshotProvider(context)
-
+  const templateProvider = new TemplateProvider(context)
   vscode.window.registerTreeDataProvider(
     'vibeEditorCodeSnapshot',
     codeSnapshotProvider,
@@ -83,30 +97,21 @@ export function activate(context: vscode.ExtensionContext): void {
     'vibeEditorLogSnapshot',
     logSnapshotProvider,
   )
+  vscode.window.registerTreeDataProvider(
+    'vibeEditorTemplatePage',
+    templateProvider,
+  )
 
   // 각 프로바이더 등록
   setCodeSnapshotProvider(codeSnapshotProvider)
   setDirectorySnapshotProvider(directoryTreeSnapshotProvider)
   setLogSnapshotProvider(logSnapshotProvider)
+  setTemplateProvider(templateProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
   // 설정 변경 이벤트 구독
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
-}
-
-function getWebviewContent(): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Create Template</title>
-</head>
-<body>
-  <h1>📝 템플릿 생성 창</h1>
-  <p>이곳에 나중에 React가 연결됩니다.</p>
-</body>
-</html>`
 }
 
 export function deactivate(): void {

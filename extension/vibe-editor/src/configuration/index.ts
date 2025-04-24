@@ -1,16 +1,9 @@
 import * as vscode from 'vscode'
 
-// 설정 키와 값 타입 정의
-interface ConfigSchema {
-  loginStatus: boolean
-  notionStatus: boolean
-}
+interface ConfigSchema {}
 
 // 기본값 정의
-const defaultConfig: ConfigSchema = {
-  loginStatus: false,
-  notionStatus: false,
-}
+const defaultConfig: ConfigSchema = {}
 
 export class Configuration {
   private static readonly configSection = 'vibeEditor'
@@ -46,19 +39,19 @@ export class Configuration {
     callback: (e: vscode.ConfigurationChangeEvent) => void,
   ): vscode.Disposable {
     return vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('vibeEditor.notionStatus')) {
-        const newValue = vscode.workspace
-          .getConfiguration(this.configSection)
-          .get<boolean>('notionStatus')
-        if (newValue !== undefined) {
-          this.currentConfig.notionStatus = newValue
-          vscode.commands.executeCommand(
-            'vscode.refreshView',
-            'vibeEditorViewer',
-          )
-          callback(e)
+      const keys: (keyof ConfigSchema)[] = []
+      keys.forEach((key) => {
+        const fullKey = `vibeEditor.${key}`
+        if (e.affectsConfiguration(fullKey)) {
+          const newValue = vscode.workspace
+            .getConfiguration(this.configSection)
+            .get(key)
+
+          console.log(`${fullKey} changed to:`, newValue)
+          // setContext로 반영
+          vscode.commands.executeCommand('setContext', fullKey, newValue)
         }
-      }
+      })
     })
   }
 }

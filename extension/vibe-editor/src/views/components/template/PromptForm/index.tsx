@@ -1,67 +1,25 @@
-import React, { FormEvent, useEffect, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 
 import { Snapshot } from '../../../../types/snapshot'
-import { CreatePrompt } from '../../../../types/template'
+import { CreatePrompt, Prompt } from '../../../../types/template'
 import './styles.css'
 
-// TailWind로 교체
-
 interface PromptFormProps {
-  onSubmit: (prompt: CreatePrompt) => void
-  selectedTemplateId: number
-  selectedPromptId: number
+  defaultPrompt: Prompt
+  onSubmit: (data: CreatePrompt) => void
   localSnapshots: Snapshot[]
 }
 
 export function PromptForm({
+  defaultPrompt,
   onSubmit,
-  selectedTemplateId,
-  selectedPromptId,
   localSnapshots,
 }: PromptFormProps) {
-  const [formData, setFormData] = useState<CreatePrompt>({
-    prompt: {
-      promptId: 0,
-      promptName: '',
-      postType: '',
-      comment: '',
-      snapshots: [],
-      options: [],
-      updatedAt: '',
-      createdAt: '',
-    },
-    selectedTemplateId: selectedTemplateId,
-    selectedPromptId: selectedPromptId,
-  })
-
-  useEffect(() => {
-    if (window.vscode) {
-      window.vscode.postMessage({
-        type: 'ready',
-        selectedTemplateId: formData.selectedTemplateId,
-        selectedPromptId: formData.selectedPromptId,
-      })
-    }
-  }, [formData.selectedTemplateId, formData.selectedPromptId])
+  const [formData, setFormData] = useState<CreatePrompt>(defaultPrompt)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    console.log('handleSubmit', formData)
     e.preventDefault()
-    if (window.vscode) {
-      window.vscode.postMessage({
-        type: 'submitPrompt',
-        data: {
-          prompt: formData,
-          selectedTemplateId: formData.selectedTemplateId,
-          selectedPromptId: formData.selectedPromptId,
-        },
-      })
-    }
-    onSubmit({
-      prompt: formData.prompt,
-      selectedTemplateId: formData.selectedTemplateId,
-      selectedPromptId: formData.selectedPromptId,
-    })
+    onSubmit(formData)
   }
 
   const handleChange = (
@@ -81,47 +39,12 @@ export function PromptForm({
       onSubmit={handleSubmit}
       className="template-form">
       <div className="form-group">
-        <label htmlFor="templateName">프롬프트 제목</label>
-        <input
-          type="text"
-          id="promptName"
-          name="promptName"
-          title="promptName"
-          value={formData.prompt.promptName}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      {formData.prompt.snapshots &&
-        formData.prompt.snapshots.map((prompt) => (
-          <div className="form-group">
-            <label htmlFor="description">템플릿 설명</label>
-            <pre className="code-block">
-              <code>
-                {
-                  localSnapshots.find(
-                    (snapshot) => snapshot.snapshotId === prompt.snapshotId,
-                  )?.content
-                }
-              </code>
-            </pre>
-            <textarea
-              id="description"
-              name="description"
-              value={prompt.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        ))}
-
-      <div className="form-group">
         <label htmlFor="category">포스트 종류</label>
         <select
           id="postType"
           title="postType"
           name="postType"
-          value={formData.prompt.postType}
+          value={formData.postType}
           onChange={handleChange}
           required>
           <option value="">포스트 종류 선택</option>
@@ -129,19 +52,50 @@ export function PromptForm({
           <option value="troubleShooting">트러블 슈팅</option>
         </select>
       </div>
-
       <div className="form-group">
-        <label htmlFor="comment">프롬프트 설명</label>
+        <label htmlFor="promptName">프롬프트 제목</label>
         <input
           type="text"
-          id="comment"
-          name="comment"
-          value={formData.prompt.comment}
+          id="promptName"
+          name="promptName"
+          value={formData.promptName}
           onChange={handleChange}
           required
         />
       </div>
+      {formData.snapshots &&
+        formData.snapshots.map((snapshot) => (
+          <div className="form-group">
+            <label htmlFor="description">코드 설명</label>
+            <pre className="code-block">
+              <code>
+                {
+                  localSnapshots.find(
+                    (snapshot) => snapshot.snapshotId === snapshot.snapshotId,
+                  )?.content
+                }
+              </code>
+            </pre>
+            <textarea
+              id={`description-${snapshot.snapshotId}`}
+              name={`description-${snapshot.snapshotId}`}
+              value={snapshot.description}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        ))}
 
+      <div className="form-group">
+        <label htmlFor="comment">프롬프트 내용</label>
+        <textarea
+          id="comment"
+          name="comment"
+          value={formData.comment}
+          onChange={handleChange}
+          required
+        />
+      </div>
       <button
         type="submit"
         className="submit-button">

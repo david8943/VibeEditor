@@ -22,11 +22,12 @@ export class NotionService {
       vscode.window.showInformationMessage(notionToken)
       vscode.window.showInformationMessage(notionStatus.toString())
       await this.context.secrets.store('notionToken', notionToken)
-
-      await Configuration.set('notionStatus', notionStatus)
-      vscode.window.showInformationMessage(
-        'Notion 등록 성공' + Configuration.get('notionStatus'),
+      await vscode.commands.executeCommand(
+        'setContext',
+        'vibeEditor.notionStatus',
+        notionStatus,
       )
+      vscode.window.showInformationMessage('Notion 등록 성공' + notionStatus)
     } catch (error) {
       vscode.window.showErrorMessage('Notion 등록 실패')
     }

@@ -36,3 +36,20 @@ export class GithubLoginCommand implements ICommand {
     await this.authService.githubLogin()
   }
 }
+
+export class LogoutCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.logout'
+  private authService: AuthService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.authService = new AuthService(context)
+  }
+
+  public get commandName(): string {
+    return LogoutCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    await this.authService.logout()
+  }
+}

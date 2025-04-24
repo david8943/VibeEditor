@@ -12,7 +12,12 @@ export class AuthService {
   }
 
   public async githubLogin(): Promise<void> {
-    await this.auth('github')
+    await vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.loginStatus',
+      true,
+    )
+    // await this.auth('github')
   }
 
   async auth(domain: string): Promise<void> {
@@ -22,27 +27,99 @@ export class AuthService {
         async (req: any, res: any) => {
           if (req.url?.startsWith('/callback')) {
             const url = new URL(req.url, `http://localhost:${PORT}`)
-            const token = url.searchParams.get('token')
+            const accessToken = url.searchParams.get('accessToken')
 
-            if (token) {
-              await this.context.secrets.store('accessToken', token)
+            if (accessToken) {
+              await this.context.secrets.store('accessToken', accessToken)
 
               await vscode.commands.executeCommand(
                 'setContext',
                 'vibeEditor.loginStatus',
                 true,
               )
-
-              res.end('로그인 성공! 창을 닫아주세요.')
+              res.writeHead(200, {
+                'Content-Type': 'text/html; charset=utf-8',
+              })
+              res.write(`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <meta charset="UTF-8">
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100vh;
+                        margin: 0;
+                        background-color: #f5f5f5;
+                      }
+                      .container {
+                        text-align: center;
+                        padding: 20px;
+                        background-color: white;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                      }
+                      button {
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        background-color: #007acc;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                      }
+                      button:hover {
+                        background-color: #0062a3;
+                      }
+                    </style>
+                    <script>
+                      function closeWindow() {
+                        // 창을 닫기 전에 메시지를 보냅니다
+                        window.opener.postMessage('closeWindow', '*');
+                        // 창을 닫으려고 시도합니다
+                        window.close();
+                      }
+                    </script>
+                  </head>
+                  <body>
+                    <div class="container">
+                      <h1>로그인 성공!</h1>
+                      <button onclick="closeWindow()">VSCode로 돌아가기</button>
+                    </div>
+                  </body>
+                </html>
+              `)
+              res.end()
               server.close()
               vscode.window.showInformationMessage(`${domain} 로그인 성공`)
+              await this.context.secrets.store('accessToken', accessToken)
+              await vscode.commands.executeCommand(
+                'setContext',
+                'vibeEditor.loginStatus',
+                true,
+              )
             } else {
               res.statusCode = 400
               res.end('Token이 없습니다.')
+              await vscode.commands.executeCommand(
+                'setContext',
+                'vibeEditor.loginStatus',
+                false,
+              )
             }
           } else {
             res.statusCode = 404
             res.end('잘못된 경로입니다.')
+            await vscode.commands.executeCommand(
+              'setContext',
+              'vibeEditor.loginStatus',
+              false,
+            )
           }
         },
       )
@@ -57,5 +134,16 @@ export class AuthService {
       vscode.window.showErrorMessage(`${domain} 로그인 실패`)
       console.error(error)
     }
+  }
+
+  public async logout(): Promise<void> {
+    console.log('로그아웃 시도')
+    this.context.secrets.delete('acceessToken')
+    await vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.loginStatus',
+      false,
+    )
+    vscode.window.showInformationMessage('로그아웃되었습니다.')
   }
 }
