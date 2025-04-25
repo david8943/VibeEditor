@@ -110,12 +110,12 @@ export function PromptForm({
       <div className="flex flex-1 w-full gap-4">
         <button
           type="submit"
-          className="submit-button flex flex-1 justify-center ">
+          className="submit-button flex flex-1 justify-center">
           프롬프트 저장
         </button>
         <button
           onClick={handlePost}
-          className="submit-button flex flex-1 justify-center ">
+          className="submit-button flex flex-1 justify-center">
           포스트 생성
         </button>
       </div>

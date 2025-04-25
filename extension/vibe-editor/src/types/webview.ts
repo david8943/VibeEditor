@@ -49,3 +49,7 @@ export interface SubmitPromptMessage extends Message {
   type: typeof MessageType.SUBMIT_PROMPT
   payload: SubmitPrompt
 }
+
+export interface WebviewPageProps {
+  postMessageToExtension: (message: Message) => void
+}

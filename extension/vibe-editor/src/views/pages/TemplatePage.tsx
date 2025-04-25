@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
 import { CreatePrompt, Template } from '../../types/template'
-import { Message, MessageType } from '../../types/webview'
+import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
 
-interface TemplatePageProps {
-  postMessageToExtension: (message: Message) => void
-}
-
-export function TemplatePage({ postMessageToExtension }: TemplatePageProps) {
+export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null,
   )

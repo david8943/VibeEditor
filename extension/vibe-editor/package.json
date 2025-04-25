@@ -3,7 +3,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -82,6 +82,12 @@
     ],
     "commands": [
       {
+        "command": "vibeEditor.showSettingPage",
+        "title": "설정 열기",
+        "icon": "gear",
+        "category": "Vibe Editor"
+      },
+      {
         "command": "vibeEditor.googleLogin",
         "title": "Google 로그인",
         "category": "Vibe Editor"
@@ -140,6 +146,13 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "vibeEditor.showSettingPage",
+          "when": "view == vibeEditorViewerPage",
+          "group": "Vibe Editor"
+        }
+      ],
       "view/item/context": [
         {
           "command": "vibeEditor.openContext",
