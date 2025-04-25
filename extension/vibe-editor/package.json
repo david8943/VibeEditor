@@ -3,7 +3,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.4",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -26,23 +26,28 @@
       "vibeEditorViewer": [
         {
           "id": "vibeEditorViewerPage",
-          "name": "Vibe Editor"
+          "name": "Vibe Editor",
+          "icon": "media/icon.svg"
         },
         {
           "id": "vibeEditorTemplatePage",
-          "name": "템플릿 목록"
+          "name": "템플릿 목록",
+          "icon": "media/icon.svg"
         },
         {
           "id": "vibeEditorCodeSnapshot",
-          "name": "코드 스냅샷"
+          "name": "코드 스냅샷",
+          "icon": "media/icon.svg"
         },
         {
           "id": "vibeEditorDirectoryTreeSnapshot",
-          "name": "디렉토리 구조 시각화"
+          "name": "디렉토리 구조 시각화",
+          "icon": "media/icon.svg"
         },
         {
           "id": "vibeEditorLogSnapshot",
-          "name": "로그 스냅 샷"
+          "name": "로그 스냅 샷",
+          "icon": "media/icon.svg"
         }
       ]
     },
@@ -50,12 +55,7 @@
       {
         "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibeEditor.googleLogin)\n[GitHub Login](command:vibeEditor.githubLogin)",
-        "when": "config:vibeEditor.loginStatus == false"
-      },
-      {
-        "view": "vibeEditorViewerPage",
-        "contents": "Vibe Editor에 로그인되었습니다.",
-        "when": "config:vibeEditor.loginStatus == true"
+        "when": "vibeEditor.loginStatus == false"
       },
       {
         "view": "vibeEditorCodeSnapshot",
@@ -70,13 +70,14 @@
         "contents": "로그 스냅샷입니다."
       },
       {
-        "contents": "노션 연동 정보가 없습니다.\n노션 PRIVATE API KEY를 입력해주세요.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "config:vibeEditor.loginStatus == true && config:vibeEditor.notionStatus == false"
+        "view": "vibeEditorViewerPage",
+        "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션 연동 정보가 없습니다.\n노션 PRIVATE API KEY를 입력해주세요.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
+        "when": "vibeEditor.loginStatus == true &&vibeEditor.notionStatus == false"
       },
       {
-        "view": "vibeEditorTemplatePage",
-        "contents": "노션과 연동이 완료되었습니다.\n코드를 노션에 추가할 수 있습니다.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "config:vibeEditor.loginStatus == true && config:vibeEditor.notionStatus == true"
+        "view": "vibeEditorViewerPage",
+        "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션과 연동이 완료되었습니다.\n코드를 노션에 추가할 수 있습니다.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
+        "when": "vibeEditor.loginStatus == true && vibeEditor.notionStatus == true"
       }
     ],
     "commands": [
@@ -88,6 +89,11 @@
       {
         "command": "vibeEditor.githubLogin",
         "title": "GitHub 로그인",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.logout",
+        "title": "로그아웃",
         "category": "Vibe Editor"
       },
       {
@@ -116,8 +122,16 @@
         "category": "Vibe Editor"
       },
       {
-        "command": "vibe-editor.createTemplate",
-        "title": "템플릿 생성",
+        "command": "vibeEditor.createTemplate",
+        "title": "새 템플릿 생성"
+      },
+      {
+        "command": "vibeEditor.showTemplatePage",
+        "title": "템플릿 페이지 보기"
+      },
+      {
+        "command": "vibeEditor.resetTemplate",
+        "title": "템플릿 초기화",
         "category": "Vibe Editor"
       },
       {
@@ -155,51 +169,72 @@
     "configuration": {
       "title": "Vibe Editor",
       "properties": {
-        "vibeEditor.loginStatus": {
-          "type": "boolean",
-          "default": false,
-          "description": "로그인 상태"
+        "vibeEditor.selectedTemplateId": {
+          "type": "number",
+          "default": 0,
+          "description": "선택된 템플릿 ID"
         },
-        "vibeEditor.notionStatus": {
-          "type": "boolean",
-          "default": false,
-          "description": "노션 연동 정보 활성 여부"
+        "vibeEditor.selectedPromptId": {
+          "type": "number",
+          "default": 0,
+          "description": "선택된 프롬프트 ID"
         }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
+    "compile": "npm-run-all compile:*",
+    "watch": "npm-run-all -p watch:*",
+    "compile:extension": "tsc -p ./",
+    "compile:view": "webpack --stats detailed",
+    "watch:extension": "tsc -watch -p ./",
+    "watch:view": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./dist/test/runTest.js"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.5.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.25.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/vscode": "^1.99.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/vscode": "^1.99.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "autoprefixer": "^10.4.21",
+    "css-loader": "^7.1.2",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "glob": "^11.0.1",
+    "mocha": "^11.1.0",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
     "prettier": "^3.5.3",
     "redux-logger": "^3.0.6",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.1.4",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",
+    "vscode-test": "^1.6.1",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   }
