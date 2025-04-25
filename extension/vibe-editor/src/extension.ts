@@ -1,17 +1,6 @@
 import * as vscode from 'vscode'
 
-import {
-  CaptureSnapshotCommand,
-  CopyCodeCommand,
-  CreateTemplateCommand,
-  DirectoryTreeCommand,
-  GithubLoginCommand,
-  GoogleLoginCommand,
-  LogoutCommand,
-  ResetTemplateCommand,
-  SetNotionApiCommand,
-} from './commands'
-import { ShowTemplatePageCommand } from './commands/template'
+import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import {
   setCodeSnapshotProvider,
@@ -55,20 +44,8 @@ async function isNotion(context: vscode.ExtensionContext) {
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
-  const commands = [
-    new CopyCodeCommand(),
-    new DirectoryTreeCommand(context),
-    new SetNotionApiCommand(context),
-    new GoogleLoginCommand(context),
-    new GithubLoginCommand(context),
-    new LogoutCommand(context),
-    new CaptureSnapshotCommand(context),
-    new CreateTemplateCommand(context),
-    new ResetTemplateCommand(context),
-    new ShowTemplatePageCommand(context),
-  ]
-
-  commands.forEach((command) => {
+  allCommands.forEach((CommandClass) => {
+    const command = new CommandClass(context)
     const disposable = vscode.commands.registerCommand(
       command.commandName,
       command.execute.bind(command),

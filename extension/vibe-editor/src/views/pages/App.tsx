@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import '../../styles/global.css'
 import { Message } from '../../types/webview'
 import { PostPage } from './PostPage'
 import { TemplatePage } from './TemplatePage'
@@ -24,7 +25,6 @@ export function App() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('App received message:', event.data)
       const message = event.data
       if (message.type === 'NAVIGATE' || message.type === 'INITIAL_PAGE') {
         setCurrentPage(message.payload.page)

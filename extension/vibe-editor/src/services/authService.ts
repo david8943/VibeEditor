@@ -137,7 +137,6 @@ export class AuthService {
   }
 
   public async logout(): Promise<void> {
-    console.log('로그아웃 시도')
     this.context.secrets.delete('acceessToken')
     await vscode.commands.executeCommand(
       'setContext',

@@ -4,6 +4,7 @@ export interface Post {
   postContent: string
   createdAt: string
   updatedAt: string
+  promptId: number
 }
 
 export type CreatePost = Pick<Post, 'postName' | 'postContent'>

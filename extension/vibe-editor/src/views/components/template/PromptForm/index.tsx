@@ -6,20 +6,31 @@ import './styles.css'
 
 interface PromptFormProps {
   defaultPrompt: Prompt
-  onSubmit: (data: CreatePrompt) => void
+  submitPrompt: (data: CreatePrompt) => void
+  updatePrompt: (data: CreatePrompt) => void
+  createPrompt: (data: CreatePrompt) => void
   localSnapshots: Snapshot[]
 }
 
 export function PromptForm({
   defaultPrompt,
-  onSubmit,
+  submitPrompt,
+  updatePrompt,
+  createPrompt,
   localSnapshots,
 }: PromptFormProps) {
   const [formData, setFormData] = useState<CreatePrompt>(defaultPrompt)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit(formData)
+    if (defaultPrompt.promptId) {
+      updatePrompt(formData)
+    } else {
+      createPrompt(formData)
+    }
+  }
+  const handlePost = () => {
+    submitPrompt(formData)
   }
 
   const handleChange = (
@@ -37,7 +48,7 @@ export function PromptForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="template-form">
+      className="flex flex-col gap-8">
       <div className="form-group">
         <label htmlFor="category">포스트 종류</label>
         <select
@@ -96,11 +107,18 @@ export function PromptForm({
           required
         />
       </div>
-      <button
-        type="submit"
-        className="submit-button">
-        프롬프트 생성
-      </button>
+      <div className="flex flex-1 w-full gap-4">
+        <button
+          type="submit"
+          className="submit-button flex flex-1 justify-center ">
+          프롬프트 저장
+        </button>
+        <button
+          onClick={handlePost}
+          className="submit-button flex flex-1 justify-center ">
+          포스트 생성
+        </button>
+      </div>
     </form>
   )
 }

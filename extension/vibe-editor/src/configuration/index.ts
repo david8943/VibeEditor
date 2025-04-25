@@ -46,9 +46,6 @@ export class Configuration {
           const newValue = vscode.workspace
             .getConfiguration(this.configSection)
             .get(key)
-
-          console.log(`${fullKey} changed to:`, newValue)
-          // setContext로 반영
           vscode.commands.executeCommand('setContext', fullKey, newValue)
         }
       })

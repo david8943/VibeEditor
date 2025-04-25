@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
-import { CreatePrompt, Prompt, Template } from '../../types/template'
-import { Message } from '../../types/webview'
+import { CreatePrompt, Template } from '../../types/template'
+import { Message, MessageType } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
 
 interface TemplatePageProps {
@@ -9,7 +9,6 @@ interface TemplatePageProps {
 }
 
 export function TemplatePage({ postMessageToExtension }: TemplatePageProps) {
-  const [templates, setTemplates] = useState<Template[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null,
   )
@@ -32,9 +31,41 @@ export function TemplatePage({ postMessageToExtension }: TemplatePageProps) {
     return () => window.removeEventListener('message', handleMessage)
   }, [postMessageToExtension])
 
-  const onSubmit = (data: CreatePrompt) => {
+  const submitPrompt = (data: CreatePrompt) => {
     postMessageToExtension({
-      type: 'SUBMIT_PROMPT',
+      type: MessageType.SUBMIT_PROMPT,
+      payload: {
+        prompt: data,
+        selectedTemplateId: selectedTemplate?.templateId,
+        selectedPromptId: selectedPromptId,
+      },
+    })
+  }
+  const updatePrompt = (data: CreatePrompt) => {
+    postMessageToExtension({
+      type: MessageType.UPDATE_PROMPT,
+      payload: {
+        prompt: data,
+        selectedTemplateId: selectedTemplate?.templateId,
+        selectedPromptId: selectedPromptId,
+      },
+    })
+  }
+
+  const createPrompt = (data: CreatePrompt) => {
+    postMessageToExtension({
+      type: MessageType.CREATE_PROMPT,
+      payload: {
+        prompt: data,
+        selectedTemplateId: selectedTemplate?.templateId,
+        selectedPromptId: selectedPromptId,
+      },
+    })
+  }
+
+  const deletePrompt = (data: CreatePrompt) => {
+    postMessageToExtension({
+      type: MessageType.DELETE_PROMPT,
       payload: {
         prompt: data,
         selectedTemplateId: selectedTemplate?.templateId,
@@ -43,7 +74,7 @@ export function TemplatePage({ postMessageToExtension }: TemplatePageProps) {
     })
   }
   return (
-    <div className="app-container">
+    <div className="app-container flex flex-col gap-8">
       <h1>프롬프트 생성기</h1>
       <PromptSelector
         selectedTemplate={selectedTemplate}
@@ -53,7 +84,9 @@ export function TemplatePage({ postMessageToExtension }: TemplatePageProps) {
       {selectedTemplate && selectedTemplate.prompts && (
         <PromptForm
           defaultPrompt={selectedTemplate.prompts[selectedPromptId]}
-          onSubmit={onSubmit}
+          submitPrompt={submitPrompt}
+          updatePrompt={updatePrompt}
+          createPrompt={createPrompt}
           localSnapshots={selectedTemplate.snapshots || []}
         />
       )}

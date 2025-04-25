@@ -10,5 +10,5 @@
     "jsx": "react",
     "types": ["node", "vscode"]
   },
-  "exclude": ["node_modules", ".vscode-test", "app"]
+  "exclude": ["node_modules", ".vscode-test", "app", "tailwind.config.ts"]
 }

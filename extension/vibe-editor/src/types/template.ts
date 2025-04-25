@@ -1,3 +1,4 @@
+import { Post } from './post'
 import { Snapshot } from './snapshot'
 
 export interface Template {
@@ -10,6 +11,17 @@ export interface Template {
   createdAt: string
 }
 
+export interface SubmitPrompt {
+  prompt: Prompt
+  selectedTemplateId: number
+  selectedPromptId: number
+  navigate?: (page: string) => Promise<void>
+}
+
+export interface SubmitPost {
+  post: Post
+  selectedPostId: number
+}
 export interface CreatePrompt extends Omit<Prompt, 'promptId'> {}
 export interface Prompt {
   promptId: number

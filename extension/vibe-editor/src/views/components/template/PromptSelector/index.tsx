@@ -15,7 +15,7 @@ export function PromptSelector({
   selectPromptId,
 }: PromptSelectorProps) {
   return (
-    <div className="form-group">
+    <div className="form-group flex flex-col gap-4">
       <label>프롬프트 선택</label>
       <select
         value={selectedPromptId || ''}

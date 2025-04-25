@@ -77,4 +77,23 @@ export class SnapshotService {
   async getSnapshots(): Promise<Snapshot[]> {
     return this.context.globalState.get<Snapshot[]>('snapshots') || []
   }
+
+  public async copyCode(): Promise<void> {
+    const editor = vscode.window.activeTextEditor
+    if (!editor) {
+      return
+    }
+
+    const selection = editor.selection
+    const text = editor.document.getText(selection)
+
+    if (text.trim()) {
+      await vscode.env.clipboard.writeText(text)
+      vscode.window.showInformationMessage(
+        '✅ 코드가 클립보드에 복사되었습니다!',
+      )
+    } else {
+      vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.')
+    }
+  }
 }
