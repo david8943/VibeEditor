@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 
 import { CreatePost, Post } from '../../types/post'
-import { MessageType, WebviewPageProps } from '../../types/webview'
-import { PostForm } from '../components'
+import { Message, MessageType, WebviewPageProps } from '../../types/webview'
 
-export function PostPage({ postMessageToExtension }: WebviewPageProps) {
+export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultPost, setDefaultPost] = useState<Post>({
     postId: 0,
     postName: '',
@@ -41,11 +40,22 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
 
   return (
     <div className="app-container">
-      <h1>포스트 생성기</h1>
-      <PostForm
-        defaultPost={defaultPost}
-        onSubmit={onSubmit}
-      />
+      <h1>Vibe Editor 설정</h1>
+      <div className="setting-container">
+        <div className="setting-item">
+          <h2>구글 로그인</h2>
+          <h2>깃허브 로그인</h2>
+          <h2>유저 정보</h2>
+          <h2>노션 PRIVATE API 키 설정</h2>
+          <h2>등록한 노션 데이터베이스 목록</h2>
+          <h2>로그아웃</h2>
+        </div>
+      </div>
+      <div className="setting-container">
+        <div className="setting-item">
+          <h2>템플릿 설정</h2>
+        </div>
+      </div>
     </div>
   )
 }

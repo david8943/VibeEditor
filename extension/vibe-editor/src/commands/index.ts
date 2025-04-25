@@ -3,6 +3,7 @@ import { CaptureSnapshotCommand } from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
 import { SetNotionApiCommand } from './notion'
+import { ShowSettingPageCommand } from './setting'
 import {
   CreateTemplateCommand,
   ResetTemplateCommand,
@@ -20,4 +21,5 @@ export const allCommands = [
   CreateTemplateCommand,
   ResetTemplateCommand,
   ShowTemplatePageCommand,
+  ShowSettingPageCommand,
 ]

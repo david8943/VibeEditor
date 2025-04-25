@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import '../../styles/global.css'
 import { Message } from '../../types/webview'
 import { PostPage } from './PostPage'
+import { SettingPage } from './SettingPage'
 import { TemplatePage } from './TemplatePage'
 
 declare global {
@@ -15,9 +16,9 @@ declare global {
 }
 
 export function App() {
-  const [currentPage, setCurrentPage] = useState<'template' | 'post'>(
-    'template',
-  )
+  const [currentPage, setCurrentPage] = useState<
+    'template' | 'post' | 'setting'
+  >('template')
 
   const postMessageToExtension = (message: Message) => {
     window.vscode.postMessage(message)
@@ -39,8 +40,10 @@ export function App() {
     <React.StrictMode>
       {currentPage === 'template' ? (
         <TemplatePage postMessageToExtension={postMessageToExtension} />
-      ) : (
+      ) : currentPage === 'post' ? (
         <PostPage postMessageToExtension={postMessageToExtension} />
+      ) : (
+        <SettingPage postMessageToExtension={postMessageToExtension} />
       )}
     </React.StrictMode>
   )
