@@ -110,6 +110,12 @@ export class ViewLoader {
           await this.getSnapshots()
         } else if (message.type === MessageType.GET_CURRENT_POST) {
           await this.getCurrentPost()
+        } else if (message.type === MessageType.PROMPT_SELECTED) {
+          console.log('setDraftData', message.payload?.selectedPromptId)
+          await setDraftData(
+            'selectedPromptId',
+            message.payload?.selectedPromptId,
+          )
         }
       },
       null,
