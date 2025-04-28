@@ -12,12 +12,7 @@ export class AuthService {
   }
 
   public async githubLogin(): Promise<void> {
-    await vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.loginStatus',
-      true,
-    )
-    // await this.auth('github')
+    await this.auth('github')
   }
 
   async auth(domain: string): Promise<void> {
@@ -89,7 +84,7 @@ export class AuthService {
                   <body>
                     <div class="container">
                       <h1>로그인 성공!</h1>
-                      <button onclick="closeWindow()">VSCode로 돌아가기</button>
+                      <button onclick="closeWindow()">VSCode로 돌아가주세요.</button>
                     </div>
                   </body>
                 </html>
