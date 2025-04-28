@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 
 import { Post } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
+import { SnapshotItem } from '../views/codeSnapshotView'
 import { ViewLoader } from '../views/webview/ViewLoader'
 
 class TemplateItem extends vscode.TreeItem {
@@ -29,7 +30,16 @@ export class TemplateService {
     await this.context.globalState.update('templates', [])
   }
 
-  async addToPrompt(): Promise<void> {
+  async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
+    console.log('addToPrompt', snapshotItem)
+    //getContext
+
+    // const selectedTemplateId = await vscode.commands.executeCommand(
+    //   'getContext',
+    //   'vibeEditor.selectedTemplateId',
+    // )
+    // console.log('addToPrompt', selectedTemplateId),
+    console.log('addToPrompt', snapshotItem)
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 

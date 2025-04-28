@@ -52,6 +52,12 @@ export class ViewLoader {
   }
   private async getTemplates() {
     const templates = await this.templateService.getTemplates()
+    vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.selectedTemplateId',
+      templates[0].templateId,
+    )
+
     this.panel.webview.postMessage({
       type: MessageType.TEMPLATE_SELECTED,
       payload: { template: templates[0] },
@@ -138,6 +144,12 @@ export class ViewLoader {
     if (cls.currentPanel) {
       cls.currentPanel.reveal(column)
       if (template) {
+        vscode.commands.executeCommand(
+          'setContext',
+          'vibeEditor.selectedTemplate',
+          template.templateId,
+        )
+
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },
@@ -146,6 +158,11 @@ export class ViewLoader {
     } else {
       cls.currentPanel = new cls(context, page).panel
       if (template) {
+        vscode.commands.executeCommand(
+          'setContext',
+          'vibeEditor.selectedTemplate',
+          template.templateId,
+        )
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },

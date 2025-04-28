@@ -71,7 +71,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }
   return (
     <div className="app-container flex flex-col gap-8">
-      <h1>프롬프트 생성기</h1>
+      <h1>프롬프트 생성기 {selectedTemplate?.templateId}</h1>
       <PromptSelector
         selectedTemplate={selectedTemplate}
         selectedPromptId={selectedPromptId}
