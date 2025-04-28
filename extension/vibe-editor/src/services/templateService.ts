@@ -29,6 +29,10 @@ export class TemplateService {
     await this.context.globalState.update('templates', [])
   }
 
+  async addToPrompt(): Promise<void> {
+    vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
+  }
+
   async createTemplate(): Promise<void> {
     const today = new Date().toISOString()
     const newPrompt: Prompt = {

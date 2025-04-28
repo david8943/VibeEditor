@@ -1,10 +1,14 @@
 import { GithubLoginCommand, GoogleLoginCommand, LogoutCommand } from './auth'
-import { CaptureSnapshotCommand } from './captureSnapshot'
+import {
+  CaptureSnapshotCommand,
+  DeleteSnapshotCommand,
+} from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
 import { SetNotionApiCommand } from './notion'
 import { ShowSettingPageCommand } from './setting'
 import {
+  AddToPromptCommand,
   CreateTemplateCommand,
   ResetTemplateCommand,
   ShowTemplatePageCommand,
@@ -22,4 +26,6 @@ export const allCommands = [
   ResetTemplateCommand,
   ShowTemplatePageCommand,
   ShowSettingPageCommand,
+  AddToPromptCommand,
+  DeleteSnapshotCommand,
 ]
