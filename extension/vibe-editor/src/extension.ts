@@ -23,8 +23,17 @@ async function isLogin(context: vscode.ExtensionContext) {
 
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
+    await vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.loginStatus',
+      false,
+    )
   } else {
-    vscode.commands.executeCommand('setContext', 'vibeEditor.loginStatus', true)
+    await vscode.commands.executeCommand(
+      'setContext',
+      'vibeEditor.loginStatus',
+      true,
+    )
   }
 }
 
@@ -39,6 +48,19 @@ async function isNotion(context: vscode.ExtensionContext) {
       true,
     )
   }
+}
+
+async function addStatusBarItem(context: vscode.ExtensionContext) {
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  )
+  statusBarItem.text = 'VibeEditor $(gear)'
+  statusBarItem.tooltip = '$(gear) VibeEditor 설정 열기'
+  statusBarItem.command = 'vibeEditor.showSettingPage' // ← 이미 정의한 command 사용
+  statusBarItem.show()
+
+  context.subscriptions.push(statusBarItem)
 }
 
 export async function activate(
@@ -97,7 +119,7 @@ export async function activate(
       },
     ),
   )
-
+  addStatusBarItem(context)
   // 설정 변경 이벤트 구독
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
 }

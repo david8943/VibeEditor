@@ -51,8 +51,8 @@ textarea {
 
 button {
   padding: 8px 16px;
-  background: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
   border: none;
   border-radius: 4px;
   cursor: pointer;

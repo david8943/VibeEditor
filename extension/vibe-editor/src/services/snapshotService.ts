@@ -79,21 +79,40 @@ export class SnapshotService {
   }
 
   public async copyCode(): Promise<void> {
-    const editor = vscode.window.activeTextEditor
-    if (!editor) {
+    const text = await vscode.env.clipboard.readText()
+
+    const title = await vscode.window.showInputBox({
+      prompt: `${text} 로그의 제목을 입력해주세요.`,
+      placeHolder: '로그 제목',
+    })
+    if (!title) {
+      vscode.window.showWarningMessage('⚠️ 로그 제목을 입력해주세요.')
       return
     }
 
-    const selection = editor.selection
-    const text = editor.document.getText(selection)
-
-    if (text.trim()) {
-      await vscode.env.clipboard.writeText(text)
-      vscode.window.showInformationMessage(
-        '✅ 코드가 클립보드에 복사되었습니다!',
-      )
-    } else {
-      vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.')
+    const snapshot: Snapshot = {
+      snapshotId: new Date().getTime(),
+      snapshotName: title,
+      snapshotType: 'log',
+      content: text,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
+    const prev = this.context.globalState.get<Snapshot[]>('snapshots') || []
+    await this.context.globalState.update('snapshots', [snapshot, ...prev])
+
+    vscode.window.showInformationMessage('📸 코드 스냅샷이 저장되었습니다!')
+    refreshAllProviders()
+    // const selection = editor.selection
+    // const text = editor.document.getText(selection)
+
+    //   if (text.trim()) {
+    //     await vscode.env.clipboard.writeText(text)
+    //     vscode.window.showInformationMessage(
+    //       '✅ 코드가 클립보드에 복사되었습니다!',
+    //     )
+    //   } else {
+    //     vscode.window.showWarningMessage('⚠️ 복사할 코드가 없습니다.')
+    //   }
   }
 }

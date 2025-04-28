@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { ViewLoader } from '../views/webview/ViewLoader'
+import { SettingViewLoader } from '../views/webview/SettingViewLoader'
 
 export class SettingService {
   private context: vscode.ExtensionContext
@@ -11,6 +11,6 @@ export class SettingService {
   }
 
   async showSettingPage(): Promise<void> {
-    ViewLoader.showWebview(this.context, this.page)
+    SettingViewLoader.showWebview(this.context, this.page)
   }
 }

@@ -116,7 +116,7 @@ export function PromptForm({
         <button
           onClick={handlePost}
           className="submit-button flex flex-1 justify-center">
-          포스트 생성
+          해당 프롬프트로 포스트 생성
         </button>
       </div>
     </form>
