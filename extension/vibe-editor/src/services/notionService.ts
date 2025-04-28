@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { Configuration } from '../configuration'
+import { setDraftData } from '../configuration/tempData'
 
 export class NotionService {
   private context: vscode.ExtensionContext
@@ -22,11 +23,7 @@ export class NotionService {
       vscode.window.showInformationMessage(notionToken)
       vscode.window.showInformationMessage(notionStatus.toString())
       await this.context.secrets.store('notionToken', notionToken)
-      await vscode.commands.executeCommand(
-        'setContext',
-        'vibeEditor.notionStatus',
-        notionStatus,
-      )
+      await setDraftData('notionStatus', notionStatus)
       vscode.window.showInformationMessage('Notion 등록 성공' + notionStatus)
     } catch (error) {
       vscode.window.showErrorMessage('Notion 등록 실패')

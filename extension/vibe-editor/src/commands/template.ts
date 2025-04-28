@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
+import { SnapshotItem } from '../views/codeSnapshotView'
 import { ViewLoader } from '../views/webview/ViewLoader'
 
 export class CreateTemplateCommand implements ICommand {
@@ -84,7 +85,7 @@ export class AddToPromptCommand implements ICommand {
     return AddToPromptCommand.commandName
   }
 
-  public async execute(): Promise<void> {
-    this.templateService.addToPrompt()
+  public async execute(snapshotItem: SnapshotItem): Promise<void> {
+    this.templateService.addToPrompt(snapshotItem)
   }
 }

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode'
 
+import { setDraftData } from '../configuration/tempData'
+
 export class AuthService {
   private context: vscode.ExtensionContext
 
@@ -26,12 +28,7 @@ export class AuthService {
 
             if (accessToken) {
               await this.context.secrets.store('accessToken', accessToken)
-
-              await vscode.commands.executeCommand(
-                'setContext',
-                'vibeEditor.loginStatus',
-                true,
-              )
+              await setDraftData('loginStatus', true)
               res.writeHead(200, {
                 'Content-Type': 'text/html; charset=utf-8',
               })
@@ -93,28 +90,16 @@ export class AuthService {
               server.close()
               vscode.window.showInformationMessage(`${domain} 로그인 성공`)
               await this.context.secrets.store('accessToken', accessToken)
-              await vscode.commands.executeCommand(
-                'setContext',
-                'vibeEditor.loginStatus',
-                true,
-              )
+              await setDraftData('loginStatus', true)
             } else {
               res.statusCode = 400
               res.end('Token이 없습니다.')
-              await vscode.commands.executeCommand(
-                'setContext',
-                'vibeEditor.loginStatus',
-                false,
-              )
+              await setDraftData('loginStatus', false)
             }
           } else {
             res.statusCode = 404
             res.end('잘못된 경로입니다.')
-            await vscode.commands.executeCommand(
-              'setContext',
-              'vibeEditor.loginStatus',
-              false,
-            )
+            await setDraftData('loginStatus', false)
           }
         },
       )
@@ -133,11 +118,7 @@ export class AuthService {
 
   public async logout(): Promise<void> {
     this.context.secrets.delete('acceessToken')
-    await vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.loginStatus',
-      false,
-    )
+    await setDraftData('loginStatus', false)
     vscode.window.showInformationMessage('로그아웃되었습니다.')
   }
 }

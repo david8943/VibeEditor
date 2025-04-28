@@ -1,7 +1,9 @@
 import * as vscode from 'vscode'
 
+import { getDraftData } from '../configuration/tempData'
 import { Post } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
+import { SnapshotItem } from '../views/codeSnapshotView'
 import { ViewLoader } from '../views/webview/ViewLoader'
 
 class TemplateItem extends vscode.TreeItem {
@@ -29,7 +31,48 @@ export class TemplateService {
     await this.context.globalState.update('templates', [])
   }
 
-  async addToPrompt(): Promise<void> {
+  async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
+    console.log('addToPrompt', snapshotItem)
+    const selectedTemplateId = getDraftData('selectedTemplateId')
+
+    const selectedPromptId = Number(getDraftData('selectedPromptId')) ?? 0
+    console.log('selectedPromptId', selectedPromptId)
+    // const selectedTemplateId = await vscode.commands.executeCommand(
+    //   'getContext',
+    //   'vibeEditor.selectedTemplateId',
+    // )
+    // console.log('addToPrompt', selectedTemplateId),
+    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const templateIndex = prev.findIndex(
+      (template) => template.templateId === selectedTemplateId,
+    )
+
+    if (templateIndex !== -1 && prev[templateIndex]) {
+      const template = prev[templateIndex]
+      if (template.prompts) {
+        const promptIndex = template.prompts.findIndex(
+          (prompt) => prompt.promptId === selectedPromptId,
+        )
+        const prompts = template.prompts[promptIndex]
+        if (promptIndex != -1 && prev[templateIndex] && prompts) {
+          const snapshots = prompts.snapshots
+          if (snapshots) {
+            snapshots.push({
+              attachId: new Date().getTime(),
+              promptId: selectedPromptId,
+              snapshotId: snapshotItem.snapshot.snapshotId,
+              description: '설명',
+              updatedAt: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+            })
+          }
+          prompts.snapshots = snapshots
+        }
+
+        await this.context.globalState.update('templates', prev)
+      }
+    }
+    console.log('addToPrompt', snapshotItem, selectedTemplateId)
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 

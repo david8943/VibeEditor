@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 
+import { setDraftData } from '../../configuration/tempData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
@@ -52,6 +53,8 @@ export class ViewLoader {
   }
   private async getTemplates() {
     const templates = await this.templateService.getTemplates()
+    await setDraftData('selectedTemplateId', templates[0].templateId)
+
     this.panel.webview.postMessage({
       type: MessageType.TEMPLATE_SELECTED,
       payload: { template: templates[0] },
@@ -107,6 +110,12 @@ export class ViewLoader {
           await this.getSnapshots()
         } else if (message.type === MessageType.GET_CURRENT_POST) {
           await this.getCurrentPost()
+        } else if (message.type === MessageType.PROMPT_SELECTED) {
+          console.log('setDraftData', message.payload?.selectedPromptId)
+          await setDraftData(
+            'selectedPromptId',
+            message.payload?.selectedPromptId,
+          )
         }
       },
       null,
@@ -126,7 +135,7 @@ export class ViewLoader {
     })
   }
 
-  static showWebview(
+  static async showWebview(
     context: vscode.ExtensionContext,
     page: string,
     template?: any,
@@ -138,6 +147,7 @@ export class ViewLoader {
     if (cls.currentPanel) {
       cls.currentPanel.reveal(column)
       if (template) {
+        setDraftData('selectedTemplateId', template.templateId)
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },
@@ -146,6 +156,7 @@ export class ViewLoader {
     } else {
       cls.currentPanel = new cls(context, page).panel
       if (template) {
+        await setDraftData('selectedTemplateId', template.templateId)
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },

@@ -59,23 +59,34 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
   }
 
-  const deletePrompt = (data: CreatePrompt) => {
+  const selectPrompt = (promptId: number) => {
+    setSelectedPromptId(promptId)
     postMessageToExtension({
-      type: MessageType.DELETE_PROMPT,
+      type: MessageType.PROMPT_SELECTED,
       payload: {
-        prompt: data,
-        selectedTemplateId: selectedTemplate?.templateId,
-        selectedPromptId: selectedPromptId,
+        selectedPromptId: promptId,
       },
     })
   }
+
+  const deletePrompt = (data: CreatePrompt) => {
+    if (selectedTemplate) {
+      postMessageToExtension({
+        type: MessageType.DELETE_PROMPT,
+        payload: {
+          templateId: selectedTemplate.templateId,
+          template: selectedTemplate,
+        },
+      })
+    }
+  }
   return (
     <div className="app-container flex flex-col gap-8">
-      <h1>프롬프트 생성기</h1>
+      <h1>프롬프트 생성기 {selectedTemplate?.templateId}</h1>
       <PromptSelector
         selectedTemplate={selectedTemplate}
         selectedPromptId={selectedPromptId}
-        selectPromptId={(promptId: number) => setSelectedPromptId(promptId)}
+        selectPromptId={selectPrompt}
       />
       {selectedTemplate && selectedTemplate.prompts && (
         <PromptForm
