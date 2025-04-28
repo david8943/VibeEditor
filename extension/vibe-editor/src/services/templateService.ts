@@ -1,12 +1,14 @@
 import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/tempData'
+import { DraftDataType } from '../types/configuration'
 import { Post } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
+import { PageType } from '../types/webview'
 import { SnapshotItem } from '../views/codeSnapshotView'
 import { ViewLoader } from '../views/webview/ViewLoader'
 
-class TemplateItem extends vscode.TreeItem {
+export class TemplateItem extends vscode.TreeItem {
   constructor(public readonly template: Template) {
     super(template.templateName, vscode.TreeItemCollapsibleState.None)
     this.tooltip = `${template.templateName}`
@@ -15,14 +17,15 @@ class TemplateItem extends vscode.TreeItem {
       title: 'View Template',
       arguments: [template],
     }
-    this.iconPath = new vscode.ThemeIcon('symbol-snippet')
+    this.iconPath = new vscode.ThemeIcon('notebook')
+    this.contextValue = 'vibeEditorTemplatePage'
   }
 }
 
 export class TemplateService {
   private context: vscode.ExtensionContext
-  private page: string
-  constructor(context: vscode.ExtensionContext, page: string) {
+  private page: PageType
+  constructor(context: vscode.ExtensionContext, page: PageType) {
     this.context = context
     this.page = page
   }
@@ -30,22 +33,63 @@ export class TemplateService {
   async resetTemplate(): Promise<void> {
     await this.context.globalState.update('templates', [])
   }
+  async deleteTemplate(templateId: number): Promise<void> {
+    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const templateIndex = prev.findIndex(
+      (template) => template.templateId === templateId,
+    )
+    if (templateIndex === -1) {
+      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
+      return
+    }
+    prev.splice(templateIndex, 1)
+    vscode.window
+      .showWarningMessage('템플릿을 삭제하시겠습니까?', { modal: true }, 'Ok')
+      .then(async (selection) => {
+        if (selection === 'Ok') {
+          await ViewLoader.deleteTemplateIfActive(templateId)
+          await this.context.globalState.update('templates', prev)
+          templateProviderInstance?.refresh()
+          vscode.window.showInformationMessage('템플릿이 삭제되었습니다.')
+        }
+      })
+  }
+
+  async renameTemplate(templateId: number): Promise<void> {
+    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const templateIndex = prev.findIndex(
+      (template) => template.templateId === templateId,
+    )
+    if (templateIndex === -1) {
+      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
+      return
+    }
+
+    vscode.window
+      .showInputBox({
+        value: prev[templateIndex].templateName,
+        prompt: '템플릿 이름을 입력하세요',
+        placeHolder: prev[templateIndex].templateName,
+      })
+      .then(async (value) => {
+        if (value) {
+          prev[templateIndex].templateName = value
+          await this.context.globalState.update('templates', prev)
+          templateProviderInstance?.refresh()
+        }
+      })
+  }
 
   async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
     console.log('addToPrompt', snapshotItem)
-    const selectedTemplateId = getDraftData('selectedTemplateId')
-
-    const selectedPromptId = Number(getDraftData('selectedPromptId')) ?? 0
-    console.log('selectedPromptId', selectedPromptId)
-    // const selectedTemplateId = await vscode.commands.executeCommand(
-    //   'getContext',
-    //   'vibeEditor.selectedTemplateId',
-    // )
-    // console.log('addToPrompt', selectedTemplateId),
+    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    const selectedPromptId =
+      Number(getDraftData(DraftDataType.selectedPromptId)) ?? 0
     const prev = this.context.globalState.get<Template[]>('templates') || []
     const templateIndex = prev.findIndex(
       (template) => template.templateId === selectedTemplateId,
     )
+    console.log('templateIndex', templateIndex)
 
     if (templateIndex !== -1 && prev[templateIndex]) {
       const template = prev[templateIndex]
@@ -55,6 +99,7 @@ export class TemplateService {
         )
         const prompts = template.prompts[promptIndex]
         if (promptIndex != -1 && prev[templateIndex] && prompts) {
+          console.log('prompts', prompts)
           const snapshots = prompts.snapshots
           if (snapshots) {
             snapshots.push({
@@ -137,7 +182,7 @@ export class TemplateService {
           )
 
           if (data.navigate) {
-            await data.navigate('post')
+            await data.navigate(PageType.POST)
           }
         } else {
         }

@@ -10,6 +10,8 @@ import { ShowSettingPageCommand } from './setting'
 import {
   AddToPromptCommand,
   CreateTemplateCommand,
+  DeleteTemplateCommand,
+  RenameTemplateCommand,
   ResetTemplateCommand,
   ShowTemplatePageCommand,
 } from './template'
@@ -23,6 +25,8 @@ export const allCommands = [
   DirectoryTreeCommand,
   SetNotionApiCommand,
   CreateTemplateCommand,
+  DeleteTemplateCommand,
+  RenameTemplateCommand,
   ResetTemplateCommand,
   ShowTemplatePageCommand,
   ShowSettingPageCommand,
