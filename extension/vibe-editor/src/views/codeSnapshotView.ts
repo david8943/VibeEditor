@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { Snapshot } from '../types/snapshot'
 
-class SnapshotItem extends vscode.TreeItem {
+export class SnapshotItem extends vscode.TreeItem {
   constructor(public readonly snapshot: Snapshot) {
     super(snapshot.snapshotName, vscode.TreeItemCollapsibleState.None)
     this.tooltip = `${snapshot.snapshotName}`

@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 
 import { Snapshot } from '../types/snapshot'
 import { SnapshotProvider } from '../views/codeSnapshotView'
+import { SnapshotItem } from '../views/codeSnapshotView'
 
 let codeProviderInstance: SnapshotProvider | undefined
 let directoryProviderInstance: SnapshotProvider | undefined
@@ -78,8 +79,19 @@ export class SnapshotService {
     return this.context.globalState.get<Snapshot[]>('snapshots') || []
   }
 
-  async deleteSnapshot(): Promise<void> {
-    vscode.window.showInformationMessage(`스냅샷이 삭제되었습니다`)
+  public async deleteSnapshot(snapshot: SnapshotItem): Promise<void> {
+    const prevSnapshots =
+      this.context.globalState.get<Snapshot[]>('snapshots') || []
+
+    const updatedSnapshots = prevSnapshots.filter(
+      (s) => s.snapshotId !== snapshot.snapshot.snapshotId,
+    )
+
+    await this.context.globalState.update('snapshots', updatedSnapshots)
+
+    vscode.window.showInformationMessage(`스냅샷이 삭제되었습니다.`)
+
+    refreshAllProviders()
   }
 
   public async copyCode(): Promise<void> {
