@@ -55,7 +55,7 @@
       {
         "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibeEditor.googleLogin)\n[GitHub Login](command:vibeEditor.githubLogin)",
-        "when": "vibeEditor.loginStatus == false"
+        "when": "vibeEditor.draftData.loginStatus == false"
       },
       {
         "view": "vibeEditorCodeSnapshot",
@@ -72,12 +72,12 @@
       {
         "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션 연동 정보가 없습니다.\n노션 PRIVATE API KEY를 입력해주세요.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "vibeEditor.loginStatus == true &&vibeEditor.notionStatus == false"
+        "when": "vibeEditor.draftData.loginStatus == true &&vibeEditor.draftData.notionStatus == false"
       },
       {
         "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션과 연동이 완료되었습니다.\n코드를 노션에 추가할 수 있습니다.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "vibeEditor.loginStatus == true && vibeEditor.notionStatus == true"
+        "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.notionStatus == true"
       }
     ],
     "commands": [

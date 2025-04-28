@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
+import { setDraftData } from './configuration/tempData'
 import {
   setCodeSnapshotProvider,
   setDirectorySnapshotProvider,
@@ -23,17 +24,9 @@ async function isLogin(context: vscode.ExtensionContext) {
 
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
-    await vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.loginStatus',
-      false,
-    )
+    await setDraftData('loginStatus', false)
   } else {
-    await vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.loginStatus',
-      true,
-    )
+    await setDraftData('loginStatus', true)
   }
 }
 
@@ -42,11 +35,7 @@ async function isNotion(context: vscode.ExtensionContext) {
   if (!notionToken) {
     vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
   } else {
-    vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.notionStatus',
-      true,
-    )
+    await setDraftData('notionStatus', true)
   }
 }
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { getDraftData } from '../configuration/tempData'
 import { Post } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
 import { SnapshotItem } from '../views/codeSnapshotView'
@@ -32,14 +33,14 @@ export class TemplateService {
 
   async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
     console.log('addToPrompt', snapshotItem)
-    //getContext
+    const selectedTemplateId = getDraftData('selectedTemplateId')
 
     // const selectedTemplateId = await vscode.commands.executeCommand(
     //   'getContext',
     //   'vibeEditor.selectedTemplateId',
     // )
     // console.log('addToPrompt', selectedTemplateId),
-    console.log('addToPrompt', snapshotItem)
+    console.log('addToPrompt', snapshotItem, selectedTemplateId)
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 
