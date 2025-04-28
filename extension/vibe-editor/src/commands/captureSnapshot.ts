@@ -20,3 +20,21 @@ export class CaptureSnapshotCommand implements ICommand {
     await this.snapshotService.captureSnapshot()
   }
 }
+
+export class DeleteSnapshotCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.deleteSnapshot'
+
+  private snapshotService: SnapshotService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.snapshotService = new SnapshotService(context)
+  }
+
+  public get commandName(): string {
+    return DeleteSnapshotCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    await this.snapshotService.deleteSnapshot()
+  }
+}

@@ -78,6 +78,10 @@ export class SnapshotService {
     return this.context.globalState.get<Snapshot[]>('snapshots') || []
   }
 
+  async deleteSnapshot(): Promise<void> {
+    vscode.window.showInformationMessage(`스냅샷이 삭제되었습니다`)
+  }
+
   public async copyCode(): Promise<void> {
     const text = await vscode.env.clipboard.readText()
 

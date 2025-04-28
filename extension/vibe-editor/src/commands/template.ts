@@ -71,3 +71,20 @@ export class ResetTemplateCommand implements ICommand {
     this.templateService.resetTemplate()
   }
 }
+
+export class AddToPromptCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.addToPrompt'
+  private templateService: TemplateService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.templateService = new TemplateService(context, 'post')
+  }
+
+  public get commandName(): string {
+    return AddToPromptCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    this.templateService.addToPrompt()
+  }
+}
