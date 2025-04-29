@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 
 import { CreatePost } from '@/types/post'
 
-import { setDraftData } from '../../configuration/tempData'
+import { getDraftData, setDraftData } from '../../configuration/tempData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
@@ -62,11 +62,21 @@ export class ViewLoader {
   }
   private async getTemplates() {
     const templates = await this.templateService.getTemplates()
-    setDraftData(DraftDataType.selectedTemplateId, templates[0].templateId)
-    this.currentTemplateId = templates[0]?.templateId
+    const selectedTemplateId = Number(
+      getDraftData(DraftDataType.selectedTemplateId),
+    )
+    let selectedTemplate = templates.find(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    if (selectedTemplate) {
+      this.currentTemplateId = selectedTemplate.templateId
+    } else {
+      this.currentTemplateId = templates[0]?.templateId
+      selectedTemplate = templates[0]
+    }
     this.panel.webview.postMessage({
       type: MessageType.TEMPLATE_SELECTED,
-      payload: { template: templates[0] },
+      payload: { template: selectedTemplate },
     })
   }
 
@@ -140,7 +150,11 @@ export class ViewLoader {
             this.panel.dispose()
           }
         } else if (message.type === MessageType.DELETE_SNAPSHOT) {
-          await this.snapshotService.deleteSnapshot(message.payload.snapshotId)
+          await this.templateService.deletePromptSnapshot(
+            message.payload.snapshotId,
+            message.payload.selectedPromptId,
+            message.payload.selectedTemplateId,
+          )
         } else if (message.type === MessageType.SUBMIT_POST) {
           await this.submitPost(message.payload)
         }

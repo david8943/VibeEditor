@@ -13,15 +13,18 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
-    postMessageToExtension({ type: MessageType.WEBVIEW_READY })
+    postMessageToExtension({ type: MessageType.GET_TEMPLATES })
     const handleMessage = (event: MessageEvent) => {
       console.log('handleMessage 템플릿 페이지 안에 있음', event)
       const message = event.data
       if (message.type === MessageType.TEMPLATE_SELECTED) {
+        console.log('TEMPLATE_SELECTED', message.payload.template)
         setSelectedTemplate(message.payload.template)
       } else if (message.type === MessageType.GET_TEMPLATES) {
+        console.log('GET_TEMPLATES')
         postMessageToExtension({ type: MessageType.GET_TEMPLATES })
       } else if (message.type === MessageType.GET_SNAPSHOTS) {
+        console.log('GET_SNAPSHOTS')
         postMessageToExtension({ type: MessageType.GET_SNAPSHOTS })
       }
     }
@@ -84,14 +87,20 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     }
   }
   const deleteSnapshot = (snapshotId: number) => {
+    console.log('deleteSnapshot', snapshotId)
     postMessageToExtension({
       type: MessageType.DELETE_SNAPSHOT,
-      payload: { snapshotId },
+      payload: {
+        snapshotId,
+        selectedPromptId,
+        selectedTemplateId: selectedTemplate?.templateId,
+      },
     })
   }
   return (
     <div className="app-container flex flex-col gap-8">
-      <h1>프롬프트 생성기 {selectedTemplate?.templateId}</h1>
+      <h1>프롬프트 생성기 templateId: {selectedTemplate?.templateId}</h1>
+      <h1>프롬프트 생성기 promptId: {selectedPromptId}</h1>
       <PromptSelector
         selectedTemplate={selectedTemplate}
         selectedPromptId={selectedPromptId}
