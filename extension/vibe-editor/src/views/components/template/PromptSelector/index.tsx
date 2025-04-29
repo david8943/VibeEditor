@@ -27,7 +27,7 @@ export function PromptSelector({
             selectPromptId(prompt.promptId)
           }
         }}>
-        <option value="">프롬프트를 선택하세요</option>
+        <option value="">새 프롬프트 생성하기</option>
         {selectedTemplate?.prompts?.map((prompt) => (
           <option
             key={prompt.promptId}
