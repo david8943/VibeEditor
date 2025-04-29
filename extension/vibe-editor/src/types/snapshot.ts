@@ -1,3 +1,9 @@
+export const SnapshotType = {
+  CODE: 'code',
+  DIRECTORY: 'directory',
+  LOG: 'log',
+}
+export type SnapshotType = (typeof SnapshotType)[keyof typeof SnapshotType]
 export interface Snapshot {
   snapshotId: number
   snapshotName: string

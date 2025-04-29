@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
-import { setDraftData } from '../configuration/tempData'
+import { clearDraftData, setDraftData } from '../configuration/tempData'
+import { DraftDataType, SecretType } from '../types/configuration'
 
 export class AuthService {
   private context: vscode.ExtensionContext
@@ -14,6 +15,8 @@ export class AuthService {
   }
 
   public async githubLogin(): Promise<void> {
+    // await this.context.secrets.store(SecretType.accessToken, 'test')
+    // setDraftData(DraftDataType.loginStatus, true)
     await this.auth('github')
   }
 
@@ -27,8 +30,11 @@ export class AuthService {
             const accessToken = url.searchParams.get('accessToken')
 
             if (accessToken) {
-              await this.context.secrets.store('accessToken', accessToken)
-              await setDraftData('loginStatus', true)
+              await this.context.secrets.store(
+                SecretType.accessToken,
+                accessToken,
+              )
+              setDraftData(DraftDataType.loginStatus, true)
               res.writeHead(200, {
                 'Content-Type': 'text/html; charset=utf-8',
               })
@@ -89,17 +95,20 @@ export class AuthService {
               res.end()
               server.close()
               vscode.window.showInformationMessage(`${domain} 로그인 성공`)
-              await this.context.secrets.store('accessToken', accessToken)
-              await setDraftData('loginStatus', true)
+              await this.context.secrets.store(
+                SecretType.accessToken,
+                accessToken,
+              )
+              setDraftData(DraftDataType.loginStatus, true)
             } else {
               res.statusCode = 400
               res.end('Token이 없습니다.')
-              await setDraftData('loginStatus', false)
+              setDraftData(DraftDataType.loginStatus, false)
             }
           } else {
             res.statusCode = 404
             res.end('잘못된 경로입니다.')
-            await setDraftData('loginStatus', false)
+            setDraftData(DraftDataType.loginStatus, false)
           }
         },
       )
@@ -117,8 +126,10 @@ export class AuthService {
   }
 
   public async logout(): Promise<void> {
-    this.context.secrets.delete('acceessToken')
-    await setDraftData('loginStatus', false)
+    Object.values(SecretType).forEach((element) => {
+      this.context.secrets.delete(element)
+    })
+    clearDraftData()
     vscode.window.showInformationMessage('로그아웃되었습니다.')
   }
 }

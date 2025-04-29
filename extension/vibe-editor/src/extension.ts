@@ -12,6 +12,7 @@ import {
   TemplateProvider,
   setTemplateProvider,
 } from './services/templateService'
+import { DraftDataType, SecretType } from './types/configuration'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
@@ -20,22 +21,18 @@ import {
 } from './views/codeSnapshotView'
 
 async function isLogin(context: vscode.ExtensionContext) {
-  const accessToken = context.secrets.get('accessToken')
-
+  const accessToken = await context.secrets.get(SecretType.accessToken)
+  setDraftData(DraftDataType.loginStatus, !!accessToken)
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
-    await setDraftData('loginStatus', false)
-  } else {
-    await setDraftData('loginStatus', true)
   }
 }
 
 async function isNotion(context: vscode.ExtensionContext) {
-  const notionToken = context.secrets.get('notionToken')
+  const notionToken = await context.secrets.get(SecretType.notionToken)
+  setDraftData(DraftDataType.notionStatus, !!notionToken)
   if (!notionToken) {
     vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
-  } else {
-    await setDraftData('notionStatus', true)
   }
 }
 

@@ -1,5 +1,6 @@
 import { Post } from './post'
 import { Snapshot } from './snapshot'
+import { PageType } from './webview'
 
 export interface Template {
   templateId: number
@@ -15,7 +16,7 @@ export interface SubmitPrompt {
   prompt: Prompt
   selectedTemplateId: number
   selectedPromptId: number
-  navigate?: (page: string) => Promise<void>
+  navigate?: (page: PageType) => Promise<void>
 }
 
 export interface SubmitPost {

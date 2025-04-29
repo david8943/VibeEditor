@@ -1,8 +1,18 @@
 import * as vscode from 'vscode'
 
-let draftData: Record<string, unknown> = {}
+import { DraftDataType } from '../types/configuration'
 
-export function setDraftData(key: string, value: unknown): void {
+const initialDraftData: Record<DraftDataType, unknown> = {
+  [DraftDataType.loginStatus]: false,
+  [DraftDataType.notionStatus]: false,
+  [DraftDataType.selectedTemplateId]: 0,
+  [DraftDataType.selectedPromptId]: 0,
+  [DraftDataType.selectedPostId]: 0,
+}
+
+let draftData: Record<DraftDataType, unknown> = { ...initialDraftData }
+
+export function setDraftData(key: DraftDataType, value: unknown): void {
   draftData[key] = value
   vscode.commands.executeCommand(
     'setContext',
@@ -11,24 +21,26 @@ export function setDraftData(key: string, value: unknown): void {
   )
 }
 
-export function getDraftData<T = unknown>(key: string): T | undefined {
+export function getDraftData<T = unknown>(key: DraftDataType): T | undefined {
   return draftData[key] as T | undefined
 }
 
-export function clearDraftData(key?: string): void {
+export function clearDraftData(key?: DraftDataType): void {
   if (key) {
     delete draftData[key]
     vscode.commands.executeCommand(
       'setContext',
       `vibeEditor.draftData.${key}`,
-      undefined,
+      initialDraftData[key],
     )
   } else {
-    draftData = {}
-    vscode.commands.executeCommand(
-      'setContext',
-      'vibeEditor.draftData',
-      undefined,
-    )
+    draftData = { ...initialDraftData }
+    Object.entries(initialDraftData).forEach(([key, value]) => {
+      vscode.commands.executeCommand(
+        'setContext',
+        `vibeEditor.draftData.${key}`,
+        value,
+      )
+    })
   }
 }

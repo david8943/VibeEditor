@@ -1,11 +1,12 @@
 import * as vscode from 'vscode'
 
+import { PageType } from '../types/webview'
 import { SettingViewLoader } from '../views/webview/SettingViewLoader'
 
 export class SettingService {
   private context: vscode.ExtensionContext
-  private page: string
-  constructor(context: vscode.ExtensionContext, page: string) {
+  private page: PageType
+  constructor(context: vscode.ExtensionContext, page: PageType) {
     this.context = context
     this.page = page
   }

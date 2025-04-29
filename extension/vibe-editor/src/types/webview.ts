@@ -1,10 +1,19 @@
 import { Prompt, SubmitPrompt } from './template'
 
+export const PageType = {
+  TEMPLATE: 'TEMPLATE',
+  POST: 'POST',
+  SETTING: 'SETTING',
+  LOADING: 'LOADING',
+} as const
+
+export type PageType = (typeof PageType)[keyof typeof PageType]
 export const MessageType = {
   //공용
   COMMON: 'COMMON',
   RELOAD: 'RELOAD',
   NAVIGATE: 'NAVIGATE',
+  INITIAL_PAGE: 'INITIAL_PAGE',
   CONFIG_CHANGE: 'CONFIG_CHANGE',
   WEBVIEW_READY: 'WEBVIEW_READY',
   // 템플릿 페이지
@@ -17,6 +26,8 @@ export const MessageType = {
   TEMPLATE_SELECTED: 'TEMPLATE_SELECTED',
   SNAPSHOTS_LOADED: 'SNAPSHOTS_LOADED',
   PROMPT_SELECTED: 'PROMPT_SELECTED',
+  DELETE_TEMPLATE: 'DELETE_TEMPLATE',
+  DELETE_SNAPSHOT: 'DELETE_SNAPSHOT',
   // 포스트 페이지
   GET_CURRENT_POST: 'GET_CURRENT_POST',
   CURRENT_POST_LOADED: 'CURRENT_POST_LOADED',

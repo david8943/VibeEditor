@@ -103,7 +103,8 @@
       {
         "command": "vibeEditor.copyCode",
         "title": "복사한 로그 스냅샷 촬영하기",
-        "category": "Vibe Editor"
+        "category": "Vibe Editor",
+        "icon": "$(edit)"
       },
       {
         "command": "vibeEditor.exportDirectoryTreeSnapshot",
@@ -126,8 +127,20 @@
         "category": "Vibe Editor"
       },
       {
+        "command": "vibeEditor.renameTemplate",
+        "title": "템플릿 이름 바꾸기",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.deleteTemplate",
+        "title": "템플릿 삭제",
+        "icon": "$(trash)",
+        "category": "Vibe Editor"
+      },
+      {
         "command": "vibeEditor.createTemplate",
-        "title": "새 템플릿 생성"
+        "title": "새 템플릿 생성",
+        "category": "Vibe Editor"
       },
       {
         "command": "vibeEditor.showTemplatePage",
@@ -155,6 +168,15 @@
     ],
     "menus": {
       "view/item/context": [
+        {
+          "command": "vibeEditor.deleteTemplate",
+          "when": "viewItem == vibeEditorTemplatePage",
+          "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.renameTemplate",
+          "when": "viewItem == vibeEditorTemplatePage"
+        },
         {
           "command": "vibeEditor.openContext",
           "when": "viewItem == vibeEditorCodeSnapshot"
@@ -242,6 +264,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.25.1",
+    "@svgr/webpack": "^8.1.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",

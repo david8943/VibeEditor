@@ -5,8 +5,14 @@ import { setDraftData } from '../../configuration/tempData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
+import { DraftDataType } from '../../types/configuration'
 import { SubmitPrompt } from '../../types/template'
-import { CommonMessage, Message, MessageType } from '../../types/webview'
+import {
+  CommonMessage,
+  Message,
+  MessageType,
+  PageType,
+} from '../../types/webview'
 
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel
@@ -17,8 +23,9 @@ export class ViewLoader {
   private context: vscode.ExtensionContext
   private disposables: vscode.Disposable[]
   private currentPage: string
+  private currentTemplateId?: number
 
-  constructor(context: vscode.ExtensionContext, initialPage: string) {
+  constructor(context: vscode.ExtensionContext, initialPage: PageType) {
     this.context = context
     this.disposables = []
     this.templateService = new TemplateService(context, initialPage)
@@ -53,8 +60,8 @@ export class ViewLoader {
   }
   private async getTemplates() {
     const templates = await this.templateService.getTemplates()
-    await setDraftData('selectedTemplateId', templates[0].templateId)
-
+    setDraftData(DraftDataType.selectedTemplateId, templates[0].templateId)
+    this.currentTemplateId = templates[0]?.templateId
     this.panel.webview.postMessage({
       type: MessageType.TEMPLATE_SELECTED,
       payload: { template: templates[0] },
@@ -79,19 +86,24 @@ export class ViewLoader {
   private async submitPrompt(data: SubmitPrompt) {
     await this.templateService.submitPrompt({
       ...data,
-      navigate: (page: string) => this.navigate(page),
+      navigate: (page: PageType) => this.navigate(page),
     })
   }
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
       async (message: Message) => {
-        if (message.type === 'NAVIGATE') {
+        if (message.type === MessageType.NAVIGATE) {
           await this.navigate(message.payload?.page)
-        } else if (message.type === 'RELOAD') {
+        } else if (message.type === MessageType.RELOAD) {
           vscode.commands.executeCommand(
             'workbench.action.webview.reloadWebviewAction',
           )
-        } else if (message.type === 'COMMON') {
+        } else if (message.type === MessageType.WEBVIEW_READY) {
+          this.panel.webview.postMessage({
+            type: MessageType.INITIAL_PAGE,
+            payload: { page: this.currentPage },
+          })
+        } else if (message.type === MessageType.COMMON) {
           const text = (message as CommonMessage).payload
           vscode.window.showInformationMessage(
             `Received message from Webview: ${text}`,
@@ -111,11 +123,16 @@ export class ViewLoader {
         } else if (message.type === MessageType.GET_CURRENT_POST) {
           await this.getCurrentPost()
         } else if (message.type === MessageType.PROMPT_SELECTED) {
-          console.log('setDraftData', message.payload?.selectedPromptId)
-          await setDraftData(
-            'selectedPromptId',
+          setDraftData(
+            DraftDataType.selectedPromptId,
             message.payload?.selectedPromptId,
           )
+        } else if (message.type === MessageType.DELETE_TEMPLATE) {
+          if (this.currentTemplateId === message.payload.templateId) {
+            this.panel.dispose()
+          }
+        } else if (message.type === MessageType.DELETE_SNAPSHOT) {
+          await this.snapshotService.deleteSnapshot(message.payload.snapshotId)
         }
       },
       null,
@@ -129,15 +146,15 @@ export class ViewLoader {
   private renderPage(page: string) {
     const html = this.render()
     this.panel.webview.html = html
-    this.panel.webview.postMessage({
-      type: 'INITIAL_PAGE',
-      payload: { page },
-    })
+    // this.panel.webview.postMessage({
+    //   type: MessageType.INITIAL_PAGE,
+    //   payload: { page },
+    // })
   }
 
   static async showWebview(
     context: vscode.ExtensionContext,
-    page: string,
+    page: PageType,
     template?: any,
   ) {
     const cls = this
@@ -147,7 +164,7 @@ export class ViewLoader {
     if (cls.currentPanel) {
       cls.currentPanel.reveal(column)
       if (template) {
-        setDraftData('selectedTemplateId', template.templateId)
+        setDraftData(DraftDataType.selectedTemplateId, template.templateId)
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },
@@ -156,7 +173,7 @@ export class ViewLoader {
     } else {
       cls.currentPanel = new cls(context, page).panel
       if (template) {
-        await setDraftData('selectedTemplateId', template.templateId)
+        setDraftData(DraftDataType.selectedTemplateId, template.templateId)
         cls.currentPanel.webview.postMessage({
           type: 'TEMPLATE_SELECTED',
           payload: { template },
@@ -198,16 +215,6 @@ export class ViewLoader {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>템플릿 생성</title>
-          <link rel="stylesheet" href="${this.panel.webview.asWebviewUri(
-            vscode.Uri.file(
-              path.join(
-                this.context.extensionPath,
-                'dist',
-                'app',
-                'global.css',
-              ),
-            ),
-          )}">
           <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
           <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         </head>
@@ -225,12 +232,21 @@ export class ViewLoader {
 
   private getTitle(page: string): string {
     switch (page) {
-      case 'template':
+      case PageType.TEMPLATE:
         return '프롬프트 생성기'
-      case 'post':
+      case PageType.POST:
         return '포스트 생성기'
       default:
         return 'Vibe Editor'
+    }
+  }
+
+  public static async deleteTemplateIfActive(templateId: number) {
+    if (this.currentPanel && this.currentPanel.visible) {
+      this.currentPanel.webview.postMessage({
+        type: MessageType.DELETE_TEMPLATE,
+        payload: { templateId },
+      })
     }
   }
 }
