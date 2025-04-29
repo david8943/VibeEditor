@@ -131,6 +131,8 @@ export class ViewLoader {
           if (this.currentTemplateId === message.payload.templateId) {
             this.panel.dispose()
           }
+        } else if (message.type === MessageType.DELETE_SNAPSHOT) {
+          await this.snapshotService.deleteSnapshot(message.payload.snapshotId)
         }
       },
       null,

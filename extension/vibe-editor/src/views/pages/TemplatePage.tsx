@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { CreatePrompt, Template } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
@@ -9,23 +9,26 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     null,
   )
   const [selectedPromptId, setSelectedPromptId] = useState<number>(0)
-
+  const initialized = useRef(false)
   useEffect(() => {
-    postMessageToExtension({ type: 'WEBVIEW_READY' })
+    if (initialized.current) return
+    initialized.current = true
+    postMessageToExtension({ type: MessageType.WEBVIEW_READY })
     const handleMessage = (event: MessageEvent) => {
+      console.log('handleMessage 템플릿 페이지 안에 있음', event)
       const message = event.data
-      if (message.type === 'TEMPLATE_SELECTED') {
+      if (message.type === MessageType.TEMPLATE_SELECTED) {
         setSelectedTemplate(message.payload.template)
-      } else if (message.type === 'GET_TEMPLATES') {
-        postMessageToExtension({ type: 'GET_TEMPLATES' })
-      } else if (message.type === 'GET_SNAPSHOTS') {
-        postMessageToExtension({ type: 'GET_SNAPSHOTS' })
+      } else if (message.type === MessageType.GET_TEMPLATES) {
+        postMessageToExtension({ type: MessageType.GET_TEMPLATES })
+      } else if (message.type === MessageType.GET_SNAPSHOTS) {
+        postMessageToExtension({ type: MessageType.GET_SNAPSHOTS })
       }
     }
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [postMessageToExtension])
+  }, [])
 
   const submitPrompt = (data: CreatePrompt) => {
     postMessageToExtension({
@@ -80,6 +83,12 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       })
     }
   }
+  const deleteSnapshot = (snapshotId: number) => {
+    postMessageToExtension({
+      type: MessageType.DELETE_SNAPSHOT,
+      payload: { snapshotId },
+    })
+  }
   return (
     <div className="app-container flex flex-col gap-8">
       <h1>프롬프트 생성기 {selectedTemplate?.templateId}</h1>
@@ -95,6 +104,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           updatePrompt={updatePrompt}
           createPrompt={createPrompt}
           localSnapshots={selectedTemplate.snapshots || []}
+          deleteSnapshot={deleteSnapshot}
         />
       )}
     </div>

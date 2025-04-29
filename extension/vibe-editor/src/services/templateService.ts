@@ -83,41 +83,52 @@ export class TemplateService {
   async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
     console.log('addToPrompt', snapshotItem)
     const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
-    const selectedPromptId =
-      Number(getDraftData(DraftDataType.selectedPromptId)) ?? 0
+    const selectedPromptId = Number(
+      getDraftData(DraftDataType.selectedPromptId),
+    )
     const prev = this.context.globalState.get<Template[]>('templates') || []
     const templateIndex = prev.findIndex(
       (template) => template.templateId === selectedTemplateId,
     )
     console.log('templateIndex', templateIndex)
-
-    if (templateIndex !== -1 && prev[templateIndex]) {
-      const template = prev[templateIndex]
-      if (template.prompts) {
-        const promptIndex = template.prompts.findIndex(
-          (prompt) => prompt.promptId === selectedPromptId,
-        )
-        const prompts = template.prompts[promptIndex]
-        if (promptIndex != -1 && prev[templateIndex] && prompts) {
-          console.log('prompts', prompts)
-          const snapshots = prompts.snapshots
-          if (snapshots) {
-            snapshots.push({
-              attachId: new Date().getTime(),
-              promptId: selectedPromptId,
-              snapshotId: snapshotItem.snapshot.snapshotId,
-              description: '설명',
-              updatedAt: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-            })
-          }
-          prompts.snapshots = snapshots
-        }
-
-        await this.context.globalState.update('templates', prev)
-      }
+    if (templateIndex === -1) {
+      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
+      return
     }
-    console.log('addToPrompt', snapshotItem, selectedTemplateId)
+    const prompts: Prompt[] = prev[templateIndex].prompts || []
+    if (!prompts) {
+      vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
+      return
+    }
+    const promptIndex = prompts.findIndex(
+      (prompt) => prompt.promptId === selectedPromptId,
+    )
+    if (promptIndex === -1) {
+      vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
+      return
+    }
+    const prompt = prompts[promptIndex]
+    if (!prompt) {
+      vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
+      return
+    }
+
+    const snapshots = prompt.snapshots
+    if (!snapshots) {
+      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      return
+    }
+    snapshots.push({
+      attachId: new Date().getTime(),
+      promptId: selectedPromptId,
+      snapshotId: snapshotItem.snapshot.snapshotId,
+      description: '설명',
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    })
+    prompt.snapshots = snapshots
+    prev[templateIndex].prompts = prompts
+    await this.context.globalState.update('templates', prev)
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 
@@ -280,6 +291,40 @@ export class TemplateService {
     const templates =
       this.context.globalState.get<Template[]>('templates') || []
     return templates
+  }
+
+  public async deletePromptSnapshot(
+    snapshotId: number,
+    selectedPromptId: number,
+    selectedTemplateId: number,
+  ): Promise<void> {
+    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const templateIndex = prev.findIndex(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    const template = prev[templateIndex]
+    const promptIndex = template.prompts?.findIndex(
+      (prompt) => prompt.promptId === selectedPromptId,
+    )
+    if (promptIndex) {
+      const prompt = template.prompts?.[promptIndex]
+      if (prompt) {
+        const snapshotIndex = prompt.snapshots?.findIndex(
+          (snapshot) => snapshot.snapshotId === snapshotId,
+        )
+        if (snapshotIndex) {
+          prompt.snapshots = [
+            ...(prompt.snapshots || []).filter(
+              (snapshot) => snapshot.snapshotId !== snapshotId,
+            ),
+          ]
+          await this.context.globalState.update('templates', prev)
+          vscode.window.showInformationMessage(
+            `스냅샷이 프롬프트에서 삭제되었습니다.`,
+          )
+        }
+      }
+    }
   }
 }
 

@@ -13,13 +13,12 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["node_modules/*"],
       "@/*": ["src/*"]
     },
     "outDir": "./dist/app",
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["src/views/**/*", "tailwind.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tailwind.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
