@@ -4,6 +4,7 @@ import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import { setDraftData } from './configuration/tempData'
 import {
+  SnapshotService,
   setCodeSnapshotProvider,
   setDirectorySnapshotProvider,
   setLogSnapshotProvider,
@@ -17,6 +18,7 @@ import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
   LogSnapshotProvider,
+  SnapshotItem,
   registerSnapshotViewCommand,
 } from './views/codeSnapshotView'
 
@@ -105,6 +107,17 @@ export async function activate(
       },
     ),
   )
+  const snapshotService = new SnapshotService(context)
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'vibeEditor.renameSnapshot',
+      async (item: SnapshotItem) => {
+        await snapshotService.renameSnapshot(item.snapshot.snapshotId)
+      },
+    ),
+  )
+
   addStatusBarItem(context)
   // 설정 변경 이벤트 구독
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
