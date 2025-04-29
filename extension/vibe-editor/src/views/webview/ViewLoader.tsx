@@ -1,6 +1,8 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 
+import { CreatePost } from '@/types/post'
+
 import { setDraftData } from '../../configuration/tempData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
@@ -89,6 +91,12 @@ export class ViewLoader {
       navigate: (page: PageType) => this.navigate(page),
     })
   }
+  private async submitPost(data: CreatePost) {
+    await this.postService.submitToNotion({
+      ...data,
+    })
+  }
+
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
       async (message: Message) => {
@@ -133,6 +141,8 @@ export class ViewLoader {
           }
         } else if (message.type === MessageType.DELETE_SNAPSHOT) {
           await this.snapshotService.deleteSnapshot(message.payload.snapshotId)
+        } else if (message.type === MessageType.SUBMIT_POST) {
+          await this.submitPost(message.payload)
         }
       },
       null,

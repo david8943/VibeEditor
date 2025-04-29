@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { Post } from '../types/post'
+import { CreatePost, Post } from '../types/post'
 import { SubmitPost, Template } from '../types/template'
 
 class PostItem extends vscode.TreeItem {
@@ -87,6 +87,22 @@ export class PostService {
   async getCurrentPost(): Promise<Post> {
     const posts = this.context.globalState.get<Post[]>('posts') || []
     return posts[0]
+  }
+
+  async submitToNotion(data: CreatePost) {
+    vscode.window
+      .showInformationMessage(
+        '노션이 생성되었습니다. 해당 페이지로 이동하시겠습니까까?',
+        { modal: true },
+        'Ok',
+      )
+      .then(async (selection) => {
+        if (selection === 'Ok') {
+          await vscode.env.openExternal(
+            vscode.Uri.parse(`http://www.naver.com`),
+          )
+        }
+      })
   }
 }
 
