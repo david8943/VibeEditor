@@ -152,10 +152,6 @@
         "category": "Vibe Editor"
       },
       {
-        "command": "vibeEditor.openContext",
-        "title": "컨텍스트 메뉴 열기"
-      },
-      {
         "command": "vibeEditor.addToPrompt",
         "title": "프롬프트에 추가하기",
         "icon": "$(go-to-editing-session)"
@@ -164,6 +160,11 @@
         "command": "vibeEditor.deleteSnapshot",
         "title": "스냅샷 삭제하기",
         "icon": "$(trash)"
+      },
+      {
+        "command": "vibeEditor.renameSnapshot",
+        "title": "스냅샷 이름 바꾸기",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
@@ -178,8 +179,9 @@
           "when": "viewItem == vibeEditorTemplatePage"
         },
         {
-          "command": "vibeEditor.openContext",
-          "when": "viewItem == vibeEditorCodeSnapshot"
+          "command": "vibeEditor.renameSnapshot",
+          "when": "viewItem == vibeEditorCodeSnapshot || viewItem == vibeEditorDirectoryTreeSnapshot || viewItem == vibeEditorLogSnapshot",
+          "group": "navigation"
         },
         {
           "command": "vibeEditor.addToPrompt",

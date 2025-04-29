@@ -94,6 +94,31 @@ export class SnapshotService {
     refreshAllProviders()
   }
 
+  async renameSnapshot(snapshotId: number): Promise<void> {
+    const prev = this.context.globalState.get<Snapshot[]>('snapshots') || []
+    const snapshotIndex = prev.findIndex(
+      (snapshot) => snapshot.snapshotId === snapshotId,
+    )
+    if (snapshotIndex === -1) {
+      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      return
+    }
+
+    vscode.window
+      .showInputBox({
+        value: prev[snapshotIndex].snapshotName,
+        prompt: '스냅샷 이름을 입력하세요',
+        placeHolder: prev[snapshotIndex].snapshotName,
+      })
+      .then(async (value) => {
+        if (value) {
+          prev[snapshotIndex].snapshotName = value
+          await this.context.globalState.update('snapshots', prev)
+          refreshAllProviders()
+        }
+      })
+  }
+
   public async copyCode(): Promise<void> {
     const text = await vscode.env.clipboard.readText()
 
