@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from 'react'
 
-interface Database {
-  databaseId: number
-  databaseName: string
-  databaseUid: string
-}
+import { Database } from '../../../../types/database'
+import { MessageType } from '../../../../types/webview'
 
 interface Props {
   selectedId: string
   onChange: (id: string) => void
+  getDatabases: () => void
+  onAddClick: () => void
 }
 
-export const DBSelector: React.FC<Props> = ({ selectedId, onChange }) => {
+export const DBSelector: React.FC<Props> = ({
+  selectedId,
+  onChange,
+  getDatabases,
+  onAddClick,
+}) => {
   const [dbList, setDbList] = useState<Database[]>([])
 
   useEffect(() => {
-    window.vscode.postMessage({ command: 'getDatabases' })
+    getDatabases()
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.command === 'setDatabases') {
+      console.log('handleMessage DBSelector', event)
+      if (event.data.type == 'setDatabases') {
+        setDbList(event.data.payload)
+      } else if (event.data.type == MessageType.GET_DATABASE) {
         setDbList(event.data.payload)
       }
     }
@@ -26,6 +33,10 @@ export const DBSelector: React.FC<Props> = ({ selectedId, onChange }) => {
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
+
+  const handleAddClick = () => {
+    window.vscode.postMessage({ command: 'openDatabaseModal' })
+  }
 
   return (
     <div className="form-group">
@@ -42,6 +53,13 @@ export const DBSelector: React.FC<Props> = ({ selectedId, onChange }) => {
           </option>
         ))}
       </select>
+
+      <button
+        type="button"
+        onClick={onAddClick}
+        style={{ marginTop: '0.5rem' }}>
+        추가하기
+      </button>
     </div>
   )
 }

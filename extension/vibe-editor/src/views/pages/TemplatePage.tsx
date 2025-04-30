@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+import { Database } from '../../types/database'
 import { CreatePrompt, Template } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
 import { DBSelector } from '../components'
+import { DatabaseModal } from '../components/database/DatabaseModal'
 
 export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
@@ -87,6 +89,22 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       })
     }
   }
+
+  const saveDatabase = (database: Database) => {
+    console.log('saveDatabase', database)
+
+    postMessageToExtension({
+      type: MessageType.SAVE_DATABASE,
+      payload: database,
+    })
+  }
+  const getDatabases = () => {
+    postMessageToExtension({
+      type: MessageType.GET_DATABASE,
+      payload: null,
+    })
+  }
+
   const deleteSnapshot = (snapshotId: number) => {
     console.log('deleteSnapshot', snapshotId)
     postMessageToExtension({
@@ -99,21 +117,33 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
   }
   const [selectedDbUid, setSelectedDbUid] = useState('')
+  const [showDbModal, setShowDbModal] = useState(false)
 
   return (
     <div className="app-container flex flex-col gap-8">
       <h1>프롬프트 생성기 templateId: {selectedTemplate?.templateId}</h1>
       <h1>프롬프트 생성기 promptId: {selectedPromptId}</h1>
+
       <DBSelector
         selectedId={selectedDbUid}
         onChange={setSelectedDbUid}
+        getDatabases={getDatabases}
+        onAddClick={() => setShowDbModal(true)}
       />
+
+      {showDbModal && (
+        <DatabaseModal
+          saveDatabase={saveDatabase}
+          onClose={() => setShowDbModal(false)}
+        />
+      )}
 
       <PromptSelector
         selectedTemplate={selectedTemplate}
         selectedPromptId={selectedPromptId}
         selectPromptId={selectPrompt}
       />
+
       {selectedTemplate && selectedTemplate.prompts && (
         <PromptForm
           defaultPrompt={selectedTemplate.prompts[selectedPromptId]}
