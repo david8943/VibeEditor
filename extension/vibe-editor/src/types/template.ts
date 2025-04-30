@@ -23,7 +23,9 @@ export interface SubmitPost {
   post: Post
   selectedPostId: number
 }
-export interface CreatePrompt extends Omit<Prompt, 'promptId'> {}
+export interface CreatePrompt extends Omit<Prompt, 'promptId'> {
+  databaseUid: string
+}
 export interface Prompt {
   promptId: number
   promptName: string

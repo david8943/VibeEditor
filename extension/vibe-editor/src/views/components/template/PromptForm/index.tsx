@@ -1,4 +1,5 @@
-import React, { FormEvent, useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import MinusIcon from '@/assets/icons/minus_circle.svg'
 import { Snapshot } from '@/types/snapshot'
@@ -23,51 +24,68 @@ export function PromptForm({
   localSnapshots,
   deleteSnapshot,
 }: PromptFormProps) {
-  const [formData, setFormData] = useState<CreatePrompt>(defaultPrompt)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<CreatePrompt>({
+    defaultValues: defaultPrompt,
+  })
+  const snapshots = watch('snapshots')
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (defaultPrompt.promptId) {
-      updatePrompt(formData)
+  useEffect(() => {
+    console.log('snapshots', snapshots)
+  }, [snapshots])
+
+  useEffect(() => {
+    if (defaultPrompt) {
+      reset({
+        snapshots: defaultPrompt.snapshots,
+        postType: defaultPrompt.postType,
+        promptName: defaultPrompt.promptName,
+        comment: defaultPrompt.comment,
+        updatedAt: defaultPrompt.updatedAt,
+        createdAt: defaultPrompt.createdAt,
+        options: defaultPrompt.options,
+      })
+    }
+  }, [defaultPrompt, reset])
+  const onSubmit = (data: CreatePrompt) => {
+    if (defaultPrompt?.promptId) {
+      updatePrompt(data)
     } else {
-      createPrompt(formData)
+      createPrompt(data)
     }
   }
   const handlePost = () => {
+    const formData = watch()
     submitPrompt(formData)
-  }
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev: CreatePrompt) => ({
-      ...prev,
-      [name]: value,
-    }))
   }
 
   const handleDeleteSnapshot = useCallback(
     (snapshotId: number) => {
       deleteSnapshot(snapshotId)
+      setValue(
+        'snapshots',
+        snapshots.filter((snapshot) => snapshot.snapshotId !== snapshotId),
+      )
     },
-    [deleteSnapshot],
+    [deleteSnapshot, snapshots, setValue],
   )
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-8">
       <div className="form-group">
         <label htmlFor="category">포스트 종류</label>
         <select
           id="postType"
           title="postType"
-          name="postType"
-          value={formData.postType}
-          onChange={handleChange}
+          {...register('postType')}
           required>
           <option value="">포스트 종류 선택</option>
           <option value="cs">CS 개념</option>
@@ -79,17 +97,15 @@ export function PromptForm({
         <input
           type="text"
           id="promptName"
-          name="promptName"
-          value={formData.promptName}
-          onChange={handleChange}
+          {...register('promptName')}
           required
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="description">스냅 샷</label>
-        {formData.snapshots &&
-          formData.snapshots.map((snapshot) => (
+        <label htmlFor="description">스냅 샷 {snapshots.length}</label>
+        {snapshots &&
+          snapshots.map((snapshot) => (
             <div
               className="flex flex-1 gap-4 justify-center items-center"
               key={snapshot.snapshotId}>
@@ -104,9 +120,7 @@ export function PromptForm({
               </pre>
               <textarea
                 id={`description-${snapshot.snapshotId}`}
-                name={`description-${snapshot.snapshotId}`}
-                value={snapshot.description}
-                onChange={handleChange}
+                {...register(`snapshots.${snapshot.snapshotId}.description`)}
                 required
               />
               <button
@@ -126,9 +140,7 @@ export function PromptForm({
         <label htmlFor="comment">프롬프트 내용</label>
         <textarea
           id="comment"
-          name="comment"
-          value={formData.comment}
-          onChange={handleChange}
+          {...register('comment')}
           required
         />
       </div>
