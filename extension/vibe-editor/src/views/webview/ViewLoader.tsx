@@ -8,6 +8,7 @@ import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
+import { Database } from '../../types/database'
 import { SubmitPrompt } from '../../types/template'
 import {
   CommonMessage,
@@ -107,6 +108,32 @@ export class ViewLoader {
     })
   }
 
+  private async saveDatabase(data: Database) {
+    const existing = this.context.globalState.get<Database[]>(
+      'notionDatabases',
+      [],
+    )
+    existing.push({
+      databaseId: Date.now(),
+      databaseName: data.databaseName,
+      databaseUid: data.databaseUid,
+    })
+    await this.context.globalState.update('notionDatabases', existing)
+
+    vscode.window.showInformationMessage('DB 저장 완료')
+    this.panel.webview.postMessage({
+      type: 'setDatabases',
+      payload: existing,
+    })
+  }
+
+  private async getDatabase() {
+    const dbs = this.context.globalState.get('notionDatabases', [])
+    this.panel.webview.postMessage({
+      type: MessageType.GET_DATABASE,
+      payload: dbs,
+    })
+  }
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
       async (message: Message) => {
@@ -157,6 +184,12 @@ export class ViewLoader {
           )
         } else if (message.type === MessageType.SUBMIT_POST) {
           await this.submitPost(message.payload)
+        } else if (message.type === MessageType.SAVE_DATABASE) {
+          console.log('SAVE_DATABASE', message)
+          await this.saveDatabase(message.payload)
+        } else if (message.type === MessageType.GET_DATABASE) {
+          console.log('GET_DATABASE', message)
+          await this.getDatabase()
         }
       },
       null,

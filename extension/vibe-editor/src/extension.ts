@@ -14,6 +14,7 @@ import {
   setTemplateProvider,
 } from './services/templateService'
 import { DraftDataType, SecretType } from './types/configuration'
+import { Database } from './types/database'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
@@ -97,6 +98,47 @@ export async function activate(
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)
+
+  vscode.window.registerWebviewViewProvider('vibeEditorTemplatePage', {
+    resolveWebviewView(webviewView) {
+      webviewView.webview.options = { enableScripts: true }
+
+      webviewView.webview.onDidReceiveMessage(async (message) => {
+        switch (message.command) {
+          case 'getDatabases':
+            const dbs = context.globalState.get(
+              'notionDatabases',
+              [],
+            ) as Database[]
+            webviewView.webview.postMessage({
+              command: 'setDatabases',
+              payload: dbs,
+            })
+            break
+
+          case 'saveDatabase':
+            const existing = context.globalState.get<Database[]>(
+              'notionDatabases',
+              [],
+            )
+            existing.push({
+              databaseId: Date.now(),
+              databaseName: message.payload.databaseName,
+              databaseUid: message.payload.databaseUid,
+            })
+            await context.globalState.update('notionDatabases', existing)
+
+            vscode.window.showInformationMessage('DB 저장 완료')
+            console.log('📦 DB 저장 후:', existing)
+            webviewView.webview.postMessage({
+              command: 'setDatabases',
+              payload: existing,
+            })
+            break
+        }
+      })
+    },
+  })
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
