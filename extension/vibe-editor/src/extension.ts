@@ -122,9 +122,11 @@ export async function activate(
               [],
             )
             existing.push({
-              databaseId: Date.now(),
-              databaseName: message.payload.databaseName,
-              databaseUid: message.payload.databaseUid,
+              notionDatabaseId: Date.now(),
+              notionDatabaseName: message.payload.databaseName,
+              notionDatabaseUid: message.payload.databaseUid,
+              createdAt: Date.now().toString(),
+              updatedAt: Date.now().toString(),
             })
             await context.globalState.update('notionDatabases', existing)
 

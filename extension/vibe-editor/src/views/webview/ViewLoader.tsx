@@ -116,9 +116,11 @@ export class ViewLoader {
       [],
     )
     existing.push({
-      databaseId: Date.now(),
-      databaseName: data.databaseName,
-      databaseUid: data.databaseUid,
+      notionDatabaseId: Date.now(),
+      notionDatabaseName: data.notionDatabaseName,
+      notionDatabaseUid: data.notionDatabaseUid,
+      createdAt: Date.now().toString(),
+      updatedAt: Date.now().toString(),
     })
     await this.context.globalState.update('notionDatabases', existing)
 

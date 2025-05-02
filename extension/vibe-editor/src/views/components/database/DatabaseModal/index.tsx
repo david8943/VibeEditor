@@ -8,14 +8,18 @@ interface Props {
 }
 
 export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
-  const [databaseName, setDatabaseName] = useState('')
-  const [databaseUid, setDatabaseUid] = useState('')
+  const [notionDatabaseName, setNotionDatabaseName] = useState('')
+  const [notionDatabaseUid, setNotionDatabaseUid] = useState('')
 
   const handleSubmit = () => {
     console.log('[DBModal] window.vscode =', window.vscode)
+    const now = Date.now().toString()
+
     const database: Database = {
-      databaseName: databaseName,
-      databaseUid: databaseUid,
+      notionDatabaseName: notionDatabaseName,
+      notionDatabaseUid: notionDatabaseUid,
+      createdAt: now,
+      updatedAt: now,
     }
     saveDatabase(database)
     onClose()
@@ -28,14 +32,14 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
         <input
           className="w-full p-2 mb-2 bg-gray-800 border border-gray-600"
           placeholder="데이터베이스 이름"
-          value={databaseName}
-          onChange={(e) => setDatabaseName(e.target.value)}
+          value={notionDatabaseName}
+          onChange={(e) => setNotionDatabaseName(e.target.value)}
         />
         <input
           className="w-full p-2 mb-4 bg-gray-800 border border-gray-600"
           placeholder="데이터베이스 ID"
-          value={databaseUid}
-          onChange={(e) => setDatabaseUid(e.target.value)}
+          value={notionDatabaseUid}
+          onChange={(e) => setNotionDatabaseUid(e.target.value)}
         />
         <div className="flex justify-end gap-2">
           <button
