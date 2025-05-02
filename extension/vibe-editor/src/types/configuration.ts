@@ -1,6 +1,6 @@
 export const SecretType = {
   accessToken: 'vibeEditor.accessToken',
-  notionToken: 'vibeEditor.notionToken',
+  notionToken: 'vibeEditor.notionToken', // TODO: notionSecretKey 로 변경 필요
 }
 
 export type SecretType = (typeof SecretType)[keyof typeof SecretType]

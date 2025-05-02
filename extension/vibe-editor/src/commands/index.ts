@@ -2,6 +2,7 @@ import { GithubLoginCommand, GoogleLoginCommand, LogoutCommand } from './auth'
 import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
+  RefreshSnapshotCommand,
 } from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
@@ -32,4 +33,5 @@ export const allCommands = [
   ShowSettingPageCommand,
   AddToPromptCommand,
   DeleteSnapshotCommand,
+  RefreshSnapshotCommand,
 ]

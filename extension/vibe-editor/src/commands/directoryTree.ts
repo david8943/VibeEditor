@@ -1,14 +1,18 @@
 import * as vscode from 'vscode'
 
 import { DirectoryTreeService } from '../services/directoryTreeService'
+import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
+import { PageType } from '../types/webview'
 
 export class DirectoryTreeCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.exportDirectoryTreeSnapshot'
   private readonly directoryTreeService: DirectoryTreeService
+  private templateService: TemplateService
 
   constructor(context: vscode.ExtensionContext) {
     this.directoryTreeService = new DirectoryTreeService(context)
+    this.templateService = new TemplateService(context, PageType.TEMPLATE)
   }
 
   public get commandName(): string {
@@ -21,7 +25,11 @@ export class DirectoryTreeCommand implements ICommand {
       return
     }
 
-    const treeText = await this.directoryTreeService.generateTree(uri.fsPath)
+    const templates = await this.templateService.getTemplates()
+    const treeText = await this.directoryTreeService.generateTree(
+      uri.fsPath,
+      templates,
+    )
 
     const doc = await vscode.workspace.openTextDocument({
       content: treeText,

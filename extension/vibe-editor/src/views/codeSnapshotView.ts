@@ -1,6 +1,9 @@
 import * as vscode from 'vscode'
 
+import { getDraftData } from '../configuration/draftData'
+import { DraftDataType } from '../types/configuration'
 import { Snapshot } from '../types/snapshot'
+import { Template } from '../types/template'
 
 export class SnapshotItem extends vscode.TreeItem {
   constructor(public readonly snapshot: Snapshot) {
@@ -37,8 +40,10 @@ export class SnapshotProvider
   }
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const snapshots =
-      this.context.globalState.get<Snapshot[]>('codeSnapshots') || []
+    const snapshots = this.context.globalState.get<Snapshot[]>(
+      'codeSnapshots',
+      [],
+    )
     return snapshots
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
@@ -51,8 +56,15 @@ export class CodeSnapshotProvider extends SnapshotProvider {
   }
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const snapshots =
-      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    if (!selectedTemplateId) {
+      return []
+    }
+    const templates = this.context.globalState.get<Template[]>('templates', [])
+    const selectedTemplate = templates?.find(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    const snapshots = selectedTemplate?.snapshots || []
     return snapshots
       .filter((snapshot) => snapshot.snapshotType === 'code')
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -66,8 +78,15 @@ export class DirectoryTreeSnapshotProvider extends SnapshotProvider {
   }
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const snapshots =
-      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    if (!selectedTemplateId) {
+      return []
+    }
+    const templates = this.context.globalState.get<Template[]>('templates', [])
+    const selectedTemplate = templates?.find(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    const snapshots = selectedTemplate?.snapshots || []
     return snapshots
       .filter((snapshot) => snapshot.snapshotType === 'directory')
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -81,8 +100,15 @@ export class LogSnapshotProvider extends SnapshotProvider {
   }
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const snapshots =
-      this.context.globalState.get<Snapshot[]>('snapshots') || []
+    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    if (!selectedTemplateId) {
+      return []
+    }
+    const templates = this.context.globalState.get<Template[]>('templates', [])
+    const selectedTemplate = templates?.find(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    const snapshots = selectedTemplate?.snapshots || []
     return snapshots
       .filter((snapshot) => snapshot.snapshotType === 'log')
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
