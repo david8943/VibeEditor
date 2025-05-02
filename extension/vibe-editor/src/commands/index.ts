@@ -6,6 +6,7 @@ import {
 } from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
+import { FileSnapshotCommand } from './fileSnapshot'
 import { SetNotionApiCommand } from './notion'
 import { ShowSettingPageCommand } from './setting'
 import {
@@ -34,4 +35,5 @@ export const allCommands = [
   AddToPromptCommand,
   DeleteSnapshotCommand,
   RefreshSnapshotCommand,
+  FileSnapshotCommand,
 ]

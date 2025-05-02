@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
-import { Snapshot } from '../types/snapshot'
+import { Snapshot, SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
 
 export class SnapshotItem extends vscode.TreeItem {
@@ -66,7 +66,11 @@ export class CodeSnapshotProvider extends SnapshotProvider {
     )
     const snapshots = selectedTemplate?.snapshots || []
     return snapshots
-      .filter((snapshot) => snapshot.snapshotType === 'code')
+      .filter(
+        (snapshot) =>
+          snapshot.snapshotType === SnapshotType.BLOCK ||
+          snapshot.snapshotType === SnapshotType.FILE,
+      )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
   }
@@ -88,7 +92,7 @@ export class DirectoryTreeSnapshotProvider extends SnapshotProvider {
     )
     const snapshots = selectedTemplate?.snapshots || []
     return snapshots
-      .filter((snapshot) => snapshot.snapshotType === 'directory')
+      .filter((snapshot) => snapshot.snapshotType === SnapshotType.DIRECTORY)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
   }
@@ -110,7 +114,7 @@ export class LogSnapshotProvider extends SnapshotProvider {
     )
     const snapshots = selectedTemplate?.snapshots || []
     return snapshots
-      .filter((snapshot) => snapshot.snapshotType === 'log')
+      .filter((snapshot) => snapshot.snapshotType === SnapshotType.LOG)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
   }
