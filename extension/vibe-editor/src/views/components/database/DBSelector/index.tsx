@@ -47,9 +47,9 @@ export const DBSelector: React.FC<Props> = ({
         <option value="">선택하세요</option>
         {dbList.map((db) => (
           <option
-            key={db.databaseId}
-            value={db.databaseUid}>
-            {db.databaseName}
+            key={db.notionDatabaseId}
+            value={db.notionDatabaseUid}>
+            {db.notionDatabaseName}
           </option>
         ))}
       </select>
