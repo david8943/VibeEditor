@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { clearDraftData, setDraftData } from '../configuration/tempData'
+import { clearDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
 
 export class AuthService {

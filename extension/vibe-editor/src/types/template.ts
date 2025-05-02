@@ -5,9 +5,10 @@ import { PageType } from './webview'
 export interface Template {
   templateId: number
   templateName: string
-  category?: string
-  prompts?: Prompt[]
+  category?: string // TODO: 삭제 필요
+  prompts?: Prompt[] // TODO: 프롬프트 리스트로 변경 필요
   snapshots?: Snapshot[]
+  // TODO: 스냅샷 리스트로 변경 필요
   updatedAt: string
   createdAt: string
 }
@@ -23,42 +24,55 @@ export interface SubmitPost {
   post: Post
   selectedPostId: number
 }
-export interface CreatePrompt extends Omit<Prompt, 'promptId'> {
-  databaseUid: string
+
+export interface PromptAttach {
+  attachId: number
+  snapshotId: number
+  description: string
 }
+export interface CreatePrompt extends Omit<Prompt, 'promptId'> {}
 export interface Prompt {
+  templateId: number
   promptId: number
   promptName: string
   postType: string
   comment: string
-  updatedAt: string
-  createdAt: string
-  snapshots: PromptSnapshot[]
-  options: PromptOption[]
+  promptAttachList: PromptAttach[]
+  promptOptionList: number[]
+  databaseUid: string
+  //	TODO: updatedAt, createdAt 추가 필요
 }
 
-export interface PromptSnapshot {
+export interface EditPrompt {
+  templateId: number
+  promptId: number
+  promptName: string
+  postType: string
+  comment: string
+  snapshots: EditSnapshot[]
+  options: EditOptionList
+}
+
+export interface EditSnapshot {
   attachId: number
-  promptId: number
+  snapshotName: string
   snapshotId: number
+  content: string
   description: string
-  updatedAt: string
-  createdAt: string
 }
 
-export interface PromptOption {
-  promptOptionId: number
-  promptId: number
+export interface EditOptionList {
+  [optionName: string]: EditOption[]
+}
+export interface EditOption {
   optionId: number
-  isActive: boolean
-  updatedAt: string
-  createdAt: string
+  isSelected: boolean
+  value: string
 }
-
+export interface OptionList {
+  [optionName: string]: Option[]
+}
 export interface Option {
   optionId: number
-  optionName: string
   value: string
-  updatedAt: string
-  createdAt: string
 }

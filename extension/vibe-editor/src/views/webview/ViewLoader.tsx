@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 
 import { CreatePost } from '@/types/post'
 
-import { getDraftData, setDraftData } from '../../configuration/tempData'
+import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
@@ -82,7 +82,9 @@ export class ViewLoader {
   }
 
   private async getSnapshots() {
-    const snapshots = await this.snapshotService.getSnapshots()
+    const snapshots = await this.snapshotService.getSnapshots(
+      this.currentTemplateId ?? 0,
+    )
     this.panel.webview.postMessage({
       type: 'SNAPSHOTS_LOADED',
       payload: { snapshots },
@@ -178,7 +180,7 @@ export class ViewLoader {
           }
         } else if (message.type === MessageType.DELETE_SNAPSHOT) {
           await this.templateService.deletePromptSnapshot(
-            message.payload.snapshotId,
+            message.payload.attachId,
             message.payload.selectedPromptId,
             message.payload.selectedTemplateId,
           )
@@ -222,8 +224,12 @@ export class ViewLoader {
       cls.currentPanel.reveal(column)
       if (template) {
         setDraftData(DraftDataType.selectedTemplateId, template.templateId)
+        vscode.commands.executeCommand(
+          'vibeEditor.refreshSnapshot',
+          template.templateId,
+        )
         cls.currentPanel.webview.postMessage({
-          type: 'TEMPLATE_SELECTED',
+          type: MessageType.TEMPLATE_SELECTED,
           payload: { template },
         })
       }
@@ -231,8 +237,12 @@ export class ViewLoader {
       cls.currentPanel = new cls(context, page).panel
       if (template) {
         setDraftData(DraftDataType.selectedTemplateId, template.templateId)
+        vscode.commands.executeCommand(
+          'vibeEditor.refreshSnapshot',
+          template.templateId,
+        )
         cls.currentPanel.webview.postMessage({
-          type: 'TEMPLATE_SELECTED',
+          type: MessageType.TEMPLATE_SELECTED,
           payload: { template },
         })
       }

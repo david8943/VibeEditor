@@ -2,7 +2,10 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as vscode from 'vscode'
 
+import { getDraftData } from '../configuration/draftData'
+import { DraftDataType } from '../types/configuration'
 import { Snapshot } from '../types/snapshot'
+import { Template } from '../types/template'
 import { refreshAllProviders } from './snapshotService'
 
 export class DirectoryTreeService {
@@ -12,7 +15,11 @@ export class DirectoryTreeService {
     this.context = context
   }
 
-  public async generateTree(dirPath: string, prefix = ''): Promise<string> {
+  public async generateTree(
+    dirPath: string,
+    templates: Template[],
+    prefix = '',
+  ): Promise<string> {
     try {
       const entries = fs.readdirSync(dirPath, { withFileTypes: true })
       let result = ''
@@ -22,7 +29,7 @@ export class DirectoryTreeService {
         result += `${prefix}${entry.name}\n`
 
         if (entry.isDirectory()) {
-          result += await this.generateTree(entryPath, prefix + '  ')
+          result += await this.generateTree(entryPath, templates, prefix + '  ')
         }
       }
 
@@ -41,9 +48,35 @@ export class DirectoryTreeService {
           createdAt: timestamp,
           updatedAt: timestamp,
         }
-
-        const prev = this.context.globalState.get<Snapshot[]>('snapshots') || []
-        await this.context.globalState.update('snapshots', [snapshot, ...prev])
+        let selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+        if (!selectedTemplateId) {
+          const selected = await vscode.window.showQuickPick(
+            templates.map((template) => ({
+              label: template.templateName,
+              templateId: template.templateId,
+            })),
+            { placeHolder: '템플릿을 선택하세요' },
+          )
+          if (!selected) {
+            vscode.window.showInformationMessage(`선택해주세요.`)
+            return ''
+          }
+          selectedTemplateId = selected.templateId
+        }
+        const selectedTemplate = templates.find(
+          (template) => template.templateId === selectedTemplateId,
+        )
+        if (!selectedTemplate) {
+          vscode.window.showInformationMessage('선택한 템플릿이 없습니다.')
+          return ''
+        }
+        selectedTemplate.snapshots?.push(snapshot)
+        await this.context.globalState.update('templates', [
+          ...templates.filter(
+            (t) => t.templateId !== selectedTemplate.templateId,
+          ),
+          selectedTemplate,
+        ])
 
         vscode.window.showInformationMessage(
           '📸 디렉토리 트리 스냅샷이 저장되었습니다!',

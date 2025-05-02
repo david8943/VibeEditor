@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { setDraftData } from '../configuration/tempData'
+import { setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
 
 export class NotionService {

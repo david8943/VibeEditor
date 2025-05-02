@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+import { sampleOptionList } from '../../constants/sampleData'
 import { Database } from '../../types/database'
-import { CreatePrompt, Template } from '../../types/template'
+import { CreatePrompt, Prompt, Template } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
 import { DBSelector } from '../components'
 import { DatabaseModal } from '../components/database/DatabaseModal'
 
 export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null,
   )
@@ -36,7 +38,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const submitPrompt = (data: CreatePrompt) => {
+  const submitPrompt = (data: Prompt) => {
     postMessageToExtension({
       type: MessageType.SUBMIT_PROMPT,
       payload: {
@@ -46,7 +48,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       },
     })
   }
-  const updatePrompt = (data: CreatePrompt) => {
+  const updatePrompt = (data: Prompt) => {
     postMessageToExtension({
       type: MessageType.UPDATE_PROMPT,
       payload: {
@@ -104,13 +106,12 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       payload: null,
     })
   }
-
-  const deleteSnapshot = (snapshotId: number) => {
-    console.log('deleteSnapshot', snapshotId)
+  const deleteSnapshot = (attachId: number) => {
+    console.log('deleteSnapshot', attachId)
     postMessageToExtension({
       type: MessageType.DELETE_SNAPSHOT,
       payload: {
-        snapshotId,
+        attachId,
         selectedPromptId,
         selectedTemplateId: selectedTemplate?.templateId,
       },
@@ -119,6 +120,17 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [selectedDbUid, setSelectedDbUid] = useState('')
   const [showDbModal, setShowDbModal] = useState(false)
 
+  useEffect(() => {
+    console.log('useEffect selectedPromptId', selectedPromptId)
+    if (selectedTemplate?.prompts) {
+      setSelectedPrompt(
+        selectedTemplate.prompts.find(
+          (prompt) => prompt.promptId === selectedPromptId,
+        ) || null,
+      )
+    }
+    console.log('useEffect selectedPrompt', selectedPrompt)
+  }, [selectedPromptId, selectedTemplate])
   return (
     <div className="app-container flex flex-col gap-8">
       <h1>프롬프트 생성기 templateId: {selectedTemplate?.templateId}</h1>
@@ -143,15 +155,16 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         selectedPromptId={selectedPromptId}
         selectPromptId={selectPrompt}
       />
-
-      {selectedTemplate && selectedTemplate.prompts && (
+      {selectedTemplate && selectedPrompt && (
         <PromptForm
-          defaultPrompt={selectedTemplate.prompts[selectedPromptId]}
+          defaultPrompt={selectedPrompt}
+          selectedPromptId={selectedPromptId}
           submitPrompt={submitPrompt}
           updatePrompt={updatePrompt}
           createPrompt={createPrompt}
-          localSnapshots={selectedTemplate.snapshots || []}
           deleteSnapshot={deleteSnapshot}
+          localSnapshots={selectedTemplate.snapshots || []}
+          optionList={sampleOptionList}
         />
       )}
     </div>

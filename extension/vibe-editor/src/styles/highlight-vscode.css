@@ -1,0 +1,82 @@
+/* 기본 배경/텍스트 설정 */
+.hljs {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* 주석 */
+.hljs-comment,
+.hljs-quote {
+  color: var(--vscode-editorHint-foreground, #6a9955);
+  font-style: italic;
+}
+
+/* 키워드 */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-doctag,
+.hljs-formula {
+  color: var(--vscode-editor-keyword-foreground, #569cd6);
+}
+
+/* 문자열, 속성 */
+.hljs-string,
+.hljs-meta .hljs-string,
+.hljs-attr,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: var(--vscode-editor-string-foreground, #ce9178);
+}
+
+/* 숫자, 리터럴, 심볼 */
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--vscode-editor-number-foreground, #b5cea8);
+}
+
+/* 함수명, 선언 */
+.hljs-title,
+.hljs-section,
+.hljs-function,
+.hljs-built_in {
+  color: var(--vscode-editor-function-foreground, #dcdcaa);
+}
+
+/* 변수, 매개변수 */
+.hljs-variable,
+.hljs-params {
+  color: var(--vscode-editor-variable-foreground, #9cdcfe);
+}
+
+/* 태그, 이름 */
+.hljs-tag,
+.hljs-name {
+  color: var(--vscode-editor-tag-foreground, #569cd6);
+}
+
+/* 속성 이름 */
+.hljs-attribute {
+  color: var(--vscode-editor-attribute-foreground, #9cdcfe);
+}
+
+/* 클래스 이름 */
+.hljs-class .hljs-title {
+  color: var(--vscode-editor-class-foreground, #4ec9b0);
+}
+
+/* 강조 */
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { getDraftData } from '../configuration/tempData'
+import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { Post } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
@@ -34,7 +34,7 @@ export class TemplateService {
     await this.context.globalState.update('templates', [])
   }
   async deleteTemplate(templateId: number): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === templateId,
     )
@@ -56,7 +56,7 @@ export class TemplateService {
   }
 
   async renameTemplate(templateId: number): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === templateId,
     )
@@ -83,10 +83,12 @@ export class TemplateService {
   async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
     console.log('addToPrompt', snapshotItem)
     const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+
     const selectedPromptId = Number(
       getDraftData(DraftDataType.selectedPromptId),
     )
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
+
     const templateIndex = prev.findIndex(
       (template) => template.templateId === selectedTemplateId,
     )
@@ -113,48 +115,55 @@ export class TemplateService {
       return
     }
 
-    const snapshots = prompt.snapshots
-    if (!snapshots) {
+    const promptAttachList = prompt.promptAttachList
+    if (!promptAttachList) {
       vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
       return
     }
-    snapshots.push({
+    promptAttachList.push({
       attachId: new Date().getTime(),
-      promptId: selectedPromptId,
       snapshotId: snapshotItem.snapshot.snapshotId,
       description: '설명',
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
     })
-    prompt.snapshots = snapshots
+    prompt.promptAttachList = promptAttachList
     prev[templateIndex].prompts = prompts
     await this.context.globalState.update('templates', prev)
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 
   async createTemplate(): Promise<void> {
+    const templateId = new Date().getTime()
     const today = new Date().toISOString()
     const newPrompt: Prompt = {
-      promptId: new Date().getTime(),
+      templateId: templateId,
+      promptId: 0,
       promptName: today,
       postType: 'cs',
       comment: 'cs 개념 설명',
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      snapshots: [],
-      options: [],
+      promptAttachList: [],
+      promptOptionList: [],
+      databaseUid: '',
     }
 
     const newTemplate: Template = {
-      templateId: new Date().getTime(),
+      templateId: templateId,
       templateName: today,
       prompts: [newPrompt],
       snapshots: [],
       updatedAt: today,
       createdAt: today,
     }
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    console.log('새로운 템플릿 생성:', newTemplate)
+
+    const prev = this.context.globalState.get<Template[]>('templates', [])
+    console.log('기존 템플릿 목록:', prev)
+
     await this.context.globalState.update('templates', [newTemplate, ...prev])
+
+    // update 이후 저장된 데이터 확인
+    const saved = this.context.globalState.get<Template[]>('templates', [])
+    console.log('저장 후 템플릿 목록:', saved)
+
     templateProviderInstance?.refresh()
     ViewLoader.showWebview(this.context, this.page)
   }
@@ -183,7 +192,7 @@ export class TemplateService {
             updatedAt: new Date().toISOString(),
             promptId: data.prompt.promptId,
           }
-          const prev = this.context.globalState.get<Post[]>('posts') || []
+          const prev = this.context.globalState.get<Post[]>('posts', [])
           prev.push(newPost)
           await this.context.globalState.update('posts', prev)
           templateProviderInstance?.refresh()
@@ -200,18 +209,10 @@ export class TemplateService {
       })
   }
   async updatePrompt(data: SubmitPrompt): Promise<void> {
-    const updatedPrompt: Prompt = {
-      promptId: data.prompt.promptId,
-      promptName: data.prompt.promptName,
-      postType: data.prompt.postType,
-      comment: data.prompt.comment,
-      updatedAt: new Date().toISOString(),
-      createdAt: data.prompt.createdAt,
-      snapshots: data.prompt.snapshots,
-      options: data.prompt.options,
-    }
+    console.log('updatePrompt', data)
+    const updatedPrompt: Prompt = data.prompt
 
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === data.selectedTemplateId,
     )
@@ -235,18 +236,20 @@ export class TemplateService {
     )
   }
   async createPrompt(data: SubmitPrompt): Promise<void> {
+    console.log('createPrompt', data)
+    const promptId = new Date().getTime()
     const newPrompt: Prompt = {
-      promptId: new Date().getTime(),
+      templateId: data.selectedTemplateId,
+      promptId: promptId,
       promptName: data.prompt.promptName,
       postType: data.prompt.postType,
       comment: data.prompt.comment,
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      snapshots: data.prompt.snapshots,
-      options: data.prompt.options,
+      promptAttachList: data.prompt.promptAttachList,
+      promptOptionList: data.prompt.promptOptionList,
+      databaseUid: '',
     }
 
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === data.selectedTemplateId,
     )
@@ -266,7 +269,7 @@ export class TemplateService {
     )
   }
   async deletePrompt(data: SubmitPrompt): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === data.selectedTemplateId,
     )
@@ -288,17 +291,16 @@ export class TemplateService {
   }
 
   async getTemplates(): Promise<Template[]> {
-    const templates =
-      this.context.globalState.get<Template[]>('templates') || []
+    const templates = this.context.globalState.get<Template[]>('templates', [])
     return templates
   }
 
   public async deletePromptSnapshot(
-    snapshotId: number,
+    attachId: number,
     selectedPromptId: number,
     selectedTemplateId: number,
   ): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates') || []
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
       (template) => template.templateId === selectedTemplateId,
     )
@@ -309,13 +311,13 @@ export class TemplateService {
     if (promptIndex) {
       const prompt = template.prompts?.[promptIndex]
       if (prompt) {
-        const snapshotIndex = prompt.snapshots?.findIndex(
-          (snapshot) => snapshot.snapshotId === snapshotId,
+        const snapshotIndex = prompt.promptAttachList?.findIndex(
+          (snapshot) => snapshot.attachId === attachId,
         )
         if (snapshotIndex) {
-          prompt.snapshots = [
-            ...(prompt.snapshots || []).filter(
-              (snapshot) => snapshot.snapshotId !== snapshotId,
+          prompt.promptAttachList = [
+            ...(prompt.promptAttachList || []).filter(
+              (snapshot) => snapshot.attachId !== attachId,
             ),
           ]
           await this.context.globalState.update('templates', prev)
@@ -350,15 +352,13 @@ export class TemplateProvider
   constructor(private context: vscode.ExtensionContext) {}
 
   getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+    element.contextValue = 'vibeEditorTemplatePage'
     return element
   }
 
   getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const templates =
-      this.context.globalState.get<Template[]>('templates') || []
-
-    return templates
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-      .map((template) => new TemplateItem(template))
+    const templates = this.context.globalState.get<Template[]>('templates', [])
+    console.log('templates', templates)
+    return templates?.map((template) => new TemplateItem(template))
   }
 }

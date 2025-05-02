@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
-import { setDraftData } from './configuration/tempData'
+import { setDraftData } from './configuration/draftData'
 import {
   SnapshotService,
   setCodeSnapshotProvider,
@@ -66,13 +66,13 @@ export async function activate(
 
   await isLogin(context)
   await isNotion(context)
+  const templateProvider = new TemplateProvider(context)
   // 코드 스냅샷 뷰 등록 및 전역 등록
   const codeSnapshotProvider = new CodeSnapshotProvider(context)
   const directoryTreeSnapshotProvider = new DirectoryTreeSnapshotProvider(
     context,
   )
   const logSnapshotProvider = new LogSnapshotProvider(context)
-  const templateProvider = new TemplateProvider(context)
   vscode.window.registerTreeDataProvider(
     'vibeEditorCodeSnapshot',
     codeSnapshotProvider,
@@ -91,10 +91,10 @@ export async function activate(
   )
 
   // 각 프로바이더 등록
+  setTemplateProvider(templateProvider)
   setCodeSnapshotProvider(codeSnapshotProvider)
   setDirectorySnapshotProvider(directoryTreeSnapshotProvider)
   setLogSnapshotProvider(logSnapshotProvider)
-  setTemplateProvider(templateProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
   registerSnapshotViewCommand(context)

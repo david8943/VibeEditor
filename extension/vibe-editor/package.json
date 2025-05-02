@@ -3,14 +3,16 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "engines": {
     "vscode": "^1.99.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:vibeEditor.copyCode"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -59,14 +61,17 @@
       },
       {
         "view": "vibeEditorCodeSnapshot",
+        "when": "vibeEditor.draftData.selectedTemplateId == 0",
         "contents": "코드 스냅샷입니다."
       },
       {
         "view": "vibeEditorDirectoryTreeSnapshot",
+        "when": "vibeEditor.draftData.selectedTemplateId == 0",
         "contents": "디렉토리 구조 시각화 스냅샷입니다."
       },
       {
         "view": "vibeEditorLogSnapshot",
+        "when": "vibeEditor.draftData.selectedTemplateId == 0",
         "contents": "로그 스냅샷입니다."
       },
       {
@@ -104,7 +109,7 @@
         "command": "vibeEditor.copyCode",
         "title": "복사한 로그 스냅샷 촬영하기",
         "category": "Vibe Editor",
-        "icon": "$(edit)"
+        "icon": "$(add)"
       },
       {
         "command": "vibeEditor.exportDirectoryTreeSnapshot",
@@ -140,7 +145,8 @@
       {
         "command": "vibeEditor.createTemplate",
         "title": "새 템플릿 생성",
-        "category": "Vibe Editor"
+        "category": "Vibe Editor",
+        "icon": "$(add)"
       },
       {
         "command": "vibeEditor.showTemplatePage",
@@ -165,9 +171,26 @@
         "command": "vibeEditor.renameSnapshot",
         "title": "스냅샷 이름 바꾸기",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.refreshSnapshot",
+        "title": "스냅샷 새로 고침",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "vibeEditor.createTemplate",
+          "when": "view == vibeEditorTemplatePage",
+          "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.copyCode",
+          "when": "view == vibeEditorLogSnapshot",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "command": "vibeEditor.deleteTemplate",
@@ -196,24 +219,15 @@
       ],
       "terminal/context": [
         {
-          "command": "vibeEditor.copyCode",
-          "when": "terminalFocus",
-          "group": "navigation"
+          "command": "vibeEditor.copyCode"
         }
       ],
       "terminal/title/context": [
         {
-          "command": "vibeEditor.copyCode",
-          "when": "resourceScheme == 'vscode-terminal'",
-          "group": "vibeEditor"
+          "command": "vibeEditor.copyCode"
         }
       ],
       "editor/context": [
-        {
-          "command": "vibeEditor.copyCode",
-          "when": "editorHasSelection",
-          "group": "vibeEditor"
-        },
         {
           "command": "vibeEditor.captureCodeSnapshot",
           "when": "editorHasSelection",
@@ -259,10 +273,12 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.4",
+    "highlight.js": "^11.11.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.56.1",
-    "react-router-dom": "^7.5.1"
+    "react-router-dom": "^7.5.1",
+    "shiki": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
