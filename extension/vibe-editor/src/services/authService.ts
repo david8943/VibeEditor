@@ -116,7 +116,7 @@ export class AuthService {
 
       await vscode.env.openExternal(
         vscode.Uri.parse(
-          `http://localhost:8080/oauth2/authorization/${domain}?redirect_uri=http://localhost:${PORT}/callback`,
+          `https://vibeeditor.site/oauth2/authorization/${domain}`,
         ),
       )
     } catch (error) {

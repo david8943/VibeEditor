@@ -176,6 +176,11 @@
         "command": "vibeEditor.refreshSnapshot",
         "title": "스냅샷 새로 고침",
         "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.captureFileSnapshot",
+        "title": "파일 스냅샷 촬영",
+        "category": "Vibe Editor"
       }
     ],
     "menus": {
@@ -239,6 +244,11 @@
           "command": "vibeEditor.exportDirectoryTreeSnapshot",
           "when": "explorerResourceIsFolder",
           "group": "vibeEditor"
+        },
+        {
+          "command": "vibeEditor.captureFileSnapshot",
+          "when": "explorerResourceIsFolder == false",
+          "group": "vibeEditor"
         }
       ]
     },
@@ -273,6 +283,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.4",
+    "axios": "^1.9.0",
     "highlight.js": "^11.11.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

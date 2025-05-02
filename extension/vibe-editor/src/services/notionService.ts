@@ -11,16 +11,19 @@ export class NotionService {
   }
   public async setNotionApi(): Promise<void> {
     try {
-      const notionToken = await vscode.window.showInputBox({
+      const notionSecretKey = await vscode.window.showInputBox({
         prompt: 'Notion API 토큰을 입력해주세요.',
       })
-      const notionStatus = !!notionToken
+      const notionStatus = !!notionSecretKey
 
       if (!notionStatus) {
         vscode.window.showErrorMessage('토큰을 입력해주세요.')
         return
       }
-      await this.context.secrets.store(SecretType.notionToken, notionToken)
+      await this.context.secrets.store(
+        SecretType.notionSecretKey,
+        notionSecretKey,
+      )
       setDraftData(DraftDataType.notionStatus, notionStatus)
       vscode.window.showInformationMessage('Notion 등록 성공')
     } catch (error) {

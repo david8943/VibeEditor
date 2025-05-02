@@ -32,9 +32,9 @@ async function isLogin(context: vscode.ExtensionContext) {
 }
 
 async function isNotion(context: vscode.ExtensionContext) {
-  const notionToken = await context.secrets.get(SecretType.notionToken)
-  setDraftData(DraftDataType.notionStatus, !!notionToken)
-  if (!notionToken) {
+  const notionSecretKey = await context.secrets.get(SecretType.notionSecretKey)
+  setDraftData(DraftDataType.notionStatus, !!notionSecretKey)
+  if (!notionSecretKey) {
     vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
   }
 }

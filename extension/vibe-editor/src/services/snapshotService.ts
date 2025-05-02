@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
-import { Snapshot } from '../types/snapshot'
+import { Snapshot, SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
 import { SnapshotProvider } from '../views/codeSnapshotView'
 import { SnapshotItem } from '../views/codeSnapshotView'
@@ -93,7 +93,7 @@ export class SnapshotService {
     const snapshot: Snapshot = {
       snapshotId: new Date().getTime(),
       snapshotName: id,
-      snapshotType: 'code',
+      snapshotType: SnapshotType.BLOCK,
       content: selectedText,
       createdAt: timestamp,
       updatedAt: timestamp,
