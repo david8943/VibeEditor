@@ -194,6 +194,33 @@ export class ViewLoader {
         } else if (message.type === MessageType.GET_DATABASE) {
           console.log('GET_DATABASE', message)
           await this.getDatabase()
+        } else if (message.type === MessageType.REQUEST_DELETE_DATABASE) {
+          const { notionDatabaseId, notionDatabaseName } = message.payload
+
+          const confirm = await vscode.window.showInformationMessage(
+            `'${notionDatabaseName}' 데이터베이스를 삭제하시겠습니까?`,
+            { modal: true },
+            '삭제',
+          )
+
+          if (confirm === '삭제') {
+            const existing = this.context.globalState.get<Database[]>(
+              'notionDatabases',
+              [],
+            )
+            const updated = existing.filter(
+              (db) => db.notionDatabaseUid !== notionDatabaseId,
+            )
+
+            await this.context.globalState.update('notionDatabases', updated)
+
+            this.panel.webview.postMessage({
+              type: MessageType.DATABASE_DELETED,
+              payload: { notionDatabaseId },
+            })
+
+            vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+          }
         }
       },
       null,
