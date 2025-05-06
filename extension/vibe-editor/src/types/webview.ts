@@ -35,6 +35,9 @@ export const MessageType = {
   GET_CURRENT_POST: 'GET_CURRENT_POST',
   CURRENT_POST_LOADED: 'CURRENT_POST_LOADED',
   SUBMIT_POST: 'SUBMIT_POST',
+
+  REQUEST_DELETE_DATABASE: 'REQUEST_DELETE_DATABASE',
+  DATABASE_DELETED: 'DATABASE_DELETED',
 } as const
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]
