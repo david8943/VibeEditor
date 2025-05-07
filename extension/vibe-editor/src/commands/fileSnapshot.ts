@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { FileService } from '../services/fileService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
+import { Template } from '../types/template'
 import { PageType } from '../types/webview'
 
 export class FileSnapshotCommand implements ICommand {
@@ -27,7 +28,7 @@ export class FileSnapshotCommand implements ICommand {
       return
     }
 
-    const templates = await this.templateService.getTemplates()
+    const templates: Template[] = await this.templateService.getTemplates()
 
     for (const fileUri of selectedUris) {
       const treeText = await this.fileService.captureFileSnapshot(

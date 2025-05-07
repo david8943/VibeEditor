@@ -122,9 +122,9 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   useEffect(() => {
     console.log('useEffect selectedPromptId', selectedPromptId)
-    if (selectedTemplate?.prompts) {
+    if (selectedTemplate?.promptList) {
       setSelectedPrompt(
-        selectedTemplate.prompts.find(
+        selectedTemplate.promptList.find(
           (prompt) => prompt.promptId === selectedPromptId,
         ) || null,
       )
@@ -163,7 +163,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           updatePrompt={updatePrompt}
           createPrompt={createPrompt}
           deleteSnapshot={deleteSnapshot}
-          localSnapshots={selectedTemplate.snapshots || []}
+          localSnapshots={selectedTemplate.snapshotList || []}
           optionList={sampleOptionList}
         />
       )}

@@ -51,14 +51,14 @@ export class FileService {
         }
         selectedTemplateId = selected.templateId
       }
-      const selectedTemplate = templates.find(
+      const selectedTemplate: Template | undefined = templates.find(
         (template) => template.templateId === selectedTemplateId,
       )
       if (!selectedTemplate) {
         vscode.window.showInformationMessage('선택한 템플릿이 없습니다.')
         return ''
       }
-      selectedTemplate.snapshots?.push(snapshot)
+      selectedTemplate.snapshotList?.push(snapshot)
       await this.context.globalState.update('templates', [
         ...templates.filter(
           (t) => t.templateId !== selectedTemplate.templateId,

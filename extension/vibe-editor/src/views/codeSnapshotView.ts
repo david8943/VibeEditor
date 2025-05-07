@@ -61,10 +61,13 @@ export class CodeSnapshotProvider extends SnapshotProvider {
       return []
     }
     const templates = this.context.globalState.get<Template[]>('templates', [])
-    const selectedTemplate = templates?.find(
+    const selectedTemplate: Template | undefined = templates?.find(
       (template) => template.templateId === selectedTemplateId,
     )
-    const snapshots = selectedTemplate?.snapshots || []
+    if (!selectedTemplate) {
+      return
+    }
+    const snapshots = selectedTemplate?.snapshotList || []
     return snapshots
       .filter(
         (snapshot) =>
@@ -86,12 +89,15 @@ export class DirectoryTreeSnapshotProvider extends SnapshotProvider {
     if (!selectedTemplateId) {
       return []
     }
-    const templates = this.context.globalState.get<Template[]>('templates', [])
-    const selectedTemplate = templates?.find(
+    const templates: Template[] = this.context.globalState.get<Template[]>(
+      'templates',
+      [],
+    )
+    const selectedTemplate = templates.find(
       (template) => template.templateId === selectedTemplateId,
     )
-    const snapshots = selectedTemplate?.snapshots || []
-    return snapshots
+    const snapshotList = selectedTemplate?.snapshotList || []
+    return snapshotList
       .filter((snapshot) => snapshot.snapshotType === SnapshotType.DIRECTORY)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((snapshot) => new SnapshotItem(snapshot))
@@ -112,7 +118,7 @@ export class LogSnapshotProvider extends SnapshotProvider {
     const selectedTemplate = templates?.find(
       (template) => template.templateId === selectedTemplateId,
     )
-    const snapshots = selectedTemplate?.snapshots || []
+    const snapshots = selectedTemplate?.snapshotList || []
     return snapshots
       .filter((snapshot) => snapshot.snapshotType === SnapshotType.LOG)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))

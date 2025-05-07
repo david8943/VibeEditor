@@ -1,12 +1,18 @@
 import axios from 'axios'
 import * as vscode from 'vscode'
 
-import { ApiErrorResponse, ApiResponse } from '@/types/api'
-import { SecretType } from '@/types/configuration'
-import { handleDefaultError } from '@/utils/error/handleDefaultError'
+import { ApiErrorResponse, ApiResponse } from '../types/api'
+import { SecretType } from '../types/configuration'
+import { handleDefaultError } from '../utils/error/handleDefaultError'
+
+let extensionContext: vscode.ExtensionContext | undefined
+
+export const setExtensionContext = (context: vscode.ExtensionContext) => {
+  extensionContext = context
+}
 
 const api = axios.create({
-  baseURL: `/api/v1`,
+  baseURL: `https://vibeeditor.site/api/v1`,
   // baseURL: `${process.env.NEXT_PUBLIC_FRONTEND_SCHEME}://${process.env.NEXT_PUBLIC_FRONTEND_HOST}${process.env.NEXT_PUBLIC_FRONTEND_PATH}`,
   timeout: 5000,
   headers: {
@@ -16,20 +22,31 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    const context: vscode.ExtensionContext =
-      vscode.extensions.getExtension('vibeEditor')?.exports.context
-    const accessToken = await context.secrets.get(SecretType.accessToken)
+    try {
+      if (!extensionContext) {
+        console.log('extensionContext가 없습니다')
+        return config
+      }
 
-    if (accessToken) {
-      config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${accessToken}`
-    } else {
-      delete config.headers.Authorization
+      const accessToken = await extensionContext.secrets.get(
+        SecretType.accessToken,
+      )
+
+      if (accessToken) {
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${accessToken}`
+      } else {
+        delete config.headers.Authorization
+      }
+
+      return config
+    } catch (error) {
+      console.error('interceptor 에러:', error)
+      return config
     }
-
-    return config
   },
   (error) => {
+    console.error('interceptor 에러 핸들러:', error)
     return Promise.reject(error)
   },
 )
@@ -46,6 +63,7 @@ export default api
 export const getRequest = async <T>(url: string): Promise<ApiResponse<T>> => {
   try {
     const response = await api.get<ApiResponse<T>>(url)
+    console.log('getRequest', response)
     return response.data
   } catch (error) {
     return error as ApiErrorResponse
@@ -62,9 +80,12 @@ export const postRequest = async <T>(
   data?: object,
 ): Promise<ApiResponse<T>> => {
   try {
+    console.log('postRequest 시작', { url, data })
     const response = await api.post<ApiResponse<T>>(url, data)
+    console.log('postRequest 성공', response)
     return response.data
   } catch (error) {
+    console.log('postRequest 에러', error)
     return error as ApiErrorResponse
   }
 }
@@ -74,6 +95,7 @@ export const postBooleanRequest = async (
   data?: object,
 ): Promise<boolean> => {
   const response = await postRequest<unknown>(url, data)
+  console.log('postBooleanRequest', response)
   return response.success
 }
 

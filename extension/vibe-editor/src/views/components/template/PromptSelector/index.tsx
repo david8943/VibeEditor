@@ -20,7 +20,7 @@ export function PromptSelector({
       <select
         value={selectedPromptId || ''}
         onChange={(e) => {
-          const prompt = selectedTemplate?.prompts?.find(
+          const prompt = selectedTemplate?.promptList?.find(
             (t) => t.promptId === parseInt(e.target.value),
           )
           if (prompt) {
@@ -28,7 +28,7 @@ export function PromptSelector({
           }
         }}>
         <option value="">새 프롬프트 생성하기</option>
-        {selectedTemplate?.prompts?.map((prompt) => (
+        {selectedTemplate?.promptList?.map((prompt) => (
           <option
             key={prompt.promptId}
             value={prompt.promptId}>

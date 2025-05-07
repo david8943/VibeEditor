@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { setExtensionContext } from './apis/api'
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import { setDraftData } from './configuration/draftData'
@@ -55,6 +56,8 @@ async function addStatusBarItem(context: vscode.ExtensionContext) {
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
+  setExtensionContext(context)
+
   allCommands.forEach((CommandClass) => {
     const command = new CommandClass(context)
     const disposable = vscode.commands.registerCommand(
