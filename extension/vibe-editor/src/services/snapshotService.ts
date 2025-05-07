@@ -172,37 +172,9 @@ export class SnapshotService {
       })
   }
 
-  public async copyCode(templates: Template[]): Promise<void> {
+  public async copyCode(): Promise<string> {
     const text = await vscode.env.clipboard.readText()
-    const title = await vscode.window.showInputBox({
-      prompt: `${text} 로그의 제목을 입력해주세요.`,
-      placeHolder: '로그 제목',
-    })
-    if (!title) {
-      vscode.window.showWarningMessage('⚠️ 로그 제목을 입력해주세요.')
-      return
-    }
-    const selectedTemplate = await this.selectTemplate(templates)
-    if (!selectedTemplate) {
-      vscode.window.showInformationMessage('선택한 템플릿이 없습니다.')
-      return
-    }
-    const snapshot: Snapshot = {
-      snapshotId: new Date().getTime(),
-      snapshotName: title,
-      snapshotType: 'log',
-      snapshotContent: text,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    selectedTemplate.snapshotList?.push(snapshot)
-    await this.context.globalState.update('templates', [
-      ...templates.filter((t) => t.templateId !== selectedTemplate.templateId),
-      selectedTemplate,
-    ])
-
-    vscode.window.showInformationMessage('📸 코드 스냅샷이 저장되었습니다!')
-    refreshAllProviders()
+    return text
   }
 
   async createSnapshotName(defaultSnapshotName: string): Promise<string> {

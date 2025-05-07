@@ -1,8 +1,15 @@
 import * as vscode from 'vscode'
 
-import { SnapshotService } from '../services/snapshotService'
+import { getDraftData } from '../configuration/draftData'
+import {
+  SnapshotService,
+  refreshAllProviders,
+} from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
+import { DraftDataType } from '../types/configuration'
+import { SnapshotType } from '../types/snapshot'
+import { Template } from '../types/template'
 import { PageType } from '../types/webview'
 
 export class CopyCodeCommand implements ICommand {
@@ -20,7 +27,29 @@ export class CopyCodeCommand implements ICommand {
   }
 
   public async execute(): Promise<void> {
-    const templates = await this.templateService.getTemplates()
-    await this.snapshotService.copyCode(templates)
+    const localTemplates: Template[] =
+      await this.templateService.getLocalTemplates()
+
+    const copyText = await this.snapshotService.copyCode()
+
+    const success = await this.snapshotService.createSnapshot({
+      defaultSnapshotName: new Date().toISOString(),
+      snapshotType: SnapshotType.LOG,
+      snapshotContent: copyText,
+      localTemplates,
+    })
+    if (!success) {
+      vscode.window.showInformationMessage('스냅샷 생성에 실패했습니다.')
+      return
+    }
+
+    vscode.window.showInformationMessage('📸 로그 스냅샷이 저장되었습니다!')
+    const selectedTemplateId: number | undefined = getDraftData(
+      DraftDataType.selectedTemplateId,
+    )
+    if (selectedTemplateId) {
+      await this.templateService.updateTemplateDetail(selectedTemplateId)
+    }
+    refreshAllProviders()
   }
 }
