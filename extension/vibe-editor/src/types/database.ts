@@ -5,3 +5,6 @@ export interface Database {
   createdAt: string
   updatedAt: string
 }
+
+export interface CreateDatabase
+  extends Pick<Database, 'notionDatabaseName' | 'notionDatabaseUid'> {}
