@@ -20,13 +20,9 @@ const api = axios.create({
   },
 })
 
-console.log('axios 인스턴스 생성됨')
-
 api.interceptors.request.use(
   async (config) => {
     try {
-      console.log('interceptor 시작')
-
       if (!extensionContext) {
         console.log('extensionContext가 없습니다')
         return config
@@ -35,8 +31,6 @@ api.interceptors.request.use(
       const accessToken = await extensionContext.secrets.get(
         SecretType.accessToken,
       )
-      console.log('accessToken', accessToken)
-      console.log('🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥🐦‍🔥')
 
       if (accessToken) {
         config.headers = config.headers || {}
