@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { setExtensionContext } from './apis/api'
+import { addNotionDatabase, retrieveNotionDatabases } from './apis/notion'
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import { setDraftData } from './configuration/draftData'
@@ -15,13 +16,13 @@ import {
   setTemplateProvider,
 } from './services/templateService'
 import { DraftDataType, SecretType } from './types/configuration'
-import { Database } from './types/database'
+import { CreateDatabase, Database } from './types/database'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
   LogSnapshotProvider,
   SnapshotItem,
-  registerSnapshotViewCommand,
+  // registerSnapshotViewCommand,
 } from './views/codeSnapshotView'
 
 async function isLogin(context: vscode.ExtensionContext) {
@@ -100,7 +101,7 @@ export async function activate(
   setLogSnapshotProvider(logSnapshotProvider)
 
   // 스냅샷 클릭 시 WebView 명령어 등록
-  registerSnapshotViewCommand(context)
+  // registerSnapshotViewCommand(context)
 
   vscode.window.registerWebviewViewProvider('vibeEditorTemplatePage', {
     resolveWebviewView(webviewView) {
@@ -108,30 +109,23 @@ export async function activate(
 
       webviewView.webview.onDidReceiveMessage(async (message) => {
         switch (message.command) {
-          case 'getDatabases':
-            const dbs = context.globalState.get(
-              'notionDatabases',
-              [],
-            ) as Database[]
-            webviewView.webview.postMessage({
-              command: 'setDatabases',
-              payload: dbs,
-            })
-            break
-
           case 'saveDatabase':
+            // TODO : 삭제해야
             const existing = context.globalState.get<Database[]>(
               'notionDatabases',
               [],
             )
-            existing.push({
-              notionDatabaseId: Date.now(),
-              notionDatabaseName: message.payload.databaseName,
-              notionDatabaseUid: message.payload.databaseUid,
-              createdAt: Date.now().toString(),
-              updatedAt: Date.now().toString(),
-            })
-            await context.globalState.update('notionDatabases', existing)
+            const success = await addNotionDatabase(message.payload)
+            if (!success) {
+              vscode.window.showErrorMessage('DB 저장 실패')
+              return
+            }
+            const result = await retrieveNotionDatabases()
+            console.log('📦 DB 저장 후:', result)
+            if (result.success) {
+              const database = result.data
+              await context.globalState.update('notionDatabases', database)
+            }
 
             vscode.window.showInformationMessage('DB 저장 완료')
             console.log('📦 DB 저장 후:', existing)

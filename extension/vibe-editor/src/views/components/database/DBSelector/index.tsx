@@ -4,8 +4,8 @@ import { Database } from '../../../../types/database'
 import { MessageType } from '../../../../types/webview'
 
 interface Props {
-  selectedId: string
-  onChange: (id: string) => void
+  selectedId: number
+  onChange: (id: number) => void
   getDatabases: () => void
   onAddClick: () => void
 }
@@ -17,7 +17,7 @@ export const DBSelector: React.FC<Props> = ({
   onAddClick,
 }) => {
   const [dbList, setDbList] = useState<Database[]>([])
-  const [hovered, setHovered] = useState<string>('')
+  const [hovered, setHovered] = useState<number>(0)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -34,9 +34,9 @@ export const DBSelector: React.FC<Props> = ({
       } else if (message.type === MessageType.DATABASE_DELETED) {
         const { notionDatabaseId } = message.payload
         setDbList((prev) =>
-          prev.filter((db) => db.notionDatabaseUid !== notionDatabaseId),
+          prev.filter((db) => db.notionDatabaseId !== notionDatabaseId),
         )
-        if (selectedId === notionDatabaseId) onChange('')
+        if (selectedId === notionDatabaseId) onChange(0)
       }
     }
 
@@ -44,7 +44,7 @@ export const DBSelector: React.FC<Props> = ({
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const selectedDB = dbList.find((db) => db.notionDatabaseUid === selectedId)
+  const selectedDB = dbList.find((db) => db.notionDatabaseId === selectedId)
 
   return (
     <div className="form-group">
@@ -74,13 +74,13 @@ export const DBSelector: React.FC<Props> = ({
             maxHeight: '200px',
             overflowY: 'auto',
           }}>
-          {dbList.map((db) => (
+          {dbList.map((db: Database) => (
             <div
               key={db.notionDatabaseId}
-              onMouseEnter={() => setHovered(db.notionDatabaseUid)}
-              onMouseLeave={() => setHovered('')}
+              onMouseEnter={() => setHovered(db.notionDatabaseId)}
+              onMouseLeave={() => setHovered(0)}
               onClick={() => {
-                onChange(db.notionDatabaseUid)
+                onChange(db.notionDatabaseId)
                 setOpen(false)
               }}
               style={{
@@ -90,11 +90,11 @@ export const DBSelector: React.FC<Props> = ({
                 padding: '6px 12px',
                 cursor: 'pointer',
                 backgroundColor:
-                  selectedId === db.notionDatabaseUid
+                  selectedId === db.notionDatabaseId
                     ? 'var(--vscode-button-background)'
                     : 'transparent',
                 color:
-                  selectedId === db.notionDatabaseUid
+                  selectedId === db.notionDatabaseId
                     ? 'var(--vscode-button-foreground)'
                     : 'var(--vscode-input-foreground)',
               }}>
@@ -116,7 +116,7 @@ export const DBSelector: React.FC<Props> = ({
                   cursor: 'pointer',
                   color: 'var(--vscode-icon-foreground)',
                   visibility:
-                    hovered === db.notionDatabaseUid ? 'visible' : 'hidden',
+                    hovered === db.notionDatabaseId ? 'visible' : 'hidden',
                 }}>
                 🗑️
               </button>

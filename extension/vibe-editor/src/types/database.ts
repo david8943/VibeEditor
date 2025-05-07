@@ -1,5 +1,5 @@
 export interface Database {
-  notionDatabaseId?: number
+  notionDatabaseId: number
   notionDatabaseName: string
   notionDatabaseUid: string
   createdAt: string

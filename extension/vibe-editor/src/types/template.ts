@@ -11,6 +11,10 @@ export interface Template {
   createdAt: string
 }
 
+export interface UpdateTemplateRequest {
+  templateId: number
+  templateName: string
+}
 export interface SubmitPrompt {
   prompt: Prompt
   selectedTemplateId: number
@@ -23,28 +27,51 @@ export interface SubmitPost {
   selectedPostId: number
 }
 
+export interface UpdatePost {
+  promptAttachList: [
+    {
+      attachId: number
+      snapshotId: number
+      description: string
+    },
+  ]
+  promptName: string
+  postType: string
+  comment: string
+  promptOptionList: number[]
+  notionDatabaseId: number
+}
+
 export interface PromptAttach {
   attachId: number
   snapshotId: number
   description: string
 }
-export interface CreatePrompt extends Omit<Prompt, 'promptId'> {}
+export interface CreatePrompt
+  extends Omit<Prompt, 'promptId' | 'parentPrompt'> {
+  parentPromptId: number | null
+}
+
+export interface ParentPrompt {
+  parentPromptId: number
+  parentPromptName: string
+}
+
 export interface Prompt {
+  parentPrompt: ParentPrompt | null
   templateId: number
+  promptAttachList: PromptAttach[]
   promptId: number
   promptName: string
   postType: string
   comment: string
-  promptAttachList: PromptAttach[]
   promptOptionList: number[]
-  databaseUid: string
-  // TODO: parentPromptId 추가 필요
-  //	TODO: updatedAt, createdAt 추가 필요
+  notionDatabaseId: number
 }
 
 export interface EditPrompt {
   templateId: number
-  promptId: number
+  promptId?: number
   promptName: string
   postType: string
   comment: string
@@ -56,7 +83,7 @@ export interface EditSnapshot {
   attachId: number
   snapshotName: string
   snapshotId: number
-  content: string
+  snapshotContent: string
   description: string
 }
 

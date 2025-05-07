@@ -9,7 +9,19 @@ export interface Snapshot {
   snapshotId: number
   snapshotName: string
   snapshotType: SnapshotType
-  content: string // TODO : snapshotContent
+  snapshotContent: string // TODO : snapshotContent
   createdAt: string
   updatedAt: string
+}
+
+export interface UpdateSnapshotRequest {
+  snapshotId: number
+  snapshotName: string
+}
+
+export interface CreateSnapshotRequest {
+  templateId: number
+  snapshotName: string
+  snapshotType: SnapshotType
+  snapshotContent: string
 }

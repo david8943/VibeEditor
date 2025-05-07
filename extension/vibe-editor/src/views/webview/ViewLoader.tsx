@@ -1,14 +1,18 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 
-import { CreatePost } from '@/types/post'
-
+import {
+  addNotionDatabase,
+  removeNotionDatabase,
+  retrieveNotionDatabases,
+} from '../../apis/notion'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
-import { Database } from '../../types/database'
+import { CreateDatabase, Database } from '../../types/database'
+import { CreatePost } from '../../types/post'
 import { SubmitPrompt } from '../../types/template'
 import {
   CommonMessage,
@@ -110,25 +114,24 @@ export class ViewLoader {
     })
   }
 
-  private async saveDatabase(data: Database) {
-    const existing = this.context.globalState.get<Database[]>(
-      'notionDatabases',
-      [],
-    )
-    existing.push({
-      notionDatabaseId: Date.now(),
+  private async saveDatabase(data: CreateDatabase) {
+    const success = await addNotionDatabase({
       notionDatabaseName: data.notionDatabaseName,
       notionDatabaseUid: data.notionDatabaseUid,
-      createdAt: Date.now().toString(),
-      updatedAt: Date.now().toString(),
     })
-    await this.context.globalState.update('notionDatabases', existing)
 
-    vscode.window.showInformationMessage('DB 저장 완료')
-    this.panel.webview.postMessage({
-      type: 'setDatabases',
-      payload: existing,
-    })
+    if (success) {
+      const result = await retrieveNotionDatabases()
+      if (result.success) {
+        const databases = result.data
+        await this.context.globalState.update('notionDatabases', databases)
+        vscode.window.showInformationMessage('DB 저장 완료')
+        this.panel.webview.postMessage({
+          type: MessageType.GET_DATABASE,
+          payload: databases,
+        })
+      }
+    }
   }
 
   private async getDatabase() {
@@ -138,6 +141,7 @@ export class ViewLoader {
       payload: dbs,
     })
   }
+
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
       async (message: Message) => {
@@ -202,7 +206,6 @@ export class ViewLoader {
             { modal: true },
             '삭제',
           )
-
           if (confirm === '삭제') {
             const existing = this.context.globalState.get<Database[]>(
               'notionDatabases',
@@ -213,12 +216,21 @@ export class ViewLoader {
             )
 
             await this.context.globalState.update('notionDatabases', updated)
-
-            this.panel.webview.postMessage({
-              type: MessageType.DATABASE_DELETED,
-              payload: { notionDatabaseId },
-            })
-
+            const success = await removeNotionDatabase(notionDatabaseId)
+            if (success) {
+              const result = await retrieveNotionDatabases()
+              if (result.success) {
+                const notionDatabases = result.data
+                await this.context.globalState.update(
+                  'notionDatabases',
+                  notionDatabases,
+                )
+                this.panel.webview.postMessage({
+                  type: MessageType.DATABASE_DELETED,
+                  payload: { notionDatabaseId },
+                })
+              }
+            }
             vscode.window.showInformationMessage('삭제가 완료되었습니다.')
           }
         }

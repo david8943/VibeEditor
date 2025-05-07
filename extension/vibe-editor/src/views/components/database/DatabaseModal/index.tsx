@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 
-import { Database } from '../../../../types/database'
+import { CreateDatabase, Database } from '../../../../types/database'
 
 interface Props {
-  saveDatabase: (database: Database) => void
+  saveDatabase: (database: CreateDatabase) => void
   onClose: () => void
 }
 
@@ -15,11 +15,9 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
     console.log('[DBModal] window.vscode =', window.vscode)
     const now = Date.now().toString()
 
-    const database: Database = {
+    const database: CreateDatabase = {
       notionDatabaseName: notionDatabaseName,
       notionDatabaseUid: notionDatabaseUid,
-      createdAt: now,
-      updatedAt: now,
     }
     saveDatabase(database)
     onClose()

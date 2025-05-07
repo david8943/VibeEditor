@@ -3,6 +3,7 @@ import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
   RefreshSnapshotCommand,
+  ViewCodeSnapshotCommand,
 } from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
@@ -13,6 +14,7 @@ import {
   AddToPromptCommand,
   CreateTemplateCommand,
   DeleteTemplateCommand,
+  GetTemplatesCommand,
   RenameTemplateCommand,
   ResetTemplateCommand,
   ShowTemplatePageCommand,
@@ -36,4 +38,6 @@ export const allCommands = [
   DeleteSnapshotCommand,
   RefreshSnapshotCommand,
   FileSnapshotCommand,
+  ViewCodeSnapshotCommand,
+  GetTemplatesCommand,
 ]

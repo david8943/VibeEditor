@@ -17,25 +17,27 @@ export function PromptSelector({
   return (
     <div className="form-group flex flex-col gap-4">
       <label>프롬프트 선택</label>
-      <select
-        value={selectedPromptId || ''}
-        onChange={(e) => {
-          const prompt = selectedTemplate?.promptList?.find(
-            (t) => t.promptId === parseInt(e.target.value),
-          )
-          if (prompt) {
-            selectPromptId(prompt.promptId)
-          }
-        }}>
-        <option value="">새 프롬프트 생성하기</option>
-        {selectedTemplate?.promptList?.map((prompt) => (
-          <option
-            key={prompt.promptId}
-            value={prompt.promptId}>
-            {prompt.promptName}
-          </option>
-        ))}
-      </select>
+      {selectedTemplate && (
+        <select
+          value={selectedPromptId || ''}
+          onChange={(e) => {
+            const prompt = selectedTemplate.promptList?.find(
+              (t) => t.promptId === parseInt(e.target.value),
+            )
+            if (prompt) {
+              selectPromptId(prompt.promptId)
+            }
+          }}>
+          <option value="0">새 프롬프트 생성하기</option>
+          {selectedTemplate.promptList?.map((prompt) => (
+            <option
+              key={prompt.promptId}
+              value={prompt.promptId}>
+              {prompt.promptName}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   )
 }

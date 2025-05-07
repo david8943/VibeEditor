@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { registerNotionSecretKey } from '../apis/notion'
 import { setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
 
@@ -14,17 +15,22 @@ export class NotionService {
       const notionSecretKey = await vscode.window.showInputBox({
         prompt: 'Notion API 토큰을 입력해주세요.',
       })
-      const notionStatus = !!notionSecretKey
-
-      if (!notionStatus) {
+      if (!notionSecretKey) {
         vscode.window.showErrorMessage('토큰을 입력해주세요.')
         return
       }
+      const success = await registerNotionSecretKey(notionSecretKey)
+
+      if (!success) {
+        vscode.window.showErrorMessage('Notion 등록 실패')
+        return
+      }
+
       await this.context.secrets.store(
         SecretType.notionSecretKey,
         notionSecretKey,
       )
-      setDraftData(DraftDataType.notionStatus, notionStatus)
+      setDraftData(DraftDataType.notionStatus, !!notionSecretKey)
       vscode.window.showInformationMessage('Notion 등록 성공')
     } catch (error) {
       vscode.window.showErrorMessage('Notion 등록 실패')
