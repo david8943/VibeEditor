@@ -138,6 +138,7 @@ export class GetTemplatesCommand implements ICommand {
   }
 
   public async execute(): Promise<void> {
-    this.templateService.getTemplates()
+    await this.templateService.getTemplates()
+    await this.templateService.refreshTemplate()
   }
 }

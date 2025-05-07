@@ -36,9 +36,13 @@ export class TemplateService {
     this.page = page
   }
 
+  async refreshTemplate(): Promise<void> {
+    templateProviderInstance?.refresh()
+  }
+
   async resetTemplate(): Promise<void> {
     await this.context.globalState.update('templates', [])
-    templateProviderInstance?.refresh()
+    this.refreshTemplate()
   }
   async deleteTemplate(templateId: number): Promise<void> {
     const prev = this.context.globalState.get<Template[]>('templates', [])
