@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { sampleOptionList } from '../../constants/sampleData'
-import { Database } from '../../types/database'
+import { CreateDatabase } from '../../types/database'
 import { CreatePrompt, Prompt, Template } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
 import { DBSelector } from '../components'
 import { DatabaseModal } from '../components/database/DatabaseModal'
+import { CreatePromptForm } from '../components/template/CreatePromptForm'
 
 export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null)
@@ -14,6 +15,17 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     null,
   )
   const [selectedPromptId, setSelectedPromptId] = useState<number>(0)
+  const [createPromptData, setCreatePromptData] = useState<CreatePrompt>({
+    parentPromptId: null,
+    templateId: 0,
+    promptName: '',
+    postType: 'cs',
+    comment: '설명을 추가해주세요',
+    promptAttachList: [],
+    promptOptionList: [],
+    notionDatabaseId: 0,
+  })
+
   const initialized = useRef(false)
   useEffect(() => {
     if (initialized.current) return
@@ -92,7 +104,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     }
   }
 
-  const saveDatabase = (database: Database) => {
+  const saveDatabase = (database: CreateDatabase) => {
     console.log('saveDatabase', database)
 
     postMessageToExtension({
@@ -117,7 +129,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       },
     })
   }
-  const [selectedDbUid, setSelectedDbUid] = useState('')
+  const [selectedDbId, setSelectedDbId] = useState(0)
   const [showDbModal, setShowDbModal] = useState(false)
 
   useEffect(() => {
@@ -128,6 +140,16 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           (prompt) => prompt.promptId === selectedPromptId,
         ) || null,
       )
+      setCreatePromptData({
+        parentPromptId: null,
+        templateId: selectedPromptId,
+        promptName: '새 프롬프트 생성하기',
+        postType: 'cs',
+        comment: '설명을 추가해주세요',
+        promptAttachList: [],
+        promptOptionList: [],
+        notionDatabaseId: selectedDbId,
+      })
     }
     console.log('useEffect selectedPrompt', selectedPrompt)
   }, [selectedPromptId, selectedTemplate])
@@ -137,8 +159,8 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       <h1>프롬프트 생성기 promptId: {selectedPromptId}</h1>
 
       <DBSelector
-        selectedId={selectedDbUid}
-        onChange={setSelectedDbUid}
+        selectedId={selectedDbId}
+        onChange={setSelectedDbId}
         getDatabases={getDatabases}
         onAddClick={() => setShowDbModal(true)}
       />
@@ -161,6 +183,16 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           selectedPromptId={selectedPromptId}
           submitPrompt={submitPrompt}
           updatePrompt={updatePrompt}
+          createPrompt={createPrompt}
+          deleteSnapshot={deleteSnapshot}
+          localSnapshots={selectedTemplate.snapshotList || []}
+          optionList={sampleOptionList}
+        />
+      )}
+      {selectedTemplate && selectedPromptId == 0 && (
+        <CreatePromptForm
+          defaultPrompt={createPromptData}
+          selectedPromptId={selectedPromptId}
           createPrompt={createPrompt}
           deleteSnapshot={deleteSnapshot}
           localSnapshots={selectedTemplate.snapshotList || []}

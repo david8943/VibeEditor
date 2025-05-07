@@ -1,5 +1,5 @@
 export type User = {
-  notion_active: boolean
+  notionActive: boolean
   lastLoginAt: string
   updatedAt: string
   createdAt: string

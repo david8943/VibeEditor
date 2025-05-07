@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react'
 
 import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, OptionList, Prompt } from '@/types/template'
+import { CreatePrompt, OptionList } from '@/types/template'
 
+import { useCreatePromptForm } from '../../../hooks/useCreatePromptForm'
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
-import { useUpdatePromptForm } from '../../../hooks/useUpdatePromptForm'
 import { PromptFormUI } from '../PromptFormUI'
 
-interface PromptFormProps {
-  defaultPrompt: Prompt | null
-  submitPrompt: (data: Prompt) => void
-  updatePrompt: (data: Prompt) => void
+interface CreatePromptFormProps {
+  defaultPrompt: CreatePrompt | null
   createPrompt: (data: CreatePrompt) => void
   localSnapshots: Snapshot[]
   deleteSnapshot: (snapshotId: number) => void
@@ -19,30 +17,26 @@ interface PromptFormProps {
   selectedPromptId: number
 }
 
-export function PromptForm({
+export function CreatePromptForm({
   defaultPrompt,
-  submitPrompt,
-  updatePrompt,
   createPrompt,
   localSnapshots,
   deleteSnapshot,
   optionList,
   selectedPromptId,
-}: PromptFormProps) {
+}: CreatePromptFormProps) {
   const {
-    formMethods: { register, handleSubmit, watch, setValue },
+    formMethods: { register, handleSubmit, setValue },
     onSubmit,
     handlePost,
-  } = useUpdatePromptForm({
+  } = useCreatePromptForm({
     defaultPrompt,
-    submitPrompt,
-    updatePrompt,
     createPrompt,
   })
 
   const { options, handleOption } = usePromptOptions({
     optionList,
-    promptOptionList: defaultPrompt?.promptOptionList ?? [],
+    promptOptionList: defaultPrompt?.promptOptionList || [],
     setValue,
   })
 
@@ -64,7 +58,7 @@ export function PromptForm({
       options={options}
       snapshots={snapshots}
       onSubmit={onSubmit}
-      handlePost={handlePost}
+      handlePost={null}
       handleOption={handleOption}
       handleDeleteSnapshot={handleDeleteSnapshot}
       handleDescriptionChange={handleDescriptionChange}

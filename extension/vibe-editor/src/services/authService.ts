@@ -100,6 +100,9 @@ export class AuthService {
                 accessToken,
               )
               setDraftData(DraftDataType.loginStatus, true)
+
+              // TODO: 로그인하고 나면 템플릿 리스트 재호출
+              vscode.commands.executeCommand('vibeEditor.getTemplates')
             } else {
               res.statusCode = 400
               res.end('Token이 없습니다.')
@@ -130,6 +133,7 @@ export class AuthService {
       this.context.secrets.delete(element)
     })
     clearDraftData()
+    vscode.commands.executeCommand('vibeEditor.resetTemplate')
     vscode.window.showInformationMessage('로그아웃되었습니다.')
   }
 }

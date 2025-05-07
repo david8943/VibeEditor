@@ -1,9 +1,11 @@
 import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
+import { TemplateService } from '../services/templateService'
 import { DraftDataType } from '../types/configuration'
 import { Snapshot, SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
+import { PageType } from '../types/webview'
 
 export class SnapshotItem extends vscode.TreeItem {
   constructor(public readonly snapshot: Snapshot) {
@@ -29,8 +31,11 @@ export class SnapshotProvider
     vscode.TreeItem | undefined | void
   > = this._onDidChangeTreeData.event
 
-  constructor(protected context: vscode.ExtensionContext) {}
+  constructor(protected context: vscode.ExtensionContext) {
+    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+  }
 
+  private templateService: TemplateService
   refresh(): void {
     this._onDidChangeTreeData.fire()
   }
@@ -126,51 +131,51 @@ export class LogSnapshotProvider extends SnapshotProvider {
   }
 }
 
-export function registerSnapshotViewCommand(context: vscode.ExtensionContext) {
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'vibeEditor.viewCodeSnapshot',
-      (snapshot: Snapshot) => {
-        const panel = vscode.window.createWebviewPanel(
-          'captureCodeSnapshot',
-          `📸 ${snapshot.snapshotName}`,
-          vscode.ViewColumn.One,
-          { enableScripts: false },
-        )
+// export function registerSnapshotViewCommand(context: vscode.ExtensionContext) {
+//   context.subscriptions.push(
+//     vscode.commands.registerCommand(
+//       'vibeEditor.viewCodeSnapshot',
+//       (snapshot: Snapshot) => {
+//         const panel = vscode.window.createWebviewPanel(
+//           'captureCodeSnapshot',
+//           `📸 ${snapshot.snapshotName}`,
+//           vscode.ViewColumn.One,
+//           { enableScripts: false },
+//         )
 
-        panel.webview.html = getCodeWebviewHTML(snapshot)
-      },
-    ),
-  )
-}
+//         panel.webview.html = getCodeWebviewHTML(snapshot)
+//       },
+//     ),
+//   )
+// }
 
-function getCodeWebviewHTML(snapshot: Snapshot): string {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>${snapshot.snapshotName}</title>
-      <style>
-        body {
-          font-family: monospace;
-          padding: 1rem;
-          background-color: #1e1e1e;
-          color: #d4d4d4;
-        }
-        pre {
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          background-color: #2d2d2d;
-          padding: 1rem;
-          border-radius: 6px;
-        }
-      </style>
-    </head>
-    <body>
-      <h3>${snapshot.snapshotName} | ${snapshot.createdAt}</h3>
-      <pre>${snapshot.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-    </body>
-    </html>
-  `
-}
+// function getCodeWebviewHTML(snapshot: Snapshot): string {
+//   return `
+//     <!DOCTYPE html>
+//     <html lang="en">
+//     <head>
+//       <meta charset="UTF-8">
+//       <title>${snapshot.snapshotName}</title>
+//       <style>
+//         body {
+//           font-family: monospace;
+//           padding: 1rem;
+//           background-color: #1e1e1e;
+//           color: #d4d4d4;
+//         }
+//         pre {
+//           white-space: pre-wrap;
+//           word-wrap: break-word;
+//           background-color: #2d2d2d;
+//           padding: 1rem;
+//           border-radius: 6px;
+//         }
+//       </style>
+//     </head>
+//     <body>
+//       <h3>${snapshot.snapshotName} | ${snapshot.createdAt}</h3>
+//       <pre>${snapshot.snapshotContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+//     </body>
+//     </html>
+//   `
+// }

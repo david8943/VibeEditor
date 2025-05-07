@@ -2,6 +2,15 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 
 import {
+  addNotionDatabase,
+  removeNotionDatabase,
+  retrieveNotionDatabases,
+} from '../../apis/notion'
+import { getCurrentUser } from '../../apis/user'
+import { getDraftData, setDraftData } from '../../configuration/draftData'
+import { DraftDataType } from '../../types/configuration'
+import { CreateDatabase } from '../../types/database'
+import {
   CommonMessage,
   Message,
   MessageType,
@@ -45,6 +54,71 @@ export class SettingViewLoader {
       payload: { page },
     })
   }
+  private async getLoginStatus() {
+    const loginStatus = getDraftData(DraftDataType.loginStatus)
+    this.panel.webview.postMessage({
+      type: MessageType.LOGIN_STATUS_LOADED,
+      payload: loginStatus,
+    })
+  }
+
+  private async logout() {
+    vscode.commands.executeCommand('vibeEditor.logout')
+    this.panel.webview.postMessage({
+      type: MessageType.LOGIN_STATUS_LOADED,
+      payload: false,
+    })
+  }
+
+  private async getUser() {
+    const result = await getCurrentUser()
+    console.log(result)
+    if (result.success) {
+      this.panel.webview.postMessage({
+        type: MessageType.USER_LOADED,
+        payload: result.data,
+      })
+    }
+  }
+  private async saveDatabase(data: CreateDatabase) {
+    const success = await addNotionDatabase({
+      notionDatabaseName: data.notionDatabaseName,
+      notionDatabaseUid: data.notionDatabaseUid,
+    })
+
+    if (success) {
+      const result = await retrieveNotionDatabases()
+      if (result.success) {
+        const databases = result.data
+        await this.context.globalState.update('notionDatabases', databases)
+        vscode.window.showInformationMessage('DB 저장 완료')
+        this.panel.webview.postMessage({
+          type: MessageType.GET_DATABASE,
+          payload: databases,
+        })
+      }
+    }
+  }
+
+  private async getDatabase() {
+    const dbs = this.context.globalState.get('notionDatabases', [])
+    this.panel.webview.postMessage({
+      type: MessageType.GET_DATABASE,
+      payload: dbs,
+    })
+  }
+
+  private async googleLogin() {
+    vscode.commands.executeCommand('vibeEditor.googleLogin')
+  }
+
+  private async githubLogin() {
+    vscode.commands.executeCommand('vibeEditor.githubLogin')
+  }
+
+  private async setNotionSecretKey() {
+    vscode.commands.executeCommand('vibeEditor.setNotionApi')
+  }
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
       async (message: Message) => {
@@ -60,6 +134,27 @@ export class SettingViewLoader {
           vscode.window.showInformationMessage(
             `Received message from Webview: ${text}`,
           )
+        } else if (message.type === MessageType.GET_LOGIN_STATUS) {
+          await this.getLoginStatus()
+        } else if (message.type === MessageType.GET_USER) {
+          await this.getUser()
+        } else if (message.type === MessageType.SAVE_DATABASE) {
+          console.log('SAVE_DATABASE', message)
+          await this.saveDatabase(message.payload)
+        } else if (message.type === MessageType.GET_DATABASE) {
+          console.log('GET_DATABASE', message)
+          await this.getDatabase()
+        } else if (message.type === MessageType.LOG_OUT) {
+          console.log('LOG_OUT', message)
+          await this.logout()
+        } else if (message.type === MessageType.GOOGLE_LOGIN) {
+          console.log('GOOGLE_LOGIN', message)
+          await this.googleLogin()
+        } else if (message.type === MessageType.GITHUB_LOGIN) {
+          console.log('GITHUB_LOGIN', message)
+          await this.githubLogin()
+        } else if (message.type === MessageType.SET_NOTION_SECRET_KEY) {
+          await this.setNotionSecretKey()
         }
       },
       null,

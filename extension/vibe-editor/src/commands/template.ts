@@ -36,6 +36,8 @@ export class ShowTemplatePageCommand implements ICommand {
   }
 
   public async execute(template?: any): Promise<void> {
+    console.log('showTemplatePage', template)
+    await this.templateService.updateTemplateDetail(template.templateId)
     ViewLoader.showWebview(this.context, PageType.TEMPLATE, template)
   }
 }
@@ -120,5 +122,22 @@ export class AddToPromptCommand implements ICommand {
 
   public async execute(snapshotItem: SnapshotItem): Promise<void> {
     this.templateService.addToPrompt(snapshotItem)
+  }
+}
+
+export class GetTemplatesCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.getTemplates'
+  private templateService: TemplateService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.templateService = new TemplateService(context, PageType.POST)
+  }
+
+  public get commandName(): string {
+    return GetTemplatesCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    this.templateService.getTemplates()
   }
 }

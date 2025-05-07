@@ -1,6 +1,11 @@
 import * as vscode from 'vscode'
 
-import { addTemplate, getTemplateList } from '../apis/template'
+import {
+  addTemplate,
+  getTemplateDetail,
+  getTemplateList,
+  removeTemplate,
+} from '../apis/template'
 import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { Post } from '../types/post'
@@ -33,6 +38,7 @@ export class TemplateService {
 
   async resetTemplate(): Promise<void> {
     await this.context.globalState.update('templates', [])
+    templateProviderInstance?.refresh()
   }
   async deleteTemplate(templateId: number): Promise<void> {
     const prev = this.context.globalState.get<Template[]>('templates', [])
@@ -50,8 +56,12 @@ export class TemplateService {
         if (selection === 'Ok') {
           await ViewLoader.deleteTemplateIfActive(templateId)
           await this.context.globalState.update('templates', prev)
-          templateProviderInstance?.refresh()
-          vscode.window.showInformationMessage('템플릿이 삭제되었습니다.')
+          const success = await removeTemplate(templateId)
+          if (success) {
+            await this.getTemplates()
+            templateProviderInstance?.refresh()
+            vscode.window.showInformationMessage('템플릿이 삭제되었습니다.')
+          }
         }
       })
   }
@@ -145,6 +155,7 @@ export class TemplateService {
       const success = await addTemplate(templateName)
       if (success) {
         const result = await getTemplateList()
+        console.log('getTemplateList', result)
         if (result.success) {
           const templateList = result.data
           await this.context.globalState.update('templates', templateList)
@@ -227,6 +238,7 @@ export class TemplateService {
     console.log('createPrompt', data)
     const promptId = new Date().getTime()
     const newPrompt: Prompt = {
+      parentPrompt: null,
       templateId: data.selectedTemplateId,
       promptId: promptId,
       promptName: data.prompt.promptName,
@@ -234,7 +246,7 @@ export class TemplateService {
       comment: data.prompt.comment,
       promptAttachList: data.prompt.promptAttachList,
       promptOptionList: data.prompt.promptOptionList,
-      databaseUid: '',
+      notionDatabaseId: data.prompt.notionDatabaseId,
     }
 
     const prev = this.context.globalState.get<Template[]>('templates', [])
@@ -278,17 +290,54 @@ export class TemplateService {
     vscode.window.showInformationMessage(`프롬프트가 삭제되었습니다:`)
   }
 
+  async getLocalTemplates(): Promise<Template[]> {
+    return this.context.globalState.get<Template[]>('templates', [])
+  }
+
+  async updateTemplateDetail(templateId: number): Promise<Template | null> {
+    const result = await getTemplateDetail(templateId)
+    console.log('updateTemplateDetail', result)
+    if (result.success) {
+      const prev = this.context.globalState.get<Template[]>('templates', [])
+      const templateIndex = prev.findIndex(
+        (template) => template.templateId === templateId,
+      )
+      const newTemplate = result.data
+      newTemplate.templateId = templateId
+      if (templateIndex !== -1) {
+        prev[templateIndex] = newTemplate
+        await this.context.globalState.update('templates', prev)
+      }
+      return result.data
+    }
+    return null
+  }
+
   async getTemplates(): Promise<Template[]> {
     const result = await getTemplateList()
     if (result.success) {
-      this.context.globalState.update('templates', result.data)
-    }
+      const templates = result.data
+      const prev = this.context.globalState.get<Template[]>('templates', [])
 
-    const templates: Template[] = this.context.globalState.get<Template[]>(
-      'templates',
-      [],
-    )
-    return templates
+      const newTemplate = templates.map((template) => {
+        const prevTemplate = prev.find(
+          (t) => t.templateId === template.templateId,
+        )
+        if (prevTemplate) {
+          return {
+            ...prevTemplate,
+            templateName: template.templateName,
+            updatedAt: template.updatedAt,
+          }
+        } else {
+          return template
+        }
+      })
+
+      this.context.globalState.update('templates', [...newTemplate])
+    }
+    const localTemplates: Template[] = await this.getLocalTemplates()
+    return localTemplates
   }
 
   public async deletePromptSnapshot(
