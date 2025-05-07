@@ -95,6 +95,7 @@ export class AuthService {
               res.end()
               server.close()
               vscode.window.showInformationMessage(`${domain} 로그인 성공`)
+              console.log('로그인을 성공해서 받아온accessToken', accessToken)
               await this.context.secrets.store(
                 SecretType.accessToken,
                 accessToken,

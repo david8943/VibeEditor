@@ -62,7 +62,8 @@ export class SnapshotService {
     )
   }
   public async captureSnapshot(templates: Template[]): Promise<void> {
-    const selectedTemplate = await this.selectTemplate(templates)
+    const selectedTemplate: Template | null =
+      await this.selectTemplate(templates)
     if (!selectedTemplate) {
       vscode.window.showInformationMessage(`선택한 템플릿이 없습니다.`)
       return
@@ -99,7 +100,7 @@ export class SnapshotService {
       updatedAt: timestamp,
     }
 
-    selectedTemplate.snapshots?.push(snapshot)
+    selectedTemplate.snapshotList?.push(snapshot)
     await this.context.globalState.update('templates', [
       ...templates.filter((t) => t.templateId !== selectedTemplate.templateId),
       selectedTemplate,
@@ -119,7 +120,7 @@ export class SnapshotService {
       templates.find((template) => template.templateId === currentTemplateId) ??
       null
     templates.find
-    return currentTemplate?.snapshots ?? []
+    return currentTemplate?.snapshotList ?? []
   }
 
   public async deleteSnapshot(snapshot: SnapshotItem): Promise<void> {
@@ -137,7 +138,7 @@ export class SnapshotService {
       if (t.templateId === selectedTemplateId) {
         return {
           ...t,
-          snapshots: t.snapshots?.filter(
+          snapshotList: t.snapshotList?.filter(
             (s) => s.snapshotId !== snapshot.snapshot.snapshotId,
           ),
         }
@@ -160,7 +161,7 @@ export class SnapshotService {
     if (!template) {
       return
     }
-    const snapshot: Snapshot | undefined = template.snapshots?.find(
+    const snapshot: Snapshot | undefined = template.snapshotList?.find(
       (snapshot) => snapshot.snapshotId === snapshotId,
     )
 
@@ -207,7 +208,7 @@ export class SnapshotService {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
-    selectedTemplate.snapshots?.push(snapshot)
+    selectedTemplate.snapshotList?.push(snapshot)
     await this.context.globalState.update('templates', [
       ...templates.filter((t) => t.templateId !== selectedTemplate.templateId),
       selectedTemplate,

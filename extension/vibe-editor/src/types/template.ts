@@ -5,10 +5,8 @@ import { PageType } from './webview'
 export interface Template {
   templateId: number
   templateName: string
-  category?: string // TODO: 삭제 필요
-  prompts?: Prompt[] // TODO: 프롬프트 리스트로 변경 필요
-  snapshots?: Snapshot[]
-  // TODO: 스냅샷 리스트로 변경 필요
+  promptList?: Prompt[]
+  snapshotList?: Snapshot[]
   updatedAt: string
   createdAt: string
 }
@@ -40,6 +38,7 @@ export interface Prompt {
   promptAttachList: PromptAttach[]
   promptOptionList: number[]
   databaseUid: string
+  // TODO: parentPromptId 추가 필요
   //	TODO: updatedAt, createdAt 추가 필요
 }
 
