@@ -8,3 +8,11 @@ export interface Post {
 }
 
 export type CreatePost = Pick<Post, 'postName' | 'postContent'>
+
+export interface UploadToNotionRequest {
+  promptId: number
+}
+
+export interface UploadToNotionResponse {
+  postUrl: string
+}

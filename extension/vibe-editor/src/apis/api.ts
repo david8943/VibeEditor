@@ -133,3 +133,10 @@ export const deleteRequest = async <T>(
     return error as ApiErrorResponse
   }
 }
+
+export const deleteBooleanRequest = async <T>(
+  url: string,
+): Promise<boolean> => {
+  const response = await deleteRequest<unknown>(url)
+  return response.success
+}
