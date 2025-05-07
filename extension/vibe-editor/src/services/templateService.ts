@@ -2,11 +2,12 @@ import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
-import { Post } from '../types/post'
+import { PostDetail } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
 import { PageType } from '../types/webview'
 import { SnapshotItem } from '../views/codeSnapshotView'
 import { ViewLoader } from '../views/webview/ViewLoader'
+import { refreshPostProvider } from './postService'
 
 export class TemplateItem extends vscode.TreeItem {
   constructor(public readonly template: Template) {
@@ -184,19 +185,22 @@ export class TemplateService {
           vscode.window.showInformationMessage(
             `프롬프트로 포스트를 생성하고 있습니다: ${data.prompt.promptName}`,
           )
-          const newPost: Post = {
+          const uniqueSuffix = Math.floor(Math.random() * 10000)
+          const newPost: PostDetail = {
             postId: new Date().getTime(),
-            postName: '생성 중',
-            postContent: '생성 중',
+            postTitle: `포스트 제목 ${uniqueSuffix}`,
+            postContent: `포스트 내용 ${uniqueSuffix}`,
+            templateId: data.selectedTemplateId,
+            promptId: data.prompt.promptId,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            promptId: data.prompt.promptId,
+            parentPostIdList: [],
           }
-          const prev = this.context.globalState.get<Post[]>('posts', [])
+          const prev = this.context.globalState.get<PostDetail[]>('posts', [])
           prev.push(newPost)
           await this.context.globalState.update('posts', prev)
-          templateProviderInstance?.refresh()
-
+          console.log('포스트 생성 후 데이터:', prev)
+          refreshPostProvider()
           vscode.window.showInformationMessage(
             `포스트 수정페이지에서 확인해주세요: ${data.prompt.promptName}`,
           )

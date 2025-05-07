@@ -1,6 +1,8 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 
+import { setDraftData } from '../../configuration/draftData'
+import { DraftDataType } from '../../types/configuration'
 import {
   CommonMessage,
   Message,
@@ -78,10 +80,10 @@ export class SettingViewLoader {
     // })
   }
 
-  static showWebview(
+  static async showWebview(
     context: vscode.ExtensionContext,
     page: PageType,
-    template?: any,
+    payload?: any, // 템플릿 or 포스트 등
   ) {
     const cls = this
     const column = vscode.window.activeTextEditor
@@ -89,13 +91,42 @@ export class SettingViewLoader {
       : undefined
 
     if (cls.currentPanel) {
+      cls.currentPanel.reveal(column)
       cls.currentPanel.webview.postMessage({
-        type: MessageType.INITIAL_PAGE,
+        type: MessageType.NAVIGATE,
         payload: { page },
       })
-      cls.currentPanel.reveal(column)
+
+      if (page === PageType.POST_VIEWER && payload) {
+        cls.currentPanel.webview.postMessage({
+          type: MessageType.SHOW_POST_VIEWER,
+          payload,
+        })
+      }
     } else {
-      cls.currentPanel = new cls(context, page).panel
+      const loader = new cls(context, page)
+      cls.currentPanel = loader.panel
+
+      // 템플릿이 전달된 경우 (기존 로직 유지)
+      if (page === PageType.TEMPLATE && payload) {
+        setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
+        vscode.commands.executeCommand(
+          'vibeEditor.refreshSnapshot',
+          payload.templateId,
+        )
+
+        loader.panel.webview.postMessage({
+          type: MessageType.TEMPLATE_SELECTED,
+          payload: { template: payload },
+        })
+      }
+
+      if (page === PageType.POST_VIEWER && payload) {
+        loader.panel.webview.postMessage({
+          type: MessageType.SHOW_POST_VIEWER,
+          payload,
+        })
+      }
     }
   }
 

@@ -32,6 +32,11 @@
           "icon": "media/icon.svg"
         },
         {
+          "id": "vibeEditorPostList",
+          "name": "포스트 목록",
+          "icon": "media/icon.svg"
+        },
+        {
           "id": "vibeEditorTemplatePage",
           "name": "템플릿 목록",
           "icon": "media/icon.svg"
@@ -103,6 +108,11 @@
       {
         "command": "vibeEditor.logout",
         "title": "로그아웃",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.showPostPage",
+        "title": "포스트 보기",
         "category": "Vibe Editor"
       },
       {

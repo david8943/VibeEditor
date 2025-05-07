@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react'
 
-import { CreatePost, Post } from '../../types/post'
+import { CreatePost, PostDetail } from '../../types/post'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PostForm } from '../components'
 
 export function PostPage({ postMessageToExtension }: WebviewPageProps) {
-  const [defaultPost, setDefaultPost] = useState<Post>({
+  const [defaultPost, setDefaultPost] = useState<PostDetail>({
     postId: 0,
-    postName: '',
+    postTitle: '',
     postContent: '',
     createdAt: '',
     updatedAt: '',
     promptId: 0,
+    templateId: 0,
+    parentPostIdList: [],
   })
 
   useEffect(() => {
@@ -26,6 +28,10 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
       const message = event.data
       if (message.type === MessageType.CURRENT_POST_LOADED) {
         setDefaultPost(message.payload.post)
+      }
+
+      if (message.type === MessageType.SHOW_POST_VIEWER) {
+        setDefaultPost(message.payload)
       }
     }
     window.addEventListener('message', handleMessage)

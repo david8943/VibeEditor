@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import { setDraftData } from './configuration/draftData'
+import { PostProvider, setPostProvider } from './services/postService'
 import {
   SnapshotService,
   setCodeSnapshotProvider,
@@ -15,6 +16,7 @@ import {
 } from './services/templateService'
 import { DraftDataType, SecretType } from './types/configuration'
 import { Database } from './types/database'
+import { PageType } from './types/webview'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
@@ -22,6 +24,7 @@ import {
   SnapshotItem,
   registerSnapshotViewCommand,
 } from './views/codeSnapshotView'
+import { ViewLoader } from './views/webview/ViewLoader'
 
 async function isLogin(context: vscode.ExtensionContext) {
   const accessToken = await context.secrets.get(SecretType.accessToken)
@@ -90,6 +93,10 @@ export async function activate(
     templateProvider,
   )
 
+  const postTreeProvider = new PostProvider(context)
+  vscode.window.registerTreeDataProvider('vibeEditorPostList', postTreeProvider)
+  setPostProvider(postTreeProvider)
+
   // 각 프로바이더 등록
   setTemplateProvider(templateProvider)
   setCodeSnapshotProvider(codeSnapshotProvider)
@@ -151,6 +158,16 @@ export async function activate(
       },
     ),
   )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'vibeEditor.showPostPage',
+      async (postId: number) => {
+        ViewLoader.showWebview(context, PageType.POST_VIEWER, postId)
+      },
+    ),
+  )
+
   const snapshotService = new SnapshotService(context)
 
   context.subscriptions.push(

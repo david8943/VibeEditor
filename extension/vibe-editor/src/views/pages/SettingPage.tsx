@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 
-import { CreatePost, Post } from '../../types/post'
+import { CreatePost, PostDetail } from '../../types/post'
 import { Message, MessageType, WebviewPageProps } from '../../types/webview'
 
 export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
-  const [defaultPost, setDefaultPost] = useState<Post>({
+  const [defaultPost, setDefaultPost] = useState<PostDetail>({
     postId: 0,
-    postName: '',
+    postTitle: '',
     postContent: '',
+    templateId: 0,
+    promptId: 0,
     createdAt: '',
     updatedAt: '',
-    promptId: 0,
+    parentPostIdList: [],
   })
 
   useEffect(() => {

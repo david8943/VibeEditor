@@ -9,6 +9,7 @@ import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
 import { Database } from '../../types/database'
+import { PostDetail } from '../../types/post'
 import { SubmitPrompt } from '../../types/template'
 import {
   CommonMessage,
@@ -33,7 +34,7 @@ export class ViewLoader {
     this.disposables = []
     this.templateService = new TemplateService(context, initialPage)
     this.snapshotService = new SnapshotService(context)
-    this.postService = new PostService(context, initialPage)
+    this.postService = new PostService(context)
     this.currentPage = initialPage
 
     this.panel = vscode.window.createWebviewPanel(
@@ -243,36 +244,68 @@ export class ViewLoader {
   static async showWebview(
     context: vscode.ExtensionContext,
     page: PageType,
-    template?: any,
+    payload?: any, // postId 또는 template
   ) {
     const cls = this
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined
+
     if (cls.currentPanel) {
       cls.currentPanel.reveal(column)
-      if (template) {
-        setDraftData(DraftDataType.selectedTemplateId, template.templateId)
+      cls.currentPanel.webview.postMessage({
+        type: MessageType.NAVIGATE,
+        payload: { page },
+      })
+
+      // ✅ 포스트 뷰어: postId 전달된 경우 → 로컬에서 조회 후 메시지 전송
+      if (page === PageType.POST_VIEWER && typeof payload === 'number') {
+        const posts = context.globalState.get<PostDetail[]>('posts') || []
+        const target = posts.find((p) => p.postId === payload)
+        if (target) {
+          cls.currentPanel.webview.postMessage({
+            type: MessageType.SHOW_POST_VIEWER,
+            payload: target,
+          })
+        }
+      }
+
+      // 템플릿 전송 (기존 유지)
+      if (page === PageType.TEMPLATE && payload?.templateId) {
+        setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
         vscode.commands.executeCommand(
           'vibeEditor.refreshSnapshot',
-          template.templateId,
+          payload.templateId,
         )
         cls.currentPanel.webview.postMessage({
           type: MessageType.TEMPLATE_SELECTED,
-          payload: { template },
+          payload: { template: payload },
         })
       }
     } else {
-      cls.currentPanel = new cls(context, page).panel
-      if (template) {
-        setDraftData(DraftDataType.selectedTemplateId, template.templateId)
+      const loader = new cls(context, page)
+      cls.currentPanel = loader.panel
+
+      if (page === PageType.POST_VIEWER && typeof payload === 'number') {
+        const posts = context.globalState.get<PostDetail[]>('posts') || []
+        const target = posts.find((p) => p.postId === payload)
+        if (target) {
+          loader.panel.webview.postMessage({
+            type: MessageType.SHOW_POST_VIEWER,
+            payload: target,
+          })
+        }
+      }
+
+      if (page === PageType.TEMPLATE && payload?.templateId) {
+        setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
         vscode.commands.executeCommand(
           'vibeEditor.refreshSnapshot',
-          template.templateId,
+          payload.templateId,
         )
-        cls.currentPanel.webview.postMessage({
+        loader.panel.webview.postMessage({
           type: MessageType.TEMPLATE_SELECTED,
-          payload: { template },
+          payload: { template: payload },
         })
       }
     }
