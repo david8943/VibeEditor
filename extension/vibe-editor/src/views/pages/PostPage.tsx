@@ -7,7 +7,7 @@ import { PostForm } from '../components'
 export function PostPage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultPost, setDefaultPost] = useState<PostDetail>({
     postId: 0,
-    postTitle: '',
+    postTitle: '디폴트 포스트 제목',
     postContent: '',
     createdAt: '',
     updatedAt: '',
@@ -26,8 +26,21 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
+      console.log('handleMessage', message)
       if (message.type === MessageType.CURRENT_POST_LOADED) {
-        setDefaultPost(message.payload.post)
+        const post: PostDetail = {
+          postId: message.payload.post.postId,
+          postTitle: message.payload.post.postTitle,
+          postContent: message.payload.post.postContent,
+          templateId: message.payload.post.templateId,
+          promptId: message.payload.post.promptId,
+          createdAt: message.payload.post.createdAt,
+          updatedAt: message.payload.post.updatedAt,
+          parentPostIdList: message.payload.post.userPostIdList,
+        }
+        console.log('CURRENT_POST_LOADED', post)
+        setDefaultPost(post)
+        console.log('setDefaultPost', defaultPost)
       }
 
       if (message.type === MessageType.SHOW_POST_VIEWER) {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-import { getDraftData } from '../configuration/draftData'
+import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { PostDetail } from '../types/post'
 import { CreatePrompt, Prompt, SubmitPrompt, Template } from '../types/template'
@@ -206,6 +206,7 @@ export class TemplateService {
           )
 
           if (data.navigate) {
+            setDraftData(DraftDataType.selectedPostId, newPost.postId)
             await data.navigate(PageType.POST)
           }
         } else {

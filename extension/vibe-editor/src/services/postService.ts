@@ -66,6 +66,10 @@ export class PostService {
     const posts = this.context.globalState.get<PostDetail[]>('posts') || []
     return posts[0]
   }
+  async getPost(postId: number): Promise<PostDetail | null> {
+    const posts = this.context.globalState.get<PostDetail[]>('posts') || []
+    return posts.find((post) => post.postId === postId) || null
+  }
 
   async submitToNotion(data: CreatePost) {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함

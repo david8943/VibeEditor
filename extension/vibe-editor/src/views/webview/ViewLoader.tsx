@@ -28,6 +28,7 @@ export class ViewLoader {
   private disposables: vscode.Disposable[]
   private currentPage: string
   private currentTemplateId?: number
+  private currentPostId?: number
 
   constructor(context: vscode.ExtensionContext, initialPage: PageType) {
     this.context = context
@@ -93,7 +94,13 @@ export class ViewLoader {
   }
 
   private async getCurrentPost() {
-    const post = await this.postService.getCurrentPost()
+    const postId: undefined | number = getDraftData(
+      DraftDataType.selectedPostId,
+    )
+    if (!postId) {
+      return
+    }
+    const post = await this.postService.getPost(postId)
     this.panel.webview.postMessage({
       type: MessageType.CURRENT_POST_LOADED,
       payload: { post },
@@ -257,11 +264,23 @@ export class ViewLoader {
         type: MessageType.NAVIGATE,
         payload: { page },
       })
+      console.log('기존에 여기로 전달된 게 있어야 함', page)
+
+      setDraftData(DraftDataType.selectedPostId, payload)
+      if (page == PageType.POST) {
+        console.log('POST 페이지로 이동')
+        console.log('payload', payload)
+        cls.currentPanel.webview.postMessage({
+          type: MessageType.GET_CURRENT_POST,
+          payload: { payload },
+        })
+      }
 
       // ✅ 포스트 뷰어: postId 전달된 경우 → 로컬에서 조회 후 메시지 전송
-      if (page === PageType.POST_VIEWER && typeof payload === 'number') {
+      if (page === PageType.POST && typeof payload === 'number') {
         const posts = context.globalState.get<PostDetail[]>('posts') || []
         const target = posts.find((p) => p.postId === payload)
+
         if (target) {
           cls.currentPanel.webview.postMessage({
             type: MessageType.SHOW_POST_VIEWER,
@@ -285,17 +304,28 @@ export class ViewLoader {
     } else {
       const loader = new cls(context, page)
       cls.currentPanel = loader.panel
-
-      if (page === PageType.POST_VIEWER && typeof payload === 'number') {
-        const posts = context.globalState.get<PostDetail[]>('posts') || []
-        const target = posts.find((p) => p.postId === payload)
-        if (target) {
-          loader.panel.webview.postMessage({
-            type: MessageType.SHOW_POST_VIEWER,
-            payload: target,
-          })
-        }
+      console.log('최초 실행시 여기로 와야 함', page)
+      if (page == PageType.POST) {
+        console.log('POST 페이지로 이동')
+        console.log('payload', payload)
+        setDraftData(DraftDataType.selectedPostId, payload)
+        // cls.currentPanel.webview.postMessage({
+        //   type: MessageType.GET_CURRENT_POST,
+        //   payload: { page },
+        // })
       }
+      // if (page === PageType.POST && typeof payload === 'number') {
+      //   const posts = context.globalState.get<PostDetail[]>('posts') || []
+      //   console.log('posts', posts)
+      //   const target = posts.find((p) => p.postId === payload)
+      //   console.log('target', target)
+      //   if (target) {
+      //     loader.panel.webview.postMessage({
+      //       type: MessageType.SHOW_POST_VIEWER,
+      //       payload: target,
+      //     })
+      //   }
+      // }
 
       if (page === PageType.TEMPLATE && payload?.templateId) {
         setDraftData(DraftDataType.selectedTemplateId, payload.templateId)

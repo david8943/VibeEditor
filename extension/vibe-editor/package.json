@@ -29,32 +29,38 @@
         {
           "id": "vibeEditorViewerPage",
           "name": "Vibe Editor",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == false"
         },
         {
           "id": "vibeEditorPostList",
           "name": "포스트 목록",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true"
         },
         {
           "id": "vibeEditorTemplatePage",
           "name": "템플릿 목록",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true"
         },
         {
           "id": "vibeEditorCodeSnapshot",
           "name": "코드 스냅샷",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true"
         },
         {
           "id": "vibeEditorDirectoryTreeSnapshot",
           "name": "디렉토리 구조 시각화",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true"
         },
         {
           "id": "vibeEditorLogSnapshot",
           "name": "로그 스냅 샷",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true"
         }
       ]
     },
@@ -78,16 +84,6 @@
         "view": "vibeEditorLogSnapshot",
         "when": "vibeEditor.draftData.selectedTemplateId == 0",
         "contents": "로그 스냅샷입니다."
-      },
-      {
-        "view": "vibeEditorViewerPage",
-        "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션 연동 정보가 없습니다.\n노션 PRIVATE API KEY를 입력해주세요.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "vibeEditor.draftData.loginStatus == true &&vibeEditor.draftData.notionStatus == false"
-      },
-      {
-        "view": "vibeEditorViewerPage",
-        "contents": "Vibe Editor에 로그인되었습니다.\n[logout](command:vibeEditor.logout)\n노션과 연동이 완료되었습니다.\n코드를 노션에 추가할 수 있습니다.\n[노션 PRIVATE API 키 설정](command:vibeEditor.setNotionApi)",
-        "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.notionStatus == true"
       }
     ],
     "commands": [

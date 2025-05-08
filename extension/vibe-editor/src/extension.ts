@@ -163,7 +163,7 @@ export async function activate(
     vscode.commands.registerCommand(
       'vibeEditor.showPostPage',
       async (postId: number) => {
-        ViewLoader.showWebview(context, PageType.POST_VIEWER, postId)
+        ViewLoader.showWebview(context, PageType.POST, postId)
       },
     ),
   )
