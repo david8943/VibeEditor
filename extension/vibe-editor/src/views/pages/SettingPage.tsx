@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { CreateDatabase, Database } from '../../types/database'
-import { CreatePost, Post } from '../../types/post'
+import { CreatePost, PostDetail } from '../../types/post'
 import { User } from '../../types/user'
 import { Message, MessageType, WebviewPageProps } from '../../types/webview'
 import { DBSelector } from '../components/database/DBSelector'

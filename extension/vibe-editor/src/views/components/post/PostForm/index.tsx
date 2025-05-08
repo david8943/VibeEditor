@@ -1,59 +1,43 @@
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent, useEffect, useState } from 'react'
 
-import { CreatePost } from '../../../../types/post'
-import { Message } from '../../../../types/webview'
+import { CreatePost, PostDetail } from '../../../../types/post'
 import './styles.css'
 
 interface PostFormProps {
-  onSubmit: (prompt: CreatePost) => void
-  defaultPost: CreatePost
+  onSubmit: (data: CreatePost) => void
+  defaultPost: PostDetail
 }
 
 export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
-  const [formData, setFormData] = useState<CreatePost>({
-    postName: defaultPost.postName,
-    postContent: defaultPost.postContent,
-  })
-
+  const [post, setPost] = useState<PostDetail>(defaultPost)
+  const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit(formData)
+    onSubmit({ promptId: defaultPost.promptId })
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+  useEffect(() => {
+    console.log('PostForm useEffect', defaultPost)
+    setPost(defaultPost)
+  }, [defaultPost])
 
   return (
     <form
       onSubmit={handleSubmit}
       className="template-form">
       <div className="form-group">
-        <label htmlFor="postName">포스트 제목</label>
+        <label>포스트 제목</label>
         <input
           type="text"
-          id="postName"
-          name="postName"
-          title="postName"
-          value={formData.postName}
-          onChange={handleChange}
-          required
+          value={defaultPost.postTitle}
+          readOnly
         />
       </div>
       <div className="form-group">
-        <label htmlFor="postContent">포스트 내용</label>
+        <label>포스트 내용</label>
         <textarea
-          id="postContent"
-          name="postContent"
-          value={formData.postContent}
-          onChange={handleChange}
-          required
+          value={defaultPost.postContent}
+          readOnly
         />
       </div>
       <button

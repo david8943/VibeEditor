@@ -5,6 +5,7 @@ export const PageType = {
   POST: 'POST',
   SETTING: 'SETTING',
   LOADING: 'LOADING',
+  POST_VIEWER: 'POST_VIEWER',
 } as const
 
 export type PageType = (typeof PageType)[keyof typeof PageType]
@@ -35,6 +36,7 @@ export const MessageType = {
   GET_CURRENT_POST: 'GET_CURRENT_POST',
   CURRENT_POST_LOADED: 'CURRENT_POST_LOADED',
   SUBMIT_POST: 'SUBMIT_POST',
+  SHOW_POST_VIEWER: 'SHOW_POST_VIEWER',
 
   // 설정 페이지
   GET_USER: 'GET_USER',

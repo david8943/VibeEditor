@@ -1,4 +1,4 @@
-import { Post } from './post'
+import { PostDetail } from './post'
 import { Snapshot } from './snapshot'
 import { PageType } from './webview'
 
@@ -23,7 +23,7 @@ export interface SubmitPrompt {
 }
 
 export interface SubmitPost {
-  post: Post
+  post: PostDetail
   selectedPostId: number
 }
 

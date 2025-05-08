@@ -54,6 +54,8 @@ export function App() {
         return <TemplatePage postMessageToExtension={postMessageToExtension} />
       case PageType.POST:
         return <PostPage postMessageToExtension={postMessageToExtension} />
+      case PageType.POST_VIEWER:
+        return <PostPage postMessageToExtension={postMessageToExtension} />
       case PageType.SETTING:
         return <SettingPage postMessageToExtension={postMessageToExtension} />
       default:
