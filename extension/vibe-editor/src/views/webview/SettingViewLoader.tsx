@@ -1,13 +1,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 
-import { setDraftData } from '../../configuration/draftData'
-import { DraftDataType } from '../../types/configuration'
-import {
-  addNotionDatabase,
-  removeNotionDatabase,
-  retrieveNotionDatabases,
-} from '../../apis/notion'
+import { addNotionDatabase, retrieveNotionDatabases } from '../../apis/notion'
 import { getCurrentUser } from '../../apis/user'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { DraftDataType } from '../../types/configuration'

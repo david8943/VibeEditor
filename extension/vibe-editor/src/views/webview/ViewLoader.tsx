@@ -12,8 +12,7 @@ import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database } from '../../types/database'
-import { CreatePost } from '../../types/post'
-import { PostDetail } from '../../types/post'
+import { PostDetail, UploadToNotionRequest } from '../../types/post'
 import { SubmitPrompt } from '../../types/template'
 import {
   CommonMessage,
@@ -116,10 +115,8 @@ export class ViewLoader {
       navigate: (page: PageType) => this.navigate(page),
     })
   }
-  private async submitPost(data: CreatePost) {
-    await this.postService.submitToNotion({
-      ...data,
-    })
+  private async submitPost(data: UploadToNotionRequest) {
+    await this.postService.submitToNotion(data)
   }
 
   private async saveDatabase(data: CreateDatabase) {

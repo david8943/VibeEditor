@@ -1,10 +1,10 @@
 import React, { FormEvent, useEffect, useState } from 'react'
 
-import { CreatePost, PostDetail } from '../../../../types/post'
+import { PostDetail, UploadToNotionRequest } from '../../../../types/post'
 import './styles.css'
 
 interface PostFormProps {
-  onSubmit: (data: CreatePost) => void
+  onSubmit: (data: UploadToNotionRequest) => void
   defaultPost: PostDetail
 }
 

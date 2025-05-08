@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import { CreatePost, PostDetail } from '../../types/post'
+import { PostDetail, UploadToNotionRequest } from '../../types/post'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PostForm } from '../components'
 
@@ -51,7 +51,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const onSubmit = (data: CreatePost) => {
+  const onSubmit = (data: UploadToNotionRequest) => {
     postMessageToExtension({
       type: MessageType.SUBMIT_POST,
       payload: data,

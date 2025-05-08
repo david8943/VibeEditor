@@ -1,6 +1,11 @@
 import * as vscode from 'vscode'
 
-import { CreatePost, PostDetail, PostSummary } from '../types/post'
+import {
+  CreatePost,
+  PostDetail,
+  PostSummary,
+  UploadToNotionRequest,
+} from '../types/post'
 
 export function refreshPostProvider() {
   console.log('Refreshing post provider...')
@@ -71,7 +76,7 @@ export class PostService {
     return posts.find((post) => post.postId === postId) || null
   }
 
-  async submitToNotion(data: CreatePost) {
+  async submitToNotion(data: UploadToNotionRequest) {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
     // 여기선 로컬에서 임의 생성 (mocking)
     const newPost: PostDetail = {

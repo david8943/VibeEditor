@@ -26,11 +26,11 @@ export interface PostDetail {
   parentPostIdList: ParentPost[]
 }
 
-export interface CreatePost {
+export interface CreatePostRequest {
   promptId: number
 }
 
-export type CreatePost = Pick<Post, 'postName' | 'postContent'>
+export type CreatePost = Pick<PostDetail, 'postTitle' | 'postContent'>
 
 export interface UploadToNotionRequest {
   promptId: number
