@@ -1,33 +1,23 @@
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent } from 'react'
 
-import { CreatePost } from '../../../../types/post'
-import { Message } from '../../../../types/webview'
+import {
+  PostDetail,
+  UploadToNotionRequest,
+  UploadToNotionRequestPost,
+} from '../../../../types/post'
 import './styles.css'
 
 interface PostFormProps {
-  onSubmit: (prompt: CreatePost) => void
-  defaultPost: CreatePost
+  onSubmit: (data: UploadToNotionRequestPost) => void
+  defaultPost: PostDetail
 }
 
 export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
-  const [formData, setFormData] = useState<CreatePost>({
-    postName: defaultPost.postName,
-    postContent: defaultPost.postContent,
-  })
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit(formData)
-  }
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    if (defaultPost.postId) {
+      onSubmit({ postId: defaultPost.postId })
+    }
   }
 
   return (
@@ -35,25 +25,18 @@ export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
       onSubmit={handleSubmit}
       className="template-form">
       <div className="form-group">
-        <label htmlFor="postName">포스트 제목</label>
+        <label>포스트 제목</label>
         <input
           type="text"
-          id="postName"
-          name="postName"
-          title="postName"
-          value={formData.postName}
-          onChange={handleChange}
-          required
+          value={defaultPost.postTitle}
+          readOnly
         />
       </div>
       <div className="form-group">
-        <label htmlFor="postContent">포스트 내용</label>
+        <label>포스트 내용</label>
         <textarea
-          id="postContent"
-          name="postContent"
-          value={formData.postContent}
-          onChange={handleChange}
-          required
+          value={defaultPost.postContent}
+          readOnly
         />
       </div>
       <button

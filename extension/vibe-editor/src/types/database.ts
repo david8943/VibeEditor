@@ -8,3 +8,6 @@ export interface Database {
 
 export interface CreateDatabase
   extends Pick<Database, 'notionDatabaseName' | 'notionDatabaseUid'> {}
+
+export interface UpdateDatabase
+  extends Pick<Database, 'notionDatabaseName' | 'notionDatabaseId'> {}

@@ -1,3 +1,5 @@
+import { SnapshotItem } from '@/views/codeSnapshotView'
+
 import { Prompt, SubmitPrompt } from './template'
 
 export const PageType = {
@@ -5,6 +7,7 @@ export const PageType = {
   POST: 'POST',
   SETTING: 'SETTING',
   LOADING: 'LOADING',
+  POST_VIEWER: 'POST_VIEWER',
 } as const
 
 export type PageType = (typeof PageType)[keyof typeof PageType]
@@ -22,6 +25,7 @@ export const MessageType = {
   CREATE_PROMPT: 'CREATE_PROMPT',
   DELETE_PROMPT: 'DELETE_PROMPT',
   GET_TEMPLATES: 'GET_TEMPLATES',
+  GET_TEMPLATE: 'GET_TEMPLATE',
   GET_SNAPSHOTS: 'GET_SNAPSHOTS',
   TEMPLATE_SELECTED: 'TEMPLATE_SELECTED',
   SNAPSHOTS_LOADED: 'SNAPSHOTS_LOADED',
@@ -30,11 +34,17 @@ export const MessageType = {
   DELETE_SNAPSHOT: 'DELETE_SNAPSHOT',
   SAVE_DATABASE: 'SAVE_DATABASE',
   GET_DATABASE: 'GET_DATABASE',
+  OPTIONS_LOADED: 'OPTIONS_LOADED',
+  GET_OPTIONS: 'GET_OPTIONS',
+  SNAPSHOT_SELECTED: 'SNAPSHOT_SELECTED',
 
   // 포스트 페이지
   GET_CURRENT_POST: 'GET_CURRENT_POST',
   CURRENT_POST_LOADED: 'CURRENT_POST_LOADED',
   SUBMIT_POST: 'SUBMIT_POST',
+  SHOW_POST_VIEWER: 'SHOW_POST_VIEWER',
+  START_LOADING: 'START_LOADING',
+  STOP_LOADING: 'STOP_LOADING',
 
   // 설정 페이지
   GET_USER: 'GET_USER',

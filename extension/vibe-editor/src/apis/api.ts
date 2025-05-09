@@ -12,9 +12,10 @@ export const setExtensionContext = (context: vscode.ExtensionContext) => {
 }
 
 const api = axios.create({
+  // baseURL: `https://vibeeditor.site/api/v1`,
   baseURL: `https://vibeeditor.site/api/v1`,
   // baseURL: `${process.env.NEXT_PUBLIC_FRONTEND_SCHEME}://${process.env.NEXT_PUBLIC_FRONTEND_HOST}${process.env.NEXT_PUBLIC_FRONTEND_PATH}`,
-  timeout: 5000,
+  // timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -54,7 +55,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    return handleDefaultError(error)
+    return handleDefaultError(error, extensionContext)
   },
 )
 
@@ -109,6 +110,14 @@ export const putRequest = async <T>(
   } catch (error) {
     return error as ApiErrorResponse
   }
+}
+
+export const putBooleanRequest = async <T>(
+  url: string,
+  data: object,
+): Promise<boolean> => {
+  const response = await putRequest<unknown>(url, data)
+  return response.success
 }
 
 export const patchRequest = async <T>(

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 
 import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, OptionList, Prompt } from '@/types/template'
+import { CreatePrompt, Option, Prompt, UpdatePrompt } from '@/types/template'
 
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
@@ -11,11 +11,10 @@ import { PromptFormUI } from '../PromptFormUI'
 interface PromptFormProps {
   defaultPrompt: Prompt | null
   submitPrompt: (data: Prompt) => void
-  updatePrompt: (data: Prompt) => void
-  createPrompt: (data: CreatePrompt) => void
+  updatePrompt: (data: UpdatePrompt) => void
   localSnapshots: Snapshot[]
   deleteSnapshot: (snapshotId: number) => void
-  optionList: OptionList
+  optionList: Option[]
   selectedPromptId: number
 }
 
@@ -23,7 +22,6 @@ export function PromptForm({
   defaultPrompt,
   submitPrompt,
   updatePrompt,
-  createPrompt,
   localSnapshots,
   deleteSnapshot,
   optionList,
@@ -37,7 +35,6 @@ export function PromptForm({
     defaultPrompt,
     submitPrompt,
     updatePrompt,
-    createPrompt,
   })
 
   const { options, handleOption } = usePromptOptions({
@@ -46,16 +43,20 @@ export function PromptForm({
     setValue,
   })
 
-  const { snapshots, handleDeleteSnapshot, handleDescriptionChange } =
-    usePromptSnapshots({
-      localSnapshots,
-      promptAttachList: defaultPrompt?.promptAttachList ?? [],
-      deleteSnapshot,
-      setValue,
-    })
+  const {
+    snapshots,
+    handleDeleteSnapshot,
+    handleDescriptionChange,
+    addSnapshot,
+  } = usePromptSnapshots({
+    localSnapshots,
+    promptAttachList: defaultPrompt?.promptAttachList ?? [],
+    deleteSnapshot,
+    setValue,
+  })
 
   useEffect(() => {
-    console.log('useEffect selectedPromptId', selectedPromptId)
+    console.log('프롬프트폼useEffect selectedPromptId', selectedPromptId)
   }, [selectedPromptId])
 
   return (
@@ -68,6 +69,7 @@ export function PromptForm({
       handleOption={handleOption}
       handleDeleteSnapshot={handleDeleteSnapshot}
       handleDescriptionChange={handleDescriptionChange}
+      addSnapshot={addSnapshot}
     />
   )
 }

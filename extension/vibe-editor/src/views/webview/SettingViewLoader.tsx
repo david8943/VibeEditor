@@ -9,7 +9,7 @@ import {
 import { getCurrentUser } from '../../apis/user'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { DraftDataType } from '../../types/configuration'
-import { CreateDatabase } from '../../types/database'
+import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
 import {
   CommonMessage,
   Message,
@@ -72,7 +72,6 @@ export class SettingViewLoader {
 
   private async getUser() {
     const result = await getCurrentUser()
-    console.log(result)
     if (result.success) {
       this.panel.webview.postMessage({
         type: MessageType.USER_LOADED,
@@ -101,6 +100,10 @@ export class SettingViewLoader {
   }
 
   private async getDatabase() {
+    const result = await retrieveNotionDatabases()
+    if (result.success) {
+      await this.context.globalState.update('notionDatabases', result.data)
+    }
     const dbs = this.context.globalState.get('notionDatabases', [])
     this.panel.webview.postMessage({
       type: MessageType.GET_DATABASE,
@@ -118,6 +121,40 @@ export class SettingViewLoader {
 
   private async setNotionSecretKey() {
     vscode.commands.executeCommand('vibeEditor.setNotionApi')
+  }
+  private async deleteDatabase(database: UpdateDatabase) {
+    const { notionDatabaseId, notionDatabaseName } = database
+
+    const confirm = await vscode.window.showInformationMessage(
+      `'${notionDatabaseName}' 데이터베이스를 삭제하시겠습니까?`,
+      { modal: true },
+      '삭제',
+    )
+    if (confirm === '삭제') {
+      const existing = this.context.globalState.get<Database[]>(
+        'notionDatabases',
+        [],
+      )
+      const updated = existing.filter(
+        (db) => db.notionDatabaseId !== notionDatabaseId,
+      )
+
+      await this.context.globalState.update('notionDatabases', updated)
+      const success = await removeNotionDatabase(notionDatabaseId)
+      if (success) {
+        const result = await retrieveNotionDatabases()
+        console.log('retrieveNotionDatabases ', result)
+        if (result.success) {
+          const databases = result.data
+          await this.context.globalState.update('notionDatabases', databases)
+          this.panel.webview.postMessage({
+            type: MessageType.DATABASE_DELETED,
+            payload: { notionDatabaseId },
+          })
+        }
+      }
+      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+    }
   }
   private setupMessageListeners() {
     this.panel.webview.onDidReceiveMessage(
@@ -139,22 +176,19 @@ export class SettingViewLoader {
         } else if (message.type === MessageType.GET_USER) {
           await this.getUser()
         } else if (message.type === MessageType.SAVE_DATABASE) {
-          console.log('SAVE_DATABASE', message)
           await this.saveDatabase(message.payload)
         } else if (message.type === MessageType.GET_DATABASE) {
-          console.log('GET_DATABASE', message)
           await this.getDatabase()
         } else if (message.type === MessageType.LOG_OUT) {
-          console.log('LOG_OUT', message)
           await this.logout()
         } else if (message.type === MessageType.GOOGLE_LOGIN) {
-          console.log('GOOGLE_LOGIN', message)
           await this.googleLogin()
         } else if (message.type === MessageType.GITHUB_LOGIN) {
-          console.log('GITHUB_LOGIN', message)
           await this.githubLogin()
         } else if (message.type === MessageType.SET_NOTION_SECRET_KEY) {
           await this.setNotionSecretKey()
+        } else if (message.type === MessageType.REQUEST_DELETE_DATABASE) {
+          await this.deleteDatabase(message.payload)
         }
       },
       null,
@@ -173,10 +207,10 @@ export class SettingViewLoader {
     // })
   }
 
-  static showWebview(
+  static async showWebview(
     context: vscode.ExtensionContext,
     page: PageType,
-    template?: any,
+    payload?: any, // 템플릿 or 포스트 등
   ) {
     const cls = this
     const column = vscode.window.activeTextEditor
@@ -184,13 +218,42 @@ export class SettingViewLoader {
       : undefined
 
     if (cls.currentPanel) {
+      cls.currentPanel.reveal(column)
       cls.currentPanel.webview.postMessage({
-        type: MessageType.INITIAL_PAGE,
+        type: MessageType.NAVIGATE,
         payload: { page },
       })
-      cls.currentPanel.reveal(column)
+
+      if (page === PageType.POST_VIEWER && payload) {
+        cls.currentPanel.webview.postMessage({
+          type: MessageType.SHOW_POST_VIEWER,
+          payload,
+        })
+      }
     } else {
-      cls.currentPanel = new cls(context, page).panel
+      const loader = new cls(context, page)
+      cls.currentPanel = loader.panel
+
+      // 템플릿이 전달된 경우 (기존 로직 유지)
+      if (page === PageType.TEMPLATE && payload) {
+        setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
+        vscode.commands.executeCommand(
+          'vibeEditor.refreshSnapshot',
+          payload.templateId,
+        )
+
+        loader.panel.webview.postMessage({
+          type: MessageType.TEMPLATE_SELECTED,
+          payload: { template: payload },
+        })
+      }
+
+      if (page === PageType.POST_VIEWER && payload) {
+        loader.panel.webview.postMessage({
+          type: MessageType.SHOW_POST_VIEWER,
+          payload,
+        })
+      }
     }
   }
 

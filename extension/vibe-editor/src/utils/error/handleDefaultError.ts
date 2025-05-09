@@ -9,33 +9,32 @@ interface FetchErrorModalProps {
   content: string
   useSecondaryButton: boolean
   useI18n: boolean
+  extensionContext: vscode.ExtensionContext
 }
 
 const fetchErrorModal = (props: FetchErrorModalProps) => {
-  const { title, content, useSecondaryButton, useI18n } = props
-  vscode.window.showErrorMessage(content)
-  // store.dispatch(
-  //   setErrorModal({
-  //     modalTitle: title,
-  //     modalContent: content,
-  //     primaryButtonType: ErrorModalButtonTypes.confirm,
-  //     secondaryButtonType: useSecondaryButton
-  //       ? ErrorModalButtonTypes.goToHome
-  //       : null,
-  //     isVisible: true,
-  //     useI18n: useI18n,
-  //   }),
-  // )
+  const { content, extensionContext } = props
+  if (extensionContext) {
+    vscode.window.showErrorMessage(content)
+  }
 }
 
-export const handleDefaultError = (error: unknown) => {
+export const handleDefaultError = (
+  error: unknown,
+  extensionContext: vscode.ExtensionContext | undefined,
+) => {
+  console.log(error)
+  if (!extensionContext) {
+    return
+  }
   if (!isAxiosError(error)) {
-    // fetchErrorModal({
-    //   title: `error.999.title`,
-    //   content: `error.999.content`,
-    //   useSecondaryButton: true,
-    //   useI18n: true,
-    // })
+    fetchErrorModal({
+      title: `error.999.title`,
+      content: `error.999.content`,
+      useSecondaryButton: true,
+      useI18n: true,
+      extensionContext,
+    })
     return Promise.reject({
       success: false,
       error: error,
@@ -45,15 +44,13 @@ export const handleDefaultError = (error: unknown) => {
   const responseData = error.response?.data?.data
 
   if (responseData && !responseData.success) {
-    if (responseData.code == 'LIFE_RULE_NOT_FOUND') {
-      return Promise.reject(error.response?.data)
-    }
-    // fetchErrorModal({
-    //   title: '',
-    //   content: responseData.message,
-    //   useSecondaryButton: false,
-    //   useI18n: false,
-    // })
+    fetchErrorModal({
+      title: '',
+      content: responseData.message,
+      useSecondaryButton: false,
+      useI18n: false,
+      extensionContext,
+    })
     return Promise.reject(error.response?.data as ApiErrorResponse)
   }
 
@@ -71,12 +68,13 @@ export const handleDefaultError = (error: unknown) => {
       break
   }
 
-  // fetchErrorModal({
-  //   title: `error.${status}.title`,
-  //   content: `error.${status}.content`,
-  //   useSecondaryButton: true,
-  //   useI18n: true,
-  // })
+  fetchErrorModal({
+    title: `error.${status}.title`,
+    content: `error.${status}.content`,
+    useSecondaryButton: true,
+    useI18n: true,
+    extensionContext,
+  })
 
   return Promise.reject({
     success: false,
