@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 
-import { EditOptionList, EditPrompt, OptionList } from '../../types/template'
+import { EditOptionList, EditPrompt, Option } from '../../types/template'
 
 interface UsePromptOptionsProps {
-  optionList: OptionList
+  optionList: Option[]
   promptOptionList: number[]
   setValue: UseFormSetValue<EditPrompt>
 }
@@ -21,8 +21,8 @@ export const usePromptOptions = ({
 }: UsePromptOptionsProps): UsePromptOptionsReturn => {
   const options = useMemo(() => {
     const editOptionList: EditOptionList = {}
-    Object.keys(optionList).forEach((optionName) => {
-      editOptionList[optionName] = optionList[optionName].map((option) => ({
+    optionList.map((option) => {
+      editOptionList[option.optionName] = option.optionItems.map((option) => ({
         ...option,
         isSelected: promptOptionList.includes(option.optionId),
       }))

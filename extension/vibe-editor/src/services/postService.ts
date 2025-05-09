@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { uploadPost } from '../apis/post'
 import {
   CreatePost,
   PostDetail,
@@ -15,14 +16,16 @@ export function refreshPostProvider() {
 }
 class PostItem extends vscode.TreeItem {
   constructor(public readonly post: PostSummary) {
-    super(post.postName, vscode.TreeItemCollapsibleState.None)
-    this.tooltip = `${post.postName}`
+    super(post.postTitle, vscode.TreeItemCollapsibleState.None)
+    this.tooltip = `${post.postTitle}`
     this.command = {
       command: 'vibeEditor.showPostPage',
       title: 'View Post',
       arguments: [post.postId],
     }
-    this.iconPath = new vscode.ThemeIcon('symbol-snippet')
+    this.iconPath = post.isLoading
+      ? new vscode.ThemeIcon('sync~spin')
+      : new vscode.ThemeIcon('symbol-snippet')
   }
 }
 
@@ -71,14 +74,25 @@ export class PostService {
     const posts = this.context.globalState.get<PostDetail[]>('posts') || []
     return posts[0]
   }
+
   async getPost(postId: number): Promise<PostDetail | null> {
+    return this.getLocalPost(postId)
+  }
+
+  async getLocalPost(postId: number): Promise<PostDetail | null> {
     const posts = this.context.globalState.get<PostDetail[]>('posts') || []
     return posts.find((post) => post.postId === postId) || null
   }
 
-  async submitToNotion(data: UploadToNotionRequest) {
+  async submitToNotion(data: UploadToNotionRequest): Promise<string> {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
     // 여기선 로컬에서 임의 생성 (mocking)
+
+    const result = await uploadPost(data)
+    let postUrl = 'http://www.naver.com'
+    if (result.success) {
+      postUrl = result.data.postUrl
+    }
     const newPost: PostDetail = {
       postId: Date.now(),
       postTitle: '포스트 제목 예시',
@@ -91,12 +105,12 @@ export class PostService {
     }
 
     const prev = this.context.globalState.get<PostDetail[]>('posts', [])
-
     prev.push(newPost)
     await this.context.globalState.update('posts', prev)
-
     postProviderInstance?.refresh()
-
+    return postUrl
+  }
+  moveToNotion = (postUrl: string) => {
     vscode.window
       .showInformationMessage(
         '노션이 생성되었습니다. 해당 페이지로 이동하시겠습니까?',
@@ -106,13 +120,12 @@ export class PostService {
       .then(async (selection) => {
         if (selection === 'Ok') {
           await vscode.env.openExternal(
-            vscode.Uri.parse('http://www.naver.com'), // 실제 Notion URL로 변경 필요
+            vscode.Uri.parse(postUrl), // 실제 Notion URL로 변경 필요
           )
         }
       })
   }
 }
-
 let postProviderInstance: PostProvider | undefined
 
 export function setPostProvider(provider: PostProvider) {
@@ -140,9 +153,10 @@ export class PostProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 
     const summaries: PostSummary[] = posts.map((post) => ({
       postId: post.postId,
-      postName: post.postTitle,
+      postTitle: post.postTitle,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
+      isLoading: post.postId > 1700000000000,
     }))
 
     return Promise.resolve(

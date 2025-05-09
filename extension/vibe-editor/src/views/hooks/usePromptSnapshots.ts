@@ -1,25 +1,23 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 
 import { EditPrompt, EditSnapshot } from '@/types/template'
+import { PromptAttach } from '@/types/template'
 
 import { Snapshot } from '../../types/snapshot'
 
 interface UsePromptSnapshotsProps {
   localSnapshots: Snapshot[]
-  promptAttachList: {
-    attachId: number
-    snapshotId: number
-    description: string
-  }[]
+  promptAttachList: PromptAttach[]
   deleteSnapshot: (snapshotId: number) => void
   setValue: UseFormSetValue<EditPrompt>
 }
 
 interface UsePromptSnapshotsReturn {
   snapshots: EditSnapshot[]
-  handleDeleteSnapshot: (attachId: number) => void
-  handleDescriptionChange: (attachId: number, value: string) => void
+  handleDeleteSnapshot: (attachId: number | null) => void
+  handleDescriptionChange: (attachId: number | null, value: string) => void
+  addSnapshot: (newSnapshot: PromptAttach) => void
 }
 
 export const usePromptSnapshots = ({
@@ -28,12 +26,27 @@ export const usePromptSnapshots = ({
   deleteSnapshot,
   setValue,
 }: UsePromptSnapshotsProps): UsePromptSnapshotsReturn => {
+  console.log('usePromptSnapshots 호출됨', {
+    localSnapshots,
+    promptAttachList,
+  })
+
   const snapshots = useMemo(() => {
+    console.log('snapshots useMemo 실행됨', {
+      promptAttachList,
+      localSnapshots,
+    })
+
     if (!promptAttachList) return []
     return promptAttachList.map((snapshot) => {
       const localSnapshot = localSnapshots.find(
         (localSnapshot) => localSnapshot.snapshotId === snapshot.snapshotId,
       )
+      console.log('snapshot 매핑 중', {
+        snapshot,
+        localSnapshot,
+      })
+
       return {
         attachId: snapshot.attachId,
         snapshotId: snapshot.snapshotId,
@@ -44,8 +57,21 @@ export const usePromptSnapshots = ({
     })
   }, [localSnapshots, promptAttachList])
 
+  console.log('생성된 snapshots', snapshots)
+
+  useEffect(() => {
+    console.log('promptAttachList 변경됨', promptAttachList)
+    setValue('snapshots', snapshots)
+  }, [promptAttachList, snapshots, setValue])
+
   const handleDeleteSnapshot = useCallback(
-    (attachId: number) => {
+    (attachId: number | null) => {
+      console.log('handleDeleteSnapshot 호출됨', {
+        attachId,
+        snapshots,
+        promptAttachList,
+      })
+      if (attachId === null) return
       deleteSnapshot(attachId)
       setValue(
         'snapshots',
@@ -56,7 +82,14 @@ export const usePromptSnapshots = ({
   )
 
   const handleDescriptionChange = useCallback(
-    (attachId: number, value: string) => {
+    (attachId: number | null, value: string) => {
+      console.log('handleDescriptionChange 호출됨', {
+        attachId,
+        value,
+        snapshots,
+        promptAttachList,
+      })
+      if (attachId === null) return
       setValue(
         'snapshots',
         snapshots.map((snapshot) =>
@@ -69,9 +102,30 @@ export const usePromptSnapshots = ({
     [setValue, snapshots],
   )
 
+  const addSnapshot = useCallback(
+    (newSnapshot: PromptAttach) => {
+      console.log('addSnapshot 호출됨', {
+        newSnapshot,
+        currentSnapshots: snapshots,
+      })
+      setValue('snapshots', [
+        ...snapshots,
+        {
+          attachId: newSnapshot.attachId,
+          snapshotId: newSnapshot.snapshotId,
+          description: newSnapshot.description,
+          snapshotContent: '',
+          snapshotName: '',
+        },
+      ])
+    },
+    [snapshots, setValue],
+  )
+
   return {
     snapshots,
     handleDeleteSnapshot,
     handleDescriptionChange,
+    addSnapshot,
   }
 }

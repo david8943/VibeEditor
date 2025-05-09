@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   FieldErrors,
   UseFormHandleSubmit,
@@ -8,13 +9,12 @@ import {
   useForm,
 } from 'react-hook-form'
 
-import { CreatePrompt, EditPrompt, Prompt } from '../../types/template'
+import { EditPrompt, Prompt, UpdatePrompt } from '../../types/template'
 
 interface UsePromptFormProps {
   defaultPrompt: Prompt | null
   submitPrompt: (data: Prompt) => void
-  updatePrompt: (data: Prompt) => void
-  createPrompt: (data: CreatePrompt) => void
+  updatePrompt: (data: UpdatePrompt) => void
 }
 
 interface UsePromptFormReturn {
@@ -30,8 +30,7 @@ interface UsePromptFormReturn {
   handlePost: (() => void) | null
   defaultValues: EditPrompt
   editPromptToPrompt: (editPrompt: EditPrompt) => Prompt
-  editPromptToUpdatePrompt: (editPrompt: EditPrompt) => Prompt
-  editPromptToCreatePrompt: (editPrompt: EditPrompt) => CreatePrompt
+  editPromptToUpdatePrompt: (editPrompt: EditPrompt) => UpdatePrompt
   setDefaultValues: (defaultPrompt: Prompt | null) => EditPrompt
 }
 
@@ -39,7 +38,6 @@ export const useUpdatePromptForm = ({
   defaultPrompt,
   submitPrompt,
   updatePrompt,
-  createPrompt,
 }: UsePromptFormProps): UsePromptFormReturn => {
   const setDefaultValues = (defaultPrompt: Prompt | null): EditPrompt => {
     if (!defaultPrompt) return {} as EditPrompt
@@ -69,6 +67,11 @@ export const useUpdatePromptForm = ({
     defaultValues,
   })
 
+  useEffect(() => {
+    const newDefaultValues = setDefaultValues(defaultPrompt)
+    reset(newDefaultValues)
+  }, [defaultPrompt, reset])
+
   const editPromptToPrompt = (editPrompt: EditPrompt): Prompt => {
     return {
       parentPrompt: null,
@@ -78,7 +81,7 @@ export const useUpdatePromptForm = ({
       postType: editPrompt.postType,
       comment: editPrompt.comment,
       promptAttachList: editPrompt.snapshots.map((snapshot) => ({
-        attachId: snapshot.attachId,
+        attachId: null,
         snapshotId: snapshot.snapshotId,
         description: snapshot.description,
       })),
@@ -90,28 +93,10 @@ export const useUpdatePromptForm = ({
     }
   }
 
-  const editPromptToUpdatePrompt = (editPrompt: EditPrompt): Prompt => {
-    return editPromptToPrompt(editPrompt)
-  }
-
-  const editPromptToCreatePrompt = (editPrompt: EditPrompt): CreatePrompt => {
-    return {
-      templateId: defaultPrompt?.templateId ?? 0,
-      promptName: editPrompt.promptName,
-      postType: editPrompt.postType,
-      comment: editPrompt.comment,
-      promptAttachList: editPrompt.snapshots.map((snapshot) => ({
-        attachId: snapshot.attachId,
-        snapshotId: snapshot.snapshotId,
-        description: snapshot.description,
-      })),
-      promptOptionList: Object.values(editPrompt.options)
-        .flat()
-        .filter((option) => option.isSelected)
-        .map((option) => option.optionId),
-      notionDatabaseId: defaultPrompt?.notionDatabaseId ?? 0,
-      parentPromptId: defaultPrompt?.promptId ?? 0,
-    }
+  const editPromptToUpdatePrompt = (editPrompt: EditPrompt): UpdatePrompt => {
+    const { promptId, parentPrompt, ...updatePrompt } =
+      editPromptToPrompt(editPrompt)
+    return updatePrompt
   }
 
   const onSubmit = (data: EditPrompt) => {
@@ -119,9 +104,6 @@ export const useUpdatePromptForm = ({
     if (defaultPrompt?.promptId) {
       const prompt = editPromptToUpdatePrompt(data)
       updatePrompt(prompt)
-    } else {
-      const prompt = editPromptToCreatePrompt(data)
-      createPrompt(prompt)
     }
   }
 
@@ -145,7 +127,6 @@ export const useUpdatePromptForm = ({
     defaultValues,
     editPromptToPrompt,
     editPromptToUpdatePrompt,
-    editPromptToCreatePrompt,
     setDefaultValues,
   }
 }

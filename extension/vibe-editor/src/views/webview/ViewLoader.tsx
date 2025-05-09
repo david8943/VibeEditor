@@ -11,9 +11,14 @@ import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
-import { CreateDatabase, Database } from '../../types/database'
-import { PostDetail, UploadToNotionRequest } from '../../types/post'
-import { SubmitPrompt } from '../../types/template'
+import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
+import { Post, PostDetail, UploadToNotionRequest } from '../../types/post'
+import {
+  Prompt,
+  SelectPrompt,
+  SubmitCreatePrompt,
+  SubmitUpdatePrompt,
+} from '../../types/template'
 import {
   CommonMessage,
   Message,
@@ -31,7 +36,6 @@ export class ViewLoader {
   private disposables: vscode.Disposable[]
   private currentPage: string
   private currentTemplateId?: number
-  private currentPostId?: number
 
   constructor(context: vscode.ExtensionContext, initialPage: PageType) {
     this.context = context
@@ -66,11 +70,35 @@ export class ViewLoader {
       payload: { page },
     })
   }
+
   private async getTemplates() {
+    console.log('ViewLoader getTemplates')
     const templates = await this.templateService.getTemplates()
     const selectedTemplateId = Number(
       getDraftData(DraftDataType.selectedTemplateId),
     )
+
+    let selectedTemplate = templates.find(
+      (template) => template.templateId === selectedTemplateId,
+    )
+    if (selectedTemplate) {
+      this.currentTemplateId = selectedTemplate.templateId
+    } else {
+      this.currentTemplateId = templates[0]?.templateId
+      selectedTemplate = templates[0]
+    }
+    this.panel.webview.postMessage({
+      type: MessageType.TEMPLATE_SELECTED,
+      payload: { template: selectedTemplate },
+    })
+  }
+  private async getTemplate() {
+    console.log('ViewLoader getTemplate')
+    const templates = await this.templateService.getTemplates()
+    const selectedTemplateId = Number(
+      getDraftData(DraftDataType.selectedTemplateId),
+    )
+    const template = await this.templateService.getTemplate(selectedTemplateId)
     let selectedTemplate = templates.find(
       (template) => template.templateId === selectedTemplateId,
     )
@@ -109,16 +137,35 @@ export class ViewLoader {
       payload: { post },
     })
   }
-  private async submitPrompt(data: SubmitPrompt) {
-    await this.templateService.submitPrompt({
-      ...data,
-      navigate: (page: PageType) => this.navigate(page),
-    })
+  private async submitPrompt(data: Prompt) {
+    this.startLoading()
+    const post = await this.templateService.submitPrompt(data)
+    this.stopLoading()
+    if (post) {
+      await this.templateService.navigate({
+        post,
+        navigate: (page: PageType) => this.navigate(page),
+      })
+    }
   }
   private async submitPost(data: UploadToNotionRequest) {
-    await this.postService.submitToNotion(data)
+    this.startLoading()
+    const postUrl = await this.postService.submitToNotion(data)
+    this.stopLoading()
+    if (postUrl) {
+      this.postService.moveToNotion(postUrl)
+    }
   }
-
+  private async startLoading() {
+    this.panel.webview.postMessage({
+      type: MessageType.START_LOADING,
+    })
+  }
+  private async stopLoading() {
+    this.panel.webview.postMessage({
+      type: MessageType.STOP_LOADING,
+    })
+  }
   private async saveDatabase(data: CreateDatabase) {
     const success = await addNotionDatabase({
       notionDatabaseName: data.notionDatabaseName,
@@ -140,11 +187,98 @@ export class ViewLoader {
   }
 
   private async getDatabase() {
-    const dbs = this.context.globalState.get('notionDatabases', [])
+    const result = await retrieveNotionDatabases()
+    if (result.success) {
+      await this.context.globalState.update('notionDatabases', result.data)
+    }
+    const dbs = this.context.globalState.get<Database[]>('notionDatabases', [])
     this.panel.webview.postMessage({
       type: MessageType.GET_DATABASE,
       payload: dbs,
     })
+  }
+
+  private async getOptions() {
+    const options = await this.templateService.getOptions()
+    this.panel.webview.postMessage({
+      type: MessageType.OPTIONS_LOADED,
+      payload: options,
+    })
+  }
+
+  private async selectPrompt(data: SelectPrompt) {
+    setDraftData(DraftDataType.selectedPromptId, data.promptId)
+    const prompt = await this.templateService.selectPrompt(data)
+    this.panel.webview.postMessage({
+      type: MessageType.PROMPT_SELECTED,
+      payload: { prompt },
+    })
+  }
+
+  private async updatePrompt(data: SubmitUpdatePrompt) {
+    const success = await this.templateService.upgradePrompt(data)
+
+    if (success) {
+      const template = await this.templateService.getLocalTemplate(
+        data.selectedTemplateId,
+      )
+      this.panel.webview.postMessage({
+        type: MessageType.TEMPLATE_SELECTED,
+        payload: { template },
+      })
+    }
+  }
+  private async addPrompt(data: SubmitCreatePrompt) {
+    const selectPrompt: SelectPrompt | null =
+      await this.templateService.createPrompt(data)
+    if (selectPrompt) {
+      const template = await this.templateService.getLocalTemplate(
+        selectPrompt.templateId,
+      )
+      this.panel.webview.postMessage({
+        type: MessageType.TEMPLATE_SELECTED,
+        payload: { template: template },
+      })
+      setDraftData(DraftDataType.selectedPromptId, selectPrompt.promptId)
+      const prompt = await this.templateService.selectPrompt(selectPrompt)
+      this.panel.webview.postMessage({
+        type: MessageType.PROMPT_SELECTED,
+        payload: { prompt },
+      })
+    }
+  }
+  private async deleteDatabase(database: UpdateDatabase) {
+    const { notionDatabaseId, notionDatabaseName } = database
+
+    const confirm = await vscode.window.showInformationMessage(
+      `'${notionDatabaseName}' 데이터베이스를 삭제하시겠습니까?`,
+      { modal: true },
+      '삭제',
+    )
+    if (confirm === '삭제') {
+      const existing = this.context.globalState.get<Database[]>(
+        'notionDatabases',
+        [],
+      )
+      const updated = existing.filter(
+        (db) => db.notionDatabaseId !== notionDatabaseId,
+      )
+
+      await this.context.globalState.update('notionDatabases', updated)
+      const success = await removeNotionDatabase(notionDatabaseId)
+      if (success) {
+        const result = await retrieveNotionDatabases()
+        if (result.success) {
+          const databases = result.data
+          await this.context.globalState.update('notionDatabases', databases)
+          this.panel.webview.postMessage({
+            type: MessageType.DATABASE_DELETED,
+            payload: { notionDatabaseId },
+          })
+        }
+      }
+      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+    }
   }
 
   private setupMessageListeners() {
@@ -169,9 +303,9 @@ export class ViewLoader {
         } else if (message.type === MessageType.SUBMIT_PROMPT) {
           await this.submitPrompt(message.payload)
         } else if (message.type === MessageType.CREATE_PROMPT) {
-          await this.templateService.createPrompt(message.payload)
+          await this.addPrompt(message.payload)
         } else if (message.type === MessageType.UPDATE_PROMPT) {
-          await this.templateService.updatePrompt(message.payload)
+          await this.updatePrompt(message.payload)
         } else if (message.type === MessageType.DELETE_PROMPT) {
           await this.templateService.deletePrompt(message.payload)
         } else if (message.type === MessageType.GET_TEMPLATES) {
@@ -181,10 +315,7 @@ export class ViewLoader {
         } else if (message.type === MessageType.GET_CURRENT_POST) {
           await this.getCurrentPost()
         } else if (message.type === MessageType.PROMPT_SELECTED) {
-          setDraftData(
-            DraftDataType.selectedPromptId,
-            message.payload?.selectedPromptId,
-          )
+          await this.selectPrompt(message.payload)
         } else if (message.type === MessageType.DELETE_TEMPLATE) {
           if (this.currentTemplateId === message.payload.templateId) {
             this.panel.dispose()
@@ -198,46 +329,15 @@ export class ViewLoader {
         } else if (message.type === MessageType.SUBMIT_POST) {
           await this.submitPost(message.payload)
         } else if (message.type === MessageType.SAVE_DATABASE) {
-          console.log('SAVE_DATABASE', message)
           await this.saveDatabase(message.payload)
         } else if (message.type === MessageType.GET_DATABASE) {
-          console.log('GET_DATABASE', message)
           await this.getDatabase()
         } else if (message.type === MessageType.REQUEST_DELETE_DATABASE) {
-          const { notionDatabaseId, notionDatabaseName } = message.payload
-
-          const confirm = await vscode.window.showInformationMessage(
-            `'${notionDatabaseName}' 데이터베이스를 삭제하시겠습니까?`,
-            { modal: true },
-            '삭제',
-          )
-          if (confirm === '삭제') {
-            const existing = this.context.globalState.get<Database[]>(
-              'notionDatabases',
-              [],
-            )
-            const updated = existing.filter(
-              (db) => db.notionDatabaseUid !== notionDatabaseId,
-            )
-
-            await this.context.globalState.update('notionDatabases', updated)
-            const success = await removeNotionDatabase(notionDatabaseId)
-            if (success) {
-              const result = await retrieveNotionDatabases()
-              if (result.success) {
-                const notionDatabases = result.data
-                await this.context.globalState.update(
-                  'notionDatabases',
-                  notionDatabases,
-                )
-                this.panel.webview.postMessage({
-                  type: MessageType.DATABASE_DELETED,
-                  payload: { notionDatabaseId },
-                })
-              }
-            }
-            vscode.window.showInformationMessage('삭제가 완료되었습니다.')
-          }
+          await this.deleteDatabase(message.payload)
+        } else if (message.type === MessageType.GET_TEMPLATE) {
+          await this.getTemplate()
+        } else if (message.type === MessageType.GET_OPTIONS) {
+          await this.getOptions()
         }
       },
       null,

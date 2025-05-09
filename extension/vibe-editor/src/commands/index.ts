@@ -9,6 +9,7 @@ import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
 import { FileSnapshotCommand } from './fileSnapshot'
 import { SetNotionApiCommand } from './notion'
+import { ShowPostPageCommand } from './post'
 import { ShowSettingPageCommand } from './setting'
 import {
   AddToPromptCommand,
@@ -40,4 +41,5 @@ export const allCommands = [
   FileSnapshotCommand,
   ViewCodeSnapshotCommand,
   GetTemplatesCommand,
+  ShowPostPageCommand,
 ]

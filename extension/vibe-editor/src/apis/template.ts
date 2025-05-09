@@ -3,7 +3,7 @@ import {
   deleteBooleanRequest,
   getRequest,
   postBooleanRequest,
-  putRequest,
+  putBooleanRequest,
 } from './api'
 
 export const getTemplateDetail = async (templateId: number) =>
@@ -13,7 +13,7 @@ export const updateTemplate = async ({
   templateId,
   templateName,
 }: UpdateTemplateRequest) =>
-  await putRequest<Template[]>(`/template/${templateId}`, {
+  await putBooleanRequest(`/template/${templateId}`, {
     templateName,
   })
 

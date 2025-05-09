@@ -8,6 +8,7 @@ const initialDraftData: Record<DraftDataType, unknown> = {
   [DraftDataType.selectedTemplateId]: 0,
   [DraftDataType.selectedPromptId]: 0,
   [DraftDataType.selectedPostId]: 0,
+  [DraftDataType.optionList]: [],
 }
 
 let draftData: Record<DraftDataType, unknown> = { ...initialDraftData }

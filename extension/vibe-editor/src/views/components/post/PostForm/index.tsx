@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from 'react'
+import React, { FormEvent } from 'react'
 
 import { PostDetail, UploadToNotionRequest } from '../../../../types/post'
 import './styles.css'
@@ -9,17 +9,12 @@ interface PostFormProps {
 }
 
 export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
-  const [post, setPost] = useState<PostDetail>(defaultPost)
-  const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit({ promptId: defaultPost.promptId })
+    if (defaultPost.promptId) {
+      onSubmit({ promptId: defaultPost.promptId })
+    }
   }
-
-  useEffect(() => {
-    console.log('PostForm useEffect', defaultPost)
-    setPost(defaultPost)
-  }, [defaultPost])
 
   return (
     <form

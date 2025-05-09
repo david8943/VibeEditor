@@ -21,9 +21,13 @@ export function PromptSelector({
         <select
           value={selectedPromptId || ''}
           onChange={(e) => {
+            console.log('e.target.value', e.target.value)
+            console.log('selectedTemplate', selectedTemplate)
+            console.log('promptList', selectedTemplate?.promptList)
             const prompt = selectedTemplate.promptList?.find(
               (t) => t.promptId === parseInt(e.target.value),
             )
+            console.log('prompt', prompt)
             if (prompt) {
               selectPromptId(prompt.promptId)
             }

@@ -22,14 +22,10 @@ export const DBSelector: React.FC<Props> = ({
 
   useEffect(() => {
     getDatabases()
-
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
 
-      if (
-        message.type === 'setDatabases' ||
-        message.type === MessageType.GET_DATABASE
-      ) {
+      if (message.type === MessageType.GET_DATABASE) {
         setDbList(message.payload)
       } else if (message.type === MessageType.DATABASE_DELETED) {
         const { notionDatabaseId } = message.payload
@@ -54,10 +50,10 @@ export const DBSelector: React.FC<Props> = ({
         onClick={() => setOpen((prev) => !prev)}
         style={{
           padding: '8px',
-          border: '1px solid var(--vscode-input-border)',
+          border: '1px solid var(--vscode-dropdown-border)',
           borderRadius: '4px',
-          background: 'var(--vscode-input-background)',
-          color: 'var(--vscode-input-foreground)',
+          background: 'var(--vscode-dropdown-background)',
+          color: 'var(--vscode-dropdown-foreground)',
           cursor: 'pointer',
         }}>
         {selectedDB?.notionDatabaseName || '데이터베이스를 선택하세요'}
@@ -67,9 +63,9 @@ export const DBSelector: React.FC<Props> = ({
       {open && (
         <div
           style={{
-            border: '1px solid var(--vscode-input-border)',
+            border: '1px solid var(--vscode-dropdown-border)',
             borderRadius: '4px',
-            background: 'var(--vscode-input-background)',
+            background: 'var(--vscode-dropdown-background)',
             marginTop: '4px',
             maxHeight: '200px',
             overflowY: 'auto',
@@ -91,12 +87,14 @@ export const DBSelector: React.FC<Props> = ({
                 cursor: 'pointer',
                 backgroundColor:
                   selectedId === db.notionDatabaseId
-                    ? 'var(--vscode-button-background)'
-                    : 'transparent',
+                    ? 'var(--vscode-list-activeSelectionBackground)'
+                    : hovered === db.notionDatabaseId
+                      ? 'var(--vscode-list-hoverBackground)'
+                      : 'transparent',
                 color:
                   selectedId === db.notionDatabaseId
-                    ? 'var(--vscode-button-foreground)'
-                    : 'var(--vscode-input-foreground)',
+                    ? 'var(--vscode-list-activeSelectionForeground)'
+                    : 'var(--vscode-dropdown-foreground)',
               }}>
               <span>{db.notionDatabaseName}</span>
               <button
@@ -105,7 +103,7 @@ export const DBSelector: React.FC<Props> = ({
                   window.vscode.postMessage({
                     type: MessageType.REQUEST_DELETE_DATABASE,
                     payload: {
-                      notionDatabaseId: db.notionDatabaseUid,
+                      notionDatabaseId: db.notionDatabaseId,
                       notionDatabaseName: db.notionDatabaseName,
                     },
                   })

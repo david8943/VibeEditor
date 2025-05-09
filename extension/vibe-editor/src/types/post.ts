@@ -1,7 +1,7 @@
 // 목록 조회용
 export interface PostSummary {
   postId: number
-  postName: string
+  postTitle: string
   createdAt: string
   updatedAt: string
 }
@@ -9,7 +9,7 @@ export interface PostSummary {
 // 부모 포스트 정보
 export interface ParentPost {
   postId: number
-  postName: string
+  postTitle: string
   createdAt: string
   updatedAt: string
 }
@@ -25,6 +25,11 @@ export interface PostDetail {
   updatedAt: string
   parentPostIdList: ParentPost[]
 }
+export interface Post {
+  postId: number
+  postTitle: string
+  postContent: string
+}
 
 export interface CreatePostRequest {
   promptId: number
@@ -39,9 +44,10 @@ export interface UploadToNotionRequest {
 // 생성/수정 요청용
 export interface PostSummary {
   postId: number
-  postName: string
+  postTitle: string
   createdAt: string
   updatedAt: string
+  isLoading: boolean
 }
 export interface UploadToNotionResponse {
   postUrl: string

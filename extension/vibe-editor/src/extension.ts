@@ -1,13 +1,12 @@
 import * as vscode from 'vscode'
 
 import { setExtensionContext } from './apis/api'
-import { addNotionDatabase, retrieveNotionDatabases } from './apis/notion'
+import { getCurrentUser } from './apis/user'
 import { allCommands } from './commands'
 import { Configuration } from './configuration'
 import { setDraftData } from './configuration/draftData'
 import { PostProvider, setPostProvider } from './services/postService'
 import {
-  SnapshotService,
   setCodeSnapshotProvider,
   setDirectorySnapshotProvider,
   setLogSnapshotProvider,
@@ -17,30 +16,26 @@ import {
   setTemplateProvider,
 } from './services/templateService'
 import { DraftDataType, SecretType } from './types/configuration'
-import { CreateDatabase, Database } from './types/database'
-import { PageType } from './types/webview'
 import {
   CodeSnapshotProvider,
   DirectoryTreeSnapshotProvider,
   LogSnapshotProvider,
-  SnapshotItem,
-  // registerSnapshotViewCommand,
 } from './views/codeSnapshotView'
-import { ViewLoader } from './views/webview/ViewLoader'
 
-async function isLogin(context: vscode.ExtensionContext) {
+async function setUser(context: vscode.ExtensionContext) {
   const accessToken = await context.secrets.get(SecretType.accessToken)
+  console.log('액세스 토큰', accessToken)
   setDraftData(DraftDataType.loginStatus, !!accessToken)
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
-  }
-}
-
-async function isNotion(context: vscode.ExtensionContext) {
-  const notionSecretKey = await context.secrets.get(SecretType.notionSecretKey)
-  setDraftData(DraftDataType.notionStatus, !!notionSecretKey)
-  if (!notionSecretKey) {
-    vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
+  } else {
+    const result = await getCurrentUser()
+    if (result.success) {
+      setDraftData(DraftDataType.notionStatus, result.data.notionActive)
+      if (!result.data.notionActive) {
+        vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
+      }
+    }
   }
 }
 
@@ -57,11 +52,7 @@ async function addStatusBarItem(context: vscode.ExtensionContext) {
   context.subscriptions.push(statusBarItem)
 }
 
-export async function activate(
-  context: vscode.ExtensionContext,
-): Promise<void> {
-  setExtensionContext(context)
-
+async function registerCommand(context: vscode.ExtensionContext) {
   allCommands.forEach((CommandClass) => {
     const command = new CommandClass(context)
     const disposable = vscode.commands.registerCommand(
@@ -70,114 +61,37 @@ export async function activate(
     )
     context.subscriptions.push(disposable)
   })
+}
 
-  await isLogin(context)
-  await isNotion(context)
-  const templateProvider = new TemplateProvider(context)
-  // 코드 스냅샷 뷰 등록 및 전역 등록
-  const codeSnapshotProvider = new CodeSnapshotProvider(context)
-  const directoryTreeSnapshotProvider = new DirectoryTreeSnapshotProvider(
-    context,
-  )
-  const logSnapshotProvider = new LogSnapshotProvider(context)
-  vscode.window.registerTreeDataProvider(
-    'vibeEditorCodeSnapshot',
-    codeSnapshotProvider,
-  )
-  vscode.window.registerTreeDataProvider(
-    'vibeEditorDirectoryTreeSnapshot',
-    directoryTreeSnapshotProvider,
-  )
-  vscode.window.registerTreeDataProvider(
-    'vibeEditorLogSnapshot',
-    logSnapshotProvider,
-  )
-  vscode.window.registerTreeDataProvider(
-    'vibeEditorTemplatePage',
-    templateProvider,
-  )
+async function registerProvider(context: vscode.ExtensionContext) {
+  const tp = new TemplateProvider(context)
+  const csp = new CodeSnapshotProvider(context)
+  const dsp = new DirectoryTreeSnapshotProvider(context)
+  const lsp = new LogSnapshotProvider(context)
+  const pp = new PostProvider(context)
 
-  const postTreeProvider = new PostProvider(context)
-  vscode.window.registerTreeDataProvider('vibeEditorPostList', postTreeProvider)
-  setPostProvider(postTreeProvider)
+  vscode.window.registerTreeDataProvider('vibeEditorTemplatePage', tp)
+  vscode.window.registerTreeDataProvider('vibeEditorCodeSnapshot', csp)
+  vscode.window.registerTreeDataProvider('vibeEditorDirectoryTreeSnapshot', dsp)
+  vscode.window.registerTreeDataProvider('vibeEditorLogSnapshot', lsp)
+  vscode.window.registerTreeDataProvider('vibeEditorPostList', pp)
 
-  // 각 프로바이더 등록
-  setTemplateProvider(templateProvider)
-  setCodeSnapshotProvider(codeSnapshotProvider)
-  setDirectorySnapshotProvider(directoryTreeSnapshotProvider)
-  setLogSnapshotProvider(logSnapshotProvider)
+  setTemplateProvider(tp)
+  setCodeSnapshotProvider(csp)
+  setDirectorySnapshotProvider(dsp)
+  setLogSnapshotProvider(lsp)
+  setPostProvider(pp)
+}
 
-  // 스냅샷 클릭 시 WebView 명령어 등록
-  // registerSnapshotViewCommand(context)
-
-  vscode.window.registerWebviewViewProvider('vibeEditorTemplatePage', {
-    resolveWebviewView(webviewView) {
-      webviewView.webview.options = { enableScripts: true }
-
-      webviewView.webview.onDidReceiveMessage(async (message) => {
-        switch (message.command) {
-          case 'saveDatabase':
-            // TODO : 삭제해야
-            const existing = context.globalState.get<Database[]>(
-              'notionDatabases',
-              [],
-            )
-            const success = await addNotionDatabase(message.payload)
-            if (!success) {
-              vscode.window.showErrorMessage('DB 저장 실패')
-              return
-            }
-            const result = await retrieveNotionDatabases()
-            console.log('📦 DB 저장 후:', result)
-            if (result.success) {
-              const database = result.data
-              await context.globalState.update('notionDatabases', database)
-            }
-
-            vscode.window.showInformationMessage('DB 저장 완료')
-            console.log('📦 DB 저장 후:', existing)
-            webviewView.webview.postMessage({
-              command: 'setDatabases',
-              payload: existing,
-            })
-            break
-        }
-      })
-    },
-  })
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'vibeEditor.openContext',
-      (item: vscode.TreeItem) => {
-        vscode.window.showInformationMessage(`우클릭한 항목: ${item.label}`)
-        // TODO: Notion 업로드, 삭제 등의 기능 확장 가능
-      },
-    ),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'vibeEditor.showPostPage',
-      async (postId: number) => {
-        ViewLoader.showWebview(context, PageType.POST, postId)
-      },
-    ),
-  )
-
-  const snapshotService = new SnapshotService(context)
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'vibeEditor.renameSnapshot',
-      async (item: SnapshotItem) => {
-        await snapshotService.renameSnapshot(item.snapshot.snapshotId)
-      },
-    ),
-  )
-
+export async function activate(
+  context: vscode.ExtensionContext,
+): Promise<void> {
+  setExtensionContext(context)
+  await registerCommand(context)
+  await setUser(context)
+  await registerProvider(context)
   addStatusBarItem(context)
-  // 설정 변경 이벤트 구독
+
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
 }
 

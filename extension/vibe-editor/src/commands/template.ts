@@ -38,6 +38,7 @@ export class ShowTemplatePageCommand implements ICommand {
   public async execute(template?: any): Promise<void> {
     console.log('showTemplatePage', template)
     await this.templateService.updateTemplateDetail(template.templateId)
+
     ViewLoader.showWebview(this.context, PageType.TEMPLATE, template)
   }
 }

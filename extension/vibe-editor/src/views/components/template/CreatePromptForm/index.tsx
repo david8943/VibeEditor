@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 
 import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, OptionList } from '@/types/template'
+import { CreatePrompt, Option } from '@/types/template'
 
 import { useCreatePromptForm } from '../../../hooks/useCreatePromptForm'
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
@@ -13,7 +13,7 @@ interface CreatePromptFormProps {
   createPrompt: (data: CreatePrompt) => void
   localSnapshots: Snapshot[]
   deleteSnapshot: (snapshotId: number) => void
-  optionList: OptionList
+  optionList: Option[]
   selectedPromptId: number
 }
 
@@ -40,28 +40,35 @@ export function CreatePromptForm({
     setValue,
   })
 
-  const { snapshots, handleDeleteSnapshot, handleDescriptionChange } =
-    usePromptSnapshots({
-      localSnapshots,
-      promptAttachList: defaultPrompt?.promptAttachList ?? [],
-      deleteSnapshot,
-      setValue,
-    })
+  const {
+    snapshots,
+    handleDeleteSnapshot,
+    handleDescriptionChange,
+    addSnapshot,
+  } = usePromptSnapshots({
+    localSnapshots,
+    promptAttachList: defaultPrompt?.promptAttachList ?? [],
+    deleteSnapshot,
+    setValue,
+  })
 
   useEffect(() => {
     console.log('useEffect selectedPromptId', selectedPromptId)
   }, [selectedPromptId])
 
   return (
-    <PromptFormUI
-      formMethods={{ register, handleSubmit }}
-      options={options}
-      snapshots={snapshots}
-      onSubmit={onSubmit}
-      handlePost={null}
-      handleOption={handleOption}
-      handleDeleteSnapshot={handleDeleteSnapshot}
-      handleDescriptionChange={handleDescriptionChange}
-    />
+    <div>
+      <PromptFormUI
+        formMethods={{ register, handleSubmit }}
+        options={options}
+        snapshots={snapshots}
+        onSubmit={onSubmit}
+        handlePost={null}
+        handleOption={handleOption}
+        handleDeleteSnapshot={handleDeleteSnapshot}
+        handleDescriptionChange={handleDescriptionChange}
+        addSnapshot={addSnapshot}
+      />
+    </div>
   )
 }

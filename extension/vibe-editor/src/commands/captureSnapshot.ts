@@ -110,3 +110,20 @@ export class ViewCodeSnapshotCommand implements ICommand {
     await this.snapshotService.viewCodeSnapshot(snapshot.snapshotId)
   }
 }
+
+export class RenameSnapshotCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.renameSnapshot'
+
+  private snapshotService: SnapshotService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.snapshotService = new SnapshotService(context)
+  }
+  public get commandName(): string {
+    return RenameSnapshotCommand.commandName
+  }
+
+  public async execute(item: SnapshotItem): Promise<void> {
+    await this.snapshotService.renameSnapshot(item.snapshot.snapshotId)
+  }
+}
