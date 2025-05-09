@@ -40,6 +40,9 @@ export type CreatePost = Pick<PostDetail, 'postTitle' | 'postContent'>
 export interface UploadToNotionRequest {
   promptId: number
 }
+export interface UploadToNotionRequestPost {
+  postId: number
+}
 
 // 생성/수정 요청용
 export interface PostSummary {

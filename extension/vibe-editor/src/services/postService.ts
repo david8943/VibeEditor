@@ -6,6 +6,7 @@ import {
   PostDetail,
   PostSummary,
   UploadToNotionRequest,
+  UploadToNotionRequestPost,
 } from '../types/post'
 
 export function refreshPostProvider() {
@@ -84,7 +85,7 @@ export class PostService {
     return posts.find((post) => post.postId === postId) || null
   }
 
-  async submitToNotion(data: UploadToNotionRequest): Promise<string> {
+  async submitToNotion(data: UploadToNotionRequestPost): Promise<string> {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
     // 여기선 로컬에서 임의 생성 (mocking)
 
@@ -93,20 +94,19 @@ export class PostService {
     if (result.success) {
       postUrl = result.data.postUrl
     }
-    const newPost: PostDetail = {
-      postId: Date.now(),
-      postTitle: '포스트 제목 예시',
-      postContent: '포스트 내용 예시',
-      templateId: 0, // 필요시 추후 포함
-      promptId: data.promptId,
-      parentPostIdList: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-
+    // const newPost: PostDetail = {
+    //   postId: Date.now(),
+    //   postTitle: '포스트 제목 예시',
+    //   postContent: '포스트 내용 예시',
+    //   templateId: 0, // 필요시 추후 포함
+    //   promptId: data.promptId,
+    //   parentPostIdList: [],
+    //   createdAt: new Date().toISOString(),
+    //   updatedAt: new Date().toISOString(),
+    // }
     const prev = this.context.globalState.get<PostDetail[]>('posts', [])
-    prev.push(newPost)
-    await this.context.globalState.update('posts', prev)
+    const filtered = prev.filter((post) => post.postId > 1700000000000)
+    await this.context.globalState.update('posts', filtered)
     postProviderInstance?.refresh()
     return postUrl
   }

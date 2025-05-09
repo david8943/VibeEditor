@@ -1,6 +1,10 @@
-import { UploadToNotionRequest, UploadToNotionResponse } from '../types/post'
+import {
+  UploadToNotionRequest,
+  UploadToNotionRequestPost,
+  UploadToNotionResponse,
+} from '../types/post'
 import { postRequest } from './api'
 
 // 넣음
-export const uploadPost = async (data: UploadToNotionRequest) =>
-  await postRequest<UploadToNotionResponse>('/post', data)
+export const uploadPost = async (data: UploadToNotionRequestPost) =>
+  await postRequest<UploadToNotionResponse>('/ai-post/upload', data)

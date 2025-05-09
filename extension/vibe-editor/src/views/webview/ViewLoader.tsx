@@ -12,7 +12,12 @@ import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
-import { Post, PostDetail, UploadToNotionRequest } from '../../types/post'
+import {
+  Post,
+  PostDetail,
+  UploadToNotionRequest,
+  UploadToNotionRequestPost,
+} from '../../types/post'
 import {
   Prompt,
   SelectPrompt,
@@ -148,7 +153,7 @@ export class ViewLoader {
       })
     }
   }
-  private async submitPost(data: UploadToNotionRequest) {
+  private async submitPost(data: UploadToNotionRequestPost) {
     this.startLoading()
     const postUrl = await this.postService.submitToNotion(data)
     this.stopLoading()

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
-import { PostDetail, UploadToNotionRequest } from '../../types/post'
+import { PostDetail, UploadToNotionRequestPost } from '../../types/post'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PostForm } from '../components'
 
@@ -43,7 +43,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const onSubmit = (data: UploadToNotionRequest) => {
+  const onSubmit = (data: UploadToNotionRequestPost) => {
     postMessageToExtension({
       type: MessageType.SUBMIT_POST,
       payload: data,

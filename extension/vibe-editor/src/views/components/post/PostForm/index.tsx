@@ -1,18 +1,22 @@
 import React, { FormEvent } from 'react'
 
-import { PostDetail, UploadToNotionRequest } from '../../../../types/post'
+import {
+  PostDetail,
+  UploadToNotionRequest,
+  UploadToNotionRequestPost,
+} from '../../../../types/post'
 import './styles.css'
 
 interface PostFormProps {
-  onSubmit: (data: UploadToNotionRequest) => void
+  onSubmit: (data: UploadToNotionRequestPost) => void
   defaultPost: PostDetail
 }
 
 export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (defaultPost.promptId) {
-      onSubmit({ promptId: defaultPost.promptId })
+    if (defaultPost.postId) {
+      onSubmit({ postId: defaultPost.postId })
     }
   }
 
