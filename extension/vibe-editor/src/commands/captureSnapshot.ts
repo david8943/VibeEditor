@@ -72,8 +72,8 @@ export class DeleteSnapshotCommand implements ICommand {
     return DeleteSnapshotCommand.commandName
   }
 
-  public async execute(snapshot: SnapshotItem): Promise<void> {
-    await this.snapshotService.deleteSnapshot(snapshot)
+  public async execute(item: SnapshotItem): Promise<void> {
+    await this.snapshotService.deleteSnapshot(item.snapshot.snapshotId)
   }
 }
 

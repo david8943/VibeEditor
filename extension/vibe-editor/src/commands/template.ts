@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { SnapshotService } from '../services/snapshotService'
 import { TemplateItem, TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
 import { PageType } from '../types/webview'
@@ -112,9 +113,11 @@ export class ResetTemplateCommand implements ICommand {
 export class AddToPromptCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.addToPrompt'
   private templateService: TemplateService
+  private snapshotService: SnapshotService
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this.templateService = new TemplateService(context, PageType.POST)
+    this.snapshotService = new SnapshotService(context)
   }
 
   public get commandName(): string {
@@ -122,7 +125,12 @@ export class AddToPromptCommand implements ICommand {
   }
 
   public async execute(snapshotItem: SnapshotItem): Promise<void> {
-    this.templateService.addToPrompt(snapshotItem)
+    const snapshot = await this.snapshotService.updateCodeSnapshot(
+      snapshotItem.snapshot.snapshotId,
+    )
+    if (snapshot) {
+      this.templateService.addToPrompt(snapshot)
+    }
   }
 }
 

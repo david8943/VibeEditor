@@ -3,13 +3,14 @@ import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
   RefreshSnapshotCommand,
+  RenameSnapshotCommand,
   ViewCodeSnapshotCommand,
 } from './captureSnapshot'
 import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
 import { FileSnapshotCommand } from './fileSnapshot'
 import { SetNotionApiCommand } from './notion'
-import { ShowPostPageCommand } from './post'
+import { DeletePostCommand, ShowPostPageCommand } from './post'
 import { ShowSettingPageCommand } from './setting'
 import {
   AddToPromptCommand,
@@ -42,4 +43,6 @@ export const allCommands = [
   ViewCodeSnapshotCommand,
   GetTemplatesCommand,
   ShowPostPageCommand,
+  RenameSnapshotCommand,
+  DeletePostCommand,
 ]

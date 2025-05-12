@@ -90,8 +90,8 @@ export function PromptFormUI({
                   {snapshot.snapshotName}
                 </label>
               </div>
-              <div className="flex flex-1 gap-4 items-start">
-                <div className="code-block flex-1">
+              <div className="flex flex-1 gap-4 items-start w-full">
+                <div className="code-block flex-1 w-1/2">
                   <HighlightedCode code={snapshot.snapshotContent} />
                 </div>
                 <textarea
@@ -100,7 +100,7 @@ export function PromptFormUI({
                   onChange={(e) =>
                     handleDescriptionChange(snapshot.attachId, e.target.value)
                   }
-                  className="flex-1 min-h-[100px] p-2 rounded"
+                  className="flex-1 min-h-[100px] p-2 rounded w-1/2"
                   required
                 />
                 <button
@@ -122,7 +122,7 @@ export function PromptFormUI({
           <label
             htmlFor="options"
             className="text-sm font-medium">
-            옵션 {Object.keys(options).length}
+            옵션
           </label>
           {Object.keys(options).map((optionName) => (
             <div
@@ -131,13 +131,10 @@ export function PromptFormUI({
               <span className="text-sm font-medium">{optionName}</span>
               {options[optionName].map((option) => (
                 <button
-                  type="button"
                   key={option.optionId}
                   onClick={() => handleOption(optionName, option.optionId)}
-                  className={`px-3 py-1 rounded text-sm ${
-                    option.isSelected
-                      ? 'bg-[var(--vscode-button-background)]'
-                      : 'bg-[var(--vscode-editor-background)]'
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    option.isSelected ? 'selected' : 'unselected'
                   }`}>
                   {option.value}
                 </button>

@@ -15,7 +15,7 @@ export function refreshPostProvider() {
     postProviderInstance?.refresh()
   }
 }
-class PostItem extends vscode.TreeItem {
+export class PostItem extends vscode.TreeItem {
   constructor(public readonly post: PostSummary) {
     super(post.postTitle, vscode.TreeItemCollapsibleState.None)
     this.tooltip = `${post.postTitle}`
@@ -24,6 +24,7 @@ class PostItem extends vscode.TreeItem {
       title: 'View Post',
       arguments: [post.postId],
     }
+    this.contextValue = 'vibeEditorPostList'
     this.iconPath = post.isLoading
       ? new vscode.ThemeIcon('sync~spin')
       : new vscode.ThemeIcon('symbol-snippet')
@@ -105,7 +106,7 @@ export class PostService {
     //   updatedAt: new Date().toISOString(),
     // }
     const prev = this.context.globalState.get<PostDetail[]>('posts', [])
-    const filtered = prev.filter((post) => post.postId > 1700000000000)
+    const filtered = prev.filter((post) => post.postId < 1700000000000)
     await this.context.globalState.update('posts', filtered)
     postProviderInstance?.refresh()
     return postUrl

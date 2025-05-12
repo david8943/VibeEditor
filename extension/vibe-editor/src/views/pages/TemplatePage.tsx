@@ -224,7 +224,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             onClose={() => setShowDbModal(false)}
           />
         )}
-        {selectedTemplate?.snapshotList?.[0]?.snapshotName}
         {selectedTemplate && selectedPrompt && (
           <PromptForm
             defaultPrompt={selectedPrompt}

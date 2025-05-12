@@ -8,7 +8,7 @@ import {
   getRequest,
   postBooleanRequest,
   postRequest,
-  putRequest,
+  putBooleanRequest,
 } from './api'
 
 export const getSnapshotDetail = async (snapshotId: number) =>
@@ -18,7 +18,7 @@ export const updateSnapshot = async ({
   snapshotId,
   snapshotName,
 }: UpdateSnapshotRequest) =>
-  await putRequest<Snapshot[]>(`/snapshot/${snapshotId}`, {
+  await putBooleanRequest<Snapshot[]>(`/snapshot/${snapshotId}`, {
     snapshotName,
   })
 
