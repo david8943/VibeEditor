@@ -1,10 +1,8 @@
-import React, { FormEvent } from 'react'
+import React, { FormEvent, useState } from 'react'
 
-import {
-  PostDetail,
-  UploadToNotionRequest,
-  UploadToNotionRequestPost,
-} from '../../../../types/post'
+import { marked } from 'marked'
+
+import { PostDetail, UploadToNotionRequestPost } from '../../../../types/post'
 import './styles.css'
 
 interface PostFormProps {
@@ -13,6 +11,8 @@ interface PostFormProps {
 }
 
 export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
+  const [isViewer, setIsViewer] = useState(true)
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (defaultPost.postId) {
@@ -33,16 +33,33 @@ export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
         />
       </div>
       <div className="form-group">
-        <label>포스트 내용</label>
-        <textarea
-          value={defaultPost.postContent}
-          readOnly
-        />
+        <div className="viewer-header">
+          <label>포스트 내용</label>
+          <button
+            type="button"
+            onClick={() => setIsViewer(!isViewer)}
+            className="viewer-toggle-button">
+            {isViewer ? '에디터 보기' : '마크다운 보기'}
+          </button>
+        </div>
+        {isViewer ? (
+          <div
+            className="markdown-viewer"
+            dangerouslySetInnerHTML={{
+              __html: marked(defaultPost.postContent),
+            }}
+          />
+        ) : (
+          <textarea
+            value={defaultPost.postContent}
+            readOnly
+          />
+        )}
       </div>
       <button
         type="submit"
         className="submit-button">
-        포스트 생성
+        Notion에 게시
       </button>
     </form>
   )

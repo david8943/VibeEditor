@@ -37,6 +37,8 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
         setLoading(true)
       } else if (message.type === MessageType.STOP_LOADING) {
         setLoading(false)
+      } else if (message.type === MessageType.GET_CURRENT_POST) {
+        postMessageToExtension({ type: MessageType.GET_CURRENT_POST })
       }
     }
     window.addEventListener('message', handleMessage)

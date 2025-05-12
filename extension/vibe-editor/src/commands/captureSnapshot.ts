@@ -29,7 +29,10 @@ export class CaptureSnapshotCommand implements ICommand {
 
   public async execute(): Promise<void> {
     const localTemplates = await this.templateService.getLocalTemplates()
-
+    if (localTemplates.length == 0) {
+      vscode.window.showInformationMessage(`템플릿이 없습니다.`)
+      await this.templateService.createTemplate()
+    }
     const defaultCaptureSnapshotName =
       await this.snapshotService.getSnapshotName()
     const blockText = await this.snapshotService.captureSnapshot()
@@ -72,8 +75,8 @@ export class DeleteSnapshotCommand implements ICommand {
     return DeleteSnapshotCommand.commandName
   }
 
-  public async execute(snapshot: SnapshotItem): Promise<void> {
-    await this.snapshotService.deleteSnapshot(snapshot)
+  public async execute(item: SnapshotItem): Promise<void> {
+    await this.snapshotService.deleteSnapshot(item.snapshot.snapshotId)
   }
 }
 

@@ -31,7 +31,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     templateId: 0,
     promptName: '',
     postType: PostType.TECH_CONCEPT,
-    comment: '설명을 추가해주세요',
+    comment: '',
     promptAttachList: [],
     promptOptionList: [],
     notionDatabaseId: 0,
@@ -65,6 +65,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       } else if (message.type === MessageType.PROMPT_SELECTED) {
         setSelectedPrompt(message.payload.prompt)
         setSelectedPromptId(message.payload.prompt.promptId)
+        setNotionDatabaseId(message.payload.prompt.notionDatabaseId)
       } else if (message.type === MessageType.SNAPSHOT_SELECTED) {
         addSnapshotCode(message.payload.snapshot)
       }
@@ -91,10 +92,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
   }
   const updatePrompt = (data: UpdatePrompt) => {
+    const prompt = { ...data, notionDatabaseId }
     postMessageToExtension({
       type: MessageType.UPDATE_PROMPT,
       payload: {
-        prompt: data,
+        prompt: prompt,
         selectedTemplateId: selectedTemplate?.templateId,
         selectedPromptId: selectedPromptId,
       },
@@ -178,7 +180,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         templateId: selectedPromptId,
         promptName: '새 프롬프트 생성하기',
         postType: 'cs',
-        comment: '설명을 추가해주세요',
+        comment: '',
         promptAttachList: [],
         promptOptionList: [],
         notionDatabaseId: notionDatabaseId,
@@ -224,7 +226,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             onClose={() => setShowDbModal(false)}
           />
         )}
-        {selectedTemplate?.snapshotList?.[0]?.snapshotName}
         {selectedTemplate && selectedPrompt && (
           <PromptForm
             defaultPrompt={selectedPrompt}

@@ -39,7 +39,10 @@ export class FileSnapshotCommand implements ICommand {
 
     const localTemplates: Template[] =
       await this.templateService.getLocalTemplates()
-
+    if (localTemplates.length == 0) {
+      vscode.window.showInformationMessage(`템플릿이 없습니다.`)
+      await this.templateService.createTemplate()
+    }
     for (const fileUri of selectedUris) {
       const treeText = await this.fileService.captureFileSnapshot(
         fileUri.fsPath,
@@ -51,11 +54,13 @@ export class FileSnapshotCommand implements ICommand {
         snapshotContent: treeText,
         localTemplates,
       })
+      if (success) {
+        vscode.window.showInformationMessage('📸 파일 스냅샷이 저장되었습니다!')
+      }
       if (!success) {
-        vscode.window.showInformationMessage('스냅샷 생성에 실패했습니다.')
+        vscode.window.showErrorMessage('스냅샷 생성에 실패했습니다.')
         return
       }
-
       await this.snapshotService.openTextDocument(treeText)
     }
     const selectedTemplateId: number | undefined = getDraftData(

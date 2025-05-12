@@ -51,14 +51,20 @@ textarea {
 
 button {
   padding: 8px 16px;
-  background: var(--vscode-button-background) !important;
-  color: var(--vscode-button-foreground) !important;
-  border: none;
   border-radius: 4px;
   cursor: pointer;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
 }
 
-button:hover {
+button.unselected {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+}
+
+button:hover:not(.unselected) {
   background: var(--vscode-button-hoverBackground);
 }
 

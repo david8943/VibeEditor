@@ -18,6 +18,7 @@ import {
 import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { Post, PostDetail } from '../types/post'
+import { Snapshot } from '../types/snapshot'
 import {
   CreatePrompt,
   Option,
@@ -159,79 +160,95 @@ export class TemplateService {
     }
   }
 
-  async addToPrompt(snapshotItem: SnapshotItem): Promise<void> {
-    console.log('addToPrompt', snapshotItem)
+  async getLocalPromppt(data: SelectPrompt): Promise<Prompt | null> {
+    const prev = await this.getLocalTemplates()
+    const template = prev.find(
+      (template) => template.templateId === data.templateId,
+    )
+    return (
+      template?.promptList?.find(
+        (prompt) => prompt.promptId === data.promptId,
+      ) || null
+    )
+  }
 
-    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+  async addAndSaveToPrompt(snapshot: Snapshot): Promise<void> {
+    const selectedTemplateId = Number(
+      getDraftData(DraftDataType.selectedTemplateId),
+    )
 
     const selectedPromptId = Number(
       getDraftData(DraftDataType.selectedPromptId),
     )
-    const prev = this.context.globalState.get<Template[]>('templates', [])
 
+    const prev = this.context.globalState.get<Template[]>('templates', [])
     const template = prev.find(
       (template) => template.templateId === selectedTemplateId,
     )
-    console.log('template', template)
     if (!template) {
       vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
       return
     }
-    const promptList: Prompt[] = template.promptList || []
-    const prompt = promptList.find(
-      (prompt) => prompt.promptId === selectedPromptId,
-    )
+    const prompt =
+      template.promptList?.find(
+        (prompt) => prompt.promptId === selectedPromptId,
+      ) || null
+
     if (!prompt) {
       vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
       return
     }
-
     const promptAttachList = prompt.promptAttachList
     if (!promptAttachList) {
       const result = await getPrompt(prompt.promptId)
       if (result.success) {
         prompt.promptAttachList = result.data.promptAttachList
       }
-      if (!promptAttachList) {
-        vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
-        return
-      }
     }
     promptAttachList.push({
       attachId: new Date().getTime(),
-      snapshotId: snapshotItem.snapshot.snapshotId,
+      snapshotId: snapshot.snapshotId,
       description: '설명',
     })
-
-    const result = await getSnapshotDetail(snapshotItem.snapshot.snapshotId)
-    if (result.success) {
-      const oldSnapshot = template.snapshotList?.find(
-        (s) => s.snapshotId == snapshotItem.snapshot.snapshotId,
-      )
-      if (oldSnapshot) {
-        oldSnapshot.snapshotName = result.data.snapshotName
-        oldSnapshot.snapshotContent = result.data.snapshotContent
-      }
-    }
-    const promptAttach = {
-      attachId: new Date().getTime(),
-      snapshotId: snapshotItem.snapshot.snapshotId,
-      description: '설명',
-    }
-
     await this.context.globalState.update('templates', prev)
-    ViewLoader.currentPanel?.webview.postMessage({
-      type: MessageType.TEMPLATE_SELECTED,
-      payload: {
-        template: template,
-      },
+    await updatePrompt({
+      updatePrompt: prompt,
+      promptId: selectedPromptId,
     })
-    ViewLoader.currentPanel?.webview.postMessage({
-      type: MessageType.SNAPSHOT_SELECTED,
-      payload: {
-        snapshot: promptAttach,
-      },
-    })
+  }
+  async addToPrompt(snapshot: Snapshot): Promise<void> {
+    if (ViewLoader.currentPanel) {
+      const selectedPromptId = Number(
+        getDraftData(DraftDataType.selectedPromptId),
+      )
+      const promptAttach = {
+        attachId: new Date().getTime(),
+        snapshotId: snapshot.snapshotId,
+        description: '설명',
+      }
+
+      if (selectedPromptId !== 0) {
+        const selectedTemplateId = Number(
+          getDraftData(DraftDataType.selectedTemplateId),
+        )
+        const template = await this.getLocalTemplate(selectedTemplateId)
+
+        ViewLoader.currentPanel?.webview.postMessage({
+          type: MessageType.TEMPLATE_SELECTED,
+          payload: {
+            template: template,
+          },
+        })
+      }
+      ViewLoader.currentPanel?.webview.postMessage({
+        type: MessageType.SNAPSHOT_SELECTED,
+        payload: {
+          snapshot: promptAttach,
+        },
+      })
+    } else {
+      this.addAndSaveToPrompt(snapshot)
+    }
 
     vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
@@ -295,7 +312,6 @@ export class TemplateService {
           console.log('result', result)
           if (result.success) {
             const createdPost: Post = result.data
-            prev.filter((post) => post.postId !== loadingPost.postId)
             const newPost: PostDetail = {
               postId: createdPost.postId,
               postTitle: createdPost.postTitle,
@@ -307,9 +323,23 @@ export class TemplateService {
               parentPostIdList: [],
             }
             prev.push(newPost)
-            await this.context.globalState.update('posts', prev)
+            setDraftData(DraftDataType.selectedPostId, createdPost.postId)
+            ViewLoader.currentPanel?.webview.postMessage({
+              type: MessageType.GET_CURRENT_POST,
+            })
+            // ViewLoader.showWebview(this.context, PageType.POST)
             refreshPostProvider()
+            await this.context.globalState.update(
+              'posts',
+              prev.filter((post) => post.postId !== loadingPost.postId),
+            )
             return createdPost
+          } else {
+            await this.context.globalState.update(
+              'posts',
+              prev.filter((post) => post.postId !== loadingPost.postId),
+            )
+            refreshPostProvider()
           }
         }
       })
@@ -437,7 +467,7 @@ export class TemplateService {
     const optionList: Option[] | undefined = await getDraftData(
       DraftDataType.optionList,
     )
-    if (optionList) {
+    if (optionList && optionList.length > 0) {
       return optionList
     }
     const options = await getOptionList()
@@ -449,14 +479,24 @@ export class TemplateService {
   }
 
   async updateTemplateDetail(templateId: number): Promise<Template | null> {
+    console.log('updateTemplateDetail', templateId)
     const result = await getTemplateDetail(templateId)
     if (result.success) {
       const prev = this.context.globalState.get<Template[]>('templates', [])
       const templateIndex = prev.findIndex(
         (template) => template.templateId === templateId,
       )
-      const newTemplate = result.data
+      const newTemplate: Template = result.data
+      const { snapshotList, ...rest } = newTemplate
       newTemplate.templateId = templateId
+      snapshotList?.map((snapshot) => {
+        const oldSnapshot: Snapshot | undefined = prev[
+          templateIndex
+        ].snapshotList?.find((s) => s.snapshotId === snapshot.snapshotId)
+        if (oldSnapshot?.snapshotContent) {
+          snapshot.snapshotContent = oldSnapshot.snapshotContent
+        }
+      })
       if (templateIndex !== -1) {
         prev[templateIndex] = newTemplate
         await this.context.globalState.update('templates', prev)
@@ -494,18 +534,26 @@ export class TemplateService {
   }
 
   async getTemplate(templateId: number): Promise<Template | null> {
+    let prev: Template[] = await this.getLocalTemplates()
+    let oldTemplate = prev.find((t) => t.templateId == templateId)
+    if (!oldTemplate) {
+      prev = await this.getTemplates()
+      oldTemplate = prev.find((t) => t.templateId == templateId)
+      if (!oldTemplate) {
+        return null
+      }
+    }
+
     const result = await getTemplateDetail(templateId)
     if (result.success) {
-      const selectedTemplate = result.data
-      const prev: Template[] = await this.getLocalTemplates()
-
-      const oldTemplate = prev.find((t) => t.templateId == templateId)
+      const { templateName, promptList, snapshotList, updatedAt, ...rest } =
+        result.data
       if (oldTemplate) {
-        oldTemplate.templateName = selectedTemplate.templateName
-        oldTemplate.updatedAt = selectedTemplate.updatedAt
+        oldTemplate.templateName = templateName
+        oldTemplate.updatedAt = updatedAt
 
-        oldTemplate.promptList = selectedTemplate.promptList?.map((prompt) => {
-          const oldPrompt = oldTemplate.promptList?.find(
+        oldTemplate.promptList = promptList?.map((prompt) => {
+          const oldPrompt: Prompt | undefined = oldTemplate.promptList?.find(
             (p) => prompt.promptId == p.promptId,
           )
           if (oldPrompt) {
@@ -515,36 +563,20 @@ export class TemplateService {
             return prompt
           }
         })
-        oldTemplate.snapshotList = selectedTemplate.snapshotList?.map(
-          (snapshot) => {
-            const oldSnapshot = oldTemplate.snapshotList?.find(
-              (s) => snapshot.snapshotId == s.snapshotId,
-            )
-            if (oldSnapshot) {
-              oldSnapshot.snapshotName = snapshot.snapshotName
-              oldSnapshot.updatedAt = snapshot.snapshotName
-              return oldSnapshot
-            } else {
-              return snapshot
-            }
-          },
-        )
-      } else {
-        return null
-      }
-
-      const newTemplate = prev.map((template) => {
-        if (templateId === template.templateId) {
-          return {
-            ...selectedTemplate,
-            templateId: templateId,
+        oldTemplate.snapshotList = snapshotList?.map((snapshot) => {
+          const oldSnapshot = oldTemplate.snapshotList?.find(
+            (s) => snapshot.snapshotId == s.snapshotId,
+          )
+          if (oldSnapshot) {
+            oldSnapshot.snapshotName = snapshot.snapshotName
+            oldSnapshot.updatedAt = snapshot.snapshotName
+            return oldSnapshot
+          } else {
+            return snapshot
           }
-        } else {
-          return template
-        }
-      })
-
-      this.context.globalState.update('templates', [...newTemplate])
+        })
+        this.context.globalState.update('templates', prev)
+      }
     }
     const localTemplate = await this.getLocalTemplate(templateId)
     return localTemplate

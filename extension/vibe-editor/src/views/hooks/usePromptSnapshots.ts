@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 
 import { EditPrompt, EditSnapshot } from '@/types/template'
@@ -26,104 +26,92 @@ export const usePromptSnapshots = ({
   deleteSnapshot,
   setValue,
 }: UsePromptSnapshotsProps): UsePromptSnapshotsReturn => {
-  console.log('usePromptSnapshots 호출됨', {
-    localSnapshots,
-    promptAttachList,
-  })
+  const [internalSnapshots, setInternalSnapshots] = useState<EditSnapshot[]>([])
 
-  const snapshots = useMemo(() => {
-    console.log('snapshots useMemo 실행됨', {
-      promptAttachList,
-      localSnapshots,
-    })
-
-    if (!promptAttachList) return []
-    return promptAttachList.map((snapshot) => {
-      const localSnapshot = localSnapshots.find(
-        (localSnapshot) => localSnapshot.snapshotId === snapshot.snapshotId,
+  useEffect(() => {
+    if (!promptAttachList) return
+    setInternalSnapshots((prev) => {
+      // 기존 스냅샷 중 promptAttachList에 없는 것들은 유지
+      const existingSnapshots = prev.filter((snapshot) =>
+        promptAttachList.some(
+          (attach) => attach.attachId === snapshot.attachId,
+        ),
       )
-      console.log('snapshot 매핑 중', {
-        snapshot,
-        localSnapshot,
-      })
 
-      return {
-        attachId: snapshot.attachId,
-        snapshotId: snapshot.snapshotId,
-        snapshotContent: localSnapshot?.snapshotContent ?? '',
-        description: snapshot.description,
-        snapshotName: localSnapshot?.snapshotName ?? '',
-      }
+      // 새로운 스냅샷만 추가
+      const newSnapshots = promptAttachList
+        .filter(
+          (attach) =>
+            !prev.some((snapshot) => snapshot.attachId === attach.attachId),
+        )
+        .map((snapshot) => {
+          const localSnapshot = localSnapshots.find(
+            (localSnapshot) => localSnapshot.snapshotId === snapshot.snapshotId,
+          )
+          console.log('로컬 스냅샷 localSnapshot', localSnapshot)
+          return {
+            attachId: snapshot.attachId,
+            snapshotId: snapshot.snapshotId,
+            snapshotContent: localSnapshot?.snapshotContent ?? '',
+            description: snapshot.description,
+            snapshotName: localSnapshot?.snapshotName ?? '',
+          }
+        })
+
+      return [...existingSnapshots, ...newSnapshots]
     })
   }, [localSnapshots, promptAttachList])
 
-  console.log('생성된 snapshots', snapshots)
-
   useEffect(() => {
-    console.log('promptAttachList 변경됨', promptAttachList)
-    setValue('snapshots', snapshots)
-  }, [promptAttachList, snapshots, setValue])
+    setValue('snapshots', internalSnapshots)
+  }, [internalSnapshots, setValue])
 
   const handleDeleteSnapshot = useCallback(
     (attachId: number | null) => {
-      console.log('handleDeleteSnapshot 호출됨', {
-        attachId,
-        snapshots,
-        promptAttachList,
-      })
       if (attachId === null) return
       deleteSnapshot(attachId)
-      setValue(
-        'snapshots',
-        snapshots.filter((snapshot) => snapshot.attachId !== attachId),
+      setInternalSnapshots((prev) =>
+        prev.filter((snapshot) => snapshot.attachId !== attachId),
       )
     },
-    [deleteSnapshot, setValue, snapshots],
+    [deleteSnapshot],
   )
 
   const handleDescriptionChange = useCallback(
     (attachId: number | null, value: string) => {
-      console.log('handleDescriptionChange 호출됨', {
-        attachId,
-        value,
-        snapshots,
-        promptAttachList,
-      })
       if (attachId === null) return
-      setValue(
-        'snapshots',
-        snapshots.map((snapshot) =>
+      setInternalSnapshots((prev) =>
+        prev.map((snapshot) =>
           snapshot.attachId === attachId
             ? { ...snapshot, description: value }
             : snapshot,
         ),
       )
     },
-    [setValue, snapshots],
+    [],
   )
 
   const addSnapshot = useCallback(
     (newSnapshot: PromptAttach) => {
-      console.log('addSnapshot 호출됨', {
-        newSnapshot,
-        currentSnapshots: snapshots,
-      })
-      setValue('snapshots', [
-        ...snapshots,
+      const localSnapshot = localSnapshots.find(
+        (localSnapshot) => localSnapshot.snapshotId === newSnapshot.snapshotId,
+      )
+      setInternalSnapshots((prev) => [
+        ...prev,
         {
           attachId: newSnapshot.attachId,
           snapshotId: newSnapshot.snapshotId,
           description: newSnapshot.description,
-          snapshotContent: '',
-          snapshotName: '',
+          snapshotContent: localSnapshot?.snapshotContent ?? '',
+          snapshotName: localSnapshot?.snapshotName ?? '',
         },
       ])
     },
-    [snapshots, setValue],
+    [localSnapshots],
   )
 
   return {
-    snapshots,
+    snapshots: internalSnapshots,
     handleDeleteSnapshot,
     handleDescriptionChange,
     addSnapshot,

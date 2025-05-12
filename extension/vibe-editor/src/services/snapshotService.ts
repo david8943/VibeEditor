@@ -1,6 +1,11 @@
 import * as vscode from 'vscode'
 
-import { addSnapshot, getSnapshotDetail } from '../apis/snapshot'
+import {
+  addSnapshot,
+  getSnapshotDetail,
+  removeSnapshot,
+  updateSnapshot,
+} from '../apis/snapshot'
 import { getDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import {
@@ -14,6 +19,7 @@ import { SnapshotItem } from '../views/codeSnapshotView'
 
 let codeProviderInstance: SnapshotProvider | undefined
 let directoryProviderInstance: SnapshotProvider | undefined
+
 let logProviderInstance: SnapshotProvider | undefined
 
 export function setCodeSnapshotProvider(provider: SnapshotProvider) {
@@ -110,7 +116,7 @@ export class SnapshotService {
     return currentTemplate?.snapshotList ?? []
   }
 
-  public async deleteSnapshot(snapshot: SnapshotItem): Promise<void> {
+  public async deleteSnapshot(snapshotId: number): Promise<void> {
     let selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
     if (!selectedTemplateId) {
       vscode.window.showInformationMessage(`선택한 템플릿이 없습니다.`)
@@ -121,12 +127,15 @@ export class SnapshotService {
       [],
     )
 
+    const success = await removeSnapshot(snapshotId)
+    if (success) {
+    }
     const updatedTemplates = prevTemplates.map((t) => {
       if (t.templateId === selectedTemplateId) {
         return {
           ...t,
           snapshotList: t.snapshotList?.filter(
-            (s) => s.snapshotId !== snapshot.snapshot.snapshotId,
+            (s) => s.snapshotId !== snapshotId,
           ),
         }
       }
@@ -166,8 +175,14 @@ export class SnapshotService {
       .then(async (value) => {
         if (value) {
           snapshot.snapshotName = value
-          await this.context.globalState.update('templates', templates)
-          refreshAllProviders()
+          const success = await updateSnapshot({
+            snapshotId: snapshotId,
+            snapshotName: snapshot.snapshotName,
+          })
+          if (success) {
+            await this.context.globalState.update('templates', templates)
+            refreshAllProviders()
+          }
         }
       })
   }
@@ -219,13 +234,55 @@ export class SnapshotService {
     await vscode.window.showTextDocument(doc)
   }
 
-  public async viewCodeSnapshot(snapshotId: number): Promise<void> {
+  public async updateCodeSnapshot(
+    snapshotId: number,
+  ): Promise<Snapshot | null> {
     const result = await getSnapshotDetail(snapshotId)
     if (!result.success) {
       vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      return null
+    }
+    const {
+      snapshotName,
+      snapshotType,
+      snapshotContent,
+      createdAt,
+      updatedAt,
+    } = result.data
+
+    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    if (selectedTemplateId) {
+      const templates = this.context.globalState.get<Template[]>(
+        'templates',
+        [],
+      )
+      const localTemplate = templates.find(
+        (t) => t.templateId == selectedTemplateId,
+      )
+      if (localTemplate) {
+        const localSnapshot = localTemplate.snapshotList?.find(
+          (s) => s.snapshotId == snapshotId,
+        )
+        if (localSnapshot) {
+          localSnapshot.snapshotName = snapshotName
+          localSnapshot.snapshotType = snapshotType
+          localSnapshot.snapshotContent = snapshotContent
+          localSnapshot.updatedAt = updatedAt
+          localSnapshot.createdAt = createdAt
+          await this.context.globalState.update('templates', templates)
+          return localSnapshot
+        }
+      }
+    }
+    return null
+  }
+
+  public async viewCodeSnapshot(snapshotId: number): Promise<void> {
+    const snapshot = await this.updateCodeSnapshot(snapshotId)
+    if (!snapshot) {
+      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
       return
     }
-    const snapshot = result.data
     const panel = vscode.window.createWebviewPanel(
       'captureCodeSnapshot',
       `📸 ${snapshot.snapshotName}`,

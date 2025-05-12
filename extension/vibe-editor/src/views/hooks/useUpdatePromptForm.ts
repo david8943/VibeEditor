@@ -48,7 +48,14 @@ export const useUpdatePromptForm = ({
       promptName: defaultPrompt.promptName,
       postType: defaultPrompt.postType,
       comment: defaultPrompt.comment,
-      snapshots: [],
+      snapshots:
+        defaultPrompt.promptAttachList?.map((attach) => ({
+          attachId: attach.attachId,
+          snapshotId: attach.snapshotId,
+          description: attach.description,
+          snapshotContent: '',
+          snapshotName: '',
+        })) ?? [],
       options: {},
     }
     return editPrompt
@@ -68,9 +75,11 @@ export const useUpdatePromptForm = ({
   })
 
   useEffect(() => {
-    const newDefaultValues = setDefaultValues(defaultPrompt)
-    reset(newDefaultValues)
-  }, [defaultPrompt, reset])
+    if (defaultPrompt?.promptId) {
+      const newDefaultValues = setDefaultValues(defaultPrompt)
+      reset(newDefaultValues)
+    }
+  }, [defaultPrompt?.promptId, reset])
 
   const editPromptToPrompt = (editPrompt: EditPrompt): Prompt => {
     return {

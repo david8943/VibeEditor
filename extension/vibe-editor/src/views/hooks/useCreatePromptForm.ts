@@ -12,6 +12,7 @@ interface UseCreatePromptFormReturn {
     register: any
     handleSubmit: any
     setValue: any
+    watch: any
   }
   onSubmit: (data: EditPrompt) => void
   handlePost: null
@@ -38,7 +39,7 @@ export const useCreatePromptForm = ({
 
   const defaultValues = setDefaultValues(defaultPrompt)
 
-  const { register, handleSubmit, setValue } = useForm<EditPrompt>({
+  const { register, handleSubmit, setValue, watch } = useForm<EditPrompt>({
     defaultValues,
   })
 
@@ -73,6 +74,7 @@ export const useCreatePromptForm = ({
       register,
       handleSubmit,
       setValue,
+      watch,
     },
     onSubmit,
     handlePost: null,

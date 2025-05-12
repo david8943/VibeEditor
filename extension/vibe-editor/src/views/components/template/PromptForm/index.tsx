@@ -1,7 +1,13 @@
 import React, { useEffect } from 'react'
 
 import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, Option, Prompt, UpdatePrompt } from '@/types/template'
+import {
+  CreatePrompt,
+  EditPrompt,
+  Option,
+  Prompt,
+  UpdatePrompt,
+} from '@/types/template'
 
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
@@ -29,7 +35,7 @@ export function PromptForm({
 }: PromptFormProps) {
   const {
     formMethods: { register, handleSubmit, watch, setValue },
-    onSubmit,
+    onSubmit: originalOnSubmit,
     handlePost,
   } = useUpdatePromptForm({
     defaultPrompt,
@@ -37,10 +43,11 @@ export function PromptForm({
     updatePrompt,
   })
 
-  const { options, handleOption } = usePromptOptions({
+  const { options, handleOption, updateFormOptions } = usePromptOptions({
     optionList,
     promptOptionList: defaultPrompt?.promptOptionList ?? [],
     setValue,
+    watch,
   })
 
   const {
@@ -54,6 +61,14 @@ export function PromptForm({
     deleteSnapshot,
     setValue,
   })
+
+  const onSubmit = async (data: EditPrompt) => {
+    const updatedOptions = await updateFormOptions()
+    originalOnSubmit({
+      ...data,
+      options: updatedOptions,
+    })
+  }
 
   useEffect(() => {
     console.log('프롬프트폼useEffect selectedPromptId', selectedPromptId)
