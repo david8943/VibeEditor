@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 
 import { DraftDataType } from '../types/configuration'
 
+//Test
 const initialDraftData: Record<DraftDataType, unknown> = {
   [DraftDataType.loginStatus]: false,
   [DraftDataType.notionStatus]: false,
