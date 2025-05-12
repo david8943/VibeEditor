@@ -101,24 +101,25 @@ export class ViewLoader {
   }
   private async getTemplate() {
     console.log('ViewLoader getTemplate')
-    const templates = await this.templateService.getTemplates()
     const selectedTemplateId = Number(
       getDraftData(DraftDataType.selectedTemplateId),
     )
     const template = await this.templateService.getTemplate(selectedTemplateId)
-    let selectedTemplate = templates.find(
-      (template) => template.templateId === selectedTemplateId,
-    )
-    if (selectedTemplate) {
-      this.currentTemplateId = selectedTemplate.templateId
+
+    if (template) {
+      this.currentTemplateId = template.templateId
+      this.panel.webview.postMessage({
+        type: MessageType.TEMPLATE_SELECTED,
+        payload: { template: template },
+      })
     } else {
-      this.currentTemplateId = templates[0]?.templateId
-      selectedTemplate = templates[0]
+      // const templates = await this.templateService.getTemplates()
+      // let selectedTemplate = templates.find(
+      //   (template) => template.templateId === selectedTemplateId,
+      // )
+      // this.currentTemplateId = templates[0]?.templateId
+      // selectedTemplate = templates[0]
     }
-    this.panel.webview.postMessage({
-      type: MessageType.TEMPLATE_SELECTED,
-      payload: { template: selectedTemplate },
-    })
   }
 
   private async getSnapshots() {
