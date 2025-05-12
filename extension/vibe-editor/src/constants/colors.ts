@@ -23,3 +23,5 @@ export const vscodeTheme = {
   fontFamily: 'var(--vscode-editor-font-family)',
   color: color,
 }
+
+//Test
