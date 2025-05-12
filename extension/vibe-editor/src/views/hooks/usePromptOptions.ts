@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { UseFormSetValue, UseFormWatch } from 'react-hook-form'
 
 import { EditOptionList, EditPrompt, Option } from '../../types/template'
@@ -13,6 +13,7 @@ interface UsePromptOptionsProps {
 interface UsePromptOptionsReturn {
   options: EditOptionList
   handleOption: (optionName: string, optionId: number) => void
+  updateFormOptions: () => Promise<EditOptionList>
 }
 
 export const usePromptOptions = ({
@@ -43,27 +44,28 @@ export const usePromptOptions = ({
     setLocalOptions(editOptionList)
   }, [optionList, promptOptionList])
 
-  const options = useMemo(() => {
-    return localOptions
-  }, [localOptions])
-
-  const handleOption = useCallback(
-    (optionName: string, optionId: number) => {
-      const currentOptions = localOptions[optionName]
+  const handleOption = useCallback((optionName: string, optionId: number) => {
+    setLocalOptions((prevOptions) => {
+      const currentOptions = prevOptions[optionName]
       const updatedOptions = currentOptions.map((option) => ({
         ...option,
         isSelected: option.optionId === optionId,
       }))
-      setLocalOptions({
-        ...localOptions,
+      return {
+        ...prevOptions,
         [optionName]: updatedOptions,
-      })
-    },
-    [localOptions],
-  )
+      }
+    })
+  }, [])
+
+  const updateFormOptions = useCallback(async () => {
+    await setValue('options', localOptions, { shouldValidate: true })
+    return localOptions
+  }, [localOptions, setValue])
 
   return {
-    options,
+    options: localOptions,
     handleOption,
+    updateFormOptions,
   }
 }

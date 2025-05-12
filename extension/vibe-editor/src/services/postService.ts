@@ -27,7 +27,7 @@ export class PostItem extends vscode.TreeItem {
     this.contextValue = 'vibeEditorPostList'
     this.iconPath = post.isLoading
       ? new vscode.ThemeIcon('sync~spin')
-      : new vscode.ThemeIcon('symbol-snippet')
+      : new vscode.ThemeIcon('book')
   }
 }
 
