@@ -51,11 +51,13 @@ export class FileSnapshotCommand implements ICommand {
         snapshotContent: treeText,
         localTemplates,
       })
+      if (success) {
+        vscode.window.showInformationMessage('📸 파일 스냅샷이 저장되었습니다!')
+      }
       if (!success) {
-        vscode.window.showInformationMessage('스냅샷 생성에 실패했습니다.')
+        vscode.window.showErrorMessage('스냅샷 생성에 실패했습니다.')
         return
       }
-
       await this.snapshotService.openTextDocument(treeText)
     }
     const selectedTemplateId: number | undefined = getDraftData(

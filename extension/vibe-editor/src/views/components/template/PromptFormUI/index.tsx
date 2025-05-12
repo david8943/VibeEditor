@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import MinusIcon from '@/assets/icons/minus_circle.svg'
 import {
@@ -37,6 +37,19 @@ export function PromptFormUI({
   handleDeleteSnapshot,
   handleDescriptionChange,
 }: PromptFormUIProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        handleSubmit(onSubmit)()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

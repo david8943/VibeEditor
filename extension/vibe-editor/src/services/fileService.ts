@@ -22,7 +22,6 @@ export class FileService {
     try {
       const fileContent = fs.readFileSync(filePath)
       let result = fileContent.toString()
-      vscode.window.showInformationMessage('📸 파일 스냅샷이 저장되었습니다!')
       vscode.commands.executeCommand(
         'workbench.view.extension.vibeEditorCodeSnapshot',
       )

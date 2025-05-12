@@ -47,9 +47,13 @@ export const usePromptOptions = ({
   const handleOption = useCallback((optionName: string, optionId: number) => {
     setLocalOptions((prevOptions) => {
       const currentOptions = prevOptions[optionName]
+      const clickedOption = currentOptions.find(
+        (option) => option.optionId === optionId,
+      )
+      const isAlreadySelected = clickedOption?.isSelected
       const updatedOptions = currentOptions.map((option) => ({
         ...option,
-        isSelected: option.optionId === optionId,
+        isSelected: isAlreadySelected ? false : option.optionId === optionId,
       }))
       return {
         ...prevOptions,

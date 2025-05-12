@@ -42,8 +42,13 @@ export class DirectoryTreeCommand implements ICommand {
       snapshotContent: treeText,
       localTemplates,
     })
+    if (success) {
+      vscode.window.showInformationMessage(
+        '📸 디렉토리 트리 스냅샷이 저장되었습니다!',
+      )
+    }
     if (!success) {
-      vscode.window.showInformationMessage('스냅샷 생성에 실패했습니다.')
+      vscode.window.showErrorMessage('스냅샷 생성에 실패했습니다.')
       return
     }
     const selectedTemplateId: number | undefined = getDraftData(

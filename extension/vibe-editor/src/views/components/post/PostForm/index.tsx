@@ -59,7 +59,7 @@ export function PostForm({ onSubmit, defaultPost }: PostFormProps) {
       <button
         type="submit"
         className="submit-button">
-        포스트 생성
+        Notion에 게시
       </button>
     </form>
   )

@@ -312,7 +312,6 @@ export class TemplateService {
           console.log('result', result)
           if (result.success) {
             const createdPost: Post = result.data
-            prev.filter((post) => post.postId !== loadingPost.postId)
             const newPost: PostDetail = {
               postId: createdPost.postId,
               postTitle: createdPost.postTitle,
@@ -324,9 +323,25 @@ export class TemplateService {
               parentPostIdList: [],
             }
             prev.push(newPost)
-            await this.context.globalState.update('posts', prev)
+            setDraftData(DraftDataType.selectedPostId, createdPost.postId)
+            ViewLoader.currentPanel?.webview.postMessage({
+              type: MessageType.NAVIGATE,
+              payload: {
+                page: PageType.POST,
+              },
+            })
             refreshPostProvider()
+            await this.context.globalState.update(
+              'posts',
+              prev.filter((post) => post.postId !== loadingPost.postId),
+            )
             return createdPost
+          } else {
+            await this.context.globalState.update(
+              'posts',
+              prev.filter((post) => post.postId !== loadingPost.postId),
+            )
+            refreshPostProvider()
           }
         }
       })

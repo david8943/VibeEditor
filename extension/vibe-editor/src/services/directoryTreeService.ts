@@ -24,9 +24,6 @@ export class DirectoryTreeService {
       }
 
       if (prefix === '') {
-        vscode.window.showInformationMessage(
-          '📸 디렉토리 트리 스냅샷이 저장되었습니다!',
-        )
         vscode.commands.executeCommand(
           'workbench.view.extension.vibeEditorDirectoryTreeSnapshot',
         )
