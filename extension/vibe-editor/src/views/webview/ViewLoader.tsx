@@ -41,6 +41,7 @@ export class ViewLoader {
   private disposables: vscode.Disposable[]
   private currentPage: string
   private currentTemplateId?: number
+  private readonly extensionPath: string
 
   constructor(context: vscode.ExtensionContext, initialPage: PageType) {
     this.context = context
@@ -49,6 +50,7 @@ export class ViewLoader {
     this.snapshotService = new SnapshotService(context)
     this.postService = new PostService(context)
     this.currentPage = initialPage
+    this.extensionPath = context.extensionPath
 
     this.panel = vscode.window.createWebviewPanel(
       'vibeEditor',
@@ -343,6 +345,15 @@ export class ViewLoader {
           await this.getTemplate()
         } else if (message.type === MessageType.GET_OPTIONS) {
           await this.getOptions()
+        } else if (message.type === MessageType.SHOW_README) {
+          const readmePath = path.join(this.context.extensionPath, 'README.md')
+          console.log('README path:', readmePath)
+          try {
+            const uri = vscode.Uri.file(readmePath)
+            await vscode.commands.executeCommand('markdown.showPreview', uri)
+          } catch (error) {
+            console.error('README 열기 실패:', error)
+          }
         }
       },
       null,
