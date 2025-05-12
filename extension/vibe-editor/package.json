@@ -22,6 +22,26 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "vibeEditor.captureCodeSnapshot",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "vibeEditor.copyCode",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "terminalFocus"
+      },
+      {
+        "command": "vibeEditor.exportDirectoryTreeSnapshot",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "explorerFocus"
+      }
+    ],
     "views": {
       "vibeEditorViewer": [
         {
