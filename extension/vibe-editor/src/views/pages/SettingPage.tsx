@@ -65,7 +65,16 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   return (
     <div className="min-h-screen w-full p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Vibe Editor 설정</h1>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="text-2xl font-bold">Vibe Editor 설정</div>
+          <button
+            className="text-base font-medium px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() =>
+              postMessageToExtension({ type: MessageType.SHOW_README })
+            }>
+            이용 가이드
+          </button>
+        </div>
         <div className="rounded-lg shadow-lg p-6">
           <div className="space-y-8">
             {loginStatus && (
