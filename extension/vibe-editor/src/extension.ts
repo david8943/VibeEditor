@@ -1,3 +1,5 @@
+import * as fs from 'fs'
+import * as path from 'path'
 import * as vscode from 'vscode'
 
 import { setExtensionContext } from './apis/api'
@@ -83,6 +85,26 @@ async function registerProvider(context: vscode.ExtensionContext) {
   setPostProvider(pp)
 }
 
+async function maybeShowReadme(context: vscode.ExtensionContext) {
+  const key = 'vibeEditor.hasShownReadme'
+  const hasShown = context.globalState.get<boolean>(key)
+
+  if (!hasShown) {
+    const readmePath = path.join(context.extensionPath, 'README.md')
+    const readmeUri = vscode.Uri.file(readmePath)
+
+    try {
+      const doc = await vscode.workspace.openTextDocument(readmeUri)
+      await vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true)
+      await vscode.commands.executeCommand('markdown.showPreview', readmeUri)
+    } catch (error) {
+      console.error('README 띄우기 실패:', error)
+    }
+
+    await context.globalState.update(key, true)
+  }
+}
+
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
@@ -90,6 +112,7 @@ export async function activate(
   await registerCommand(context)
   await setUser(context)
   await registerProvider(context)
+  await maybeShowReadme(context)
   addStatusBarItem(context)
 
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
