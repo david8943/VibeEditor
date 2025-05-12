@@ -12,5 +12,5 @@ export const formatTime = (timestamp: string) => {
   }
   const nowKST = utcToZonedTime(new Date(), timeZone)
 
-  return format(nowKST, 'PPPppp', { timeZone, locale: ko })
+  return format(nowKST, 'PPpp', { timeZone, locale: ko })
 }

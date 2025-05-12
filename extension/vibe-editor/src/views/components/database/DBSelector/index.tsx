@@ -44,7 +44,20 @@ export const DBSelector: React.FC<Props> = ({
 
   return (
     <div className="form-group">
-      <label>노션 데이터베이스</label>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <label>노션 데이터베이스</label>
+        <button
+          className="small-square-button"
+          onClick={onAddClick}>
+          +
+        </button>
+      </div>
+
       {/* 셀렉터 박스 */}
       <div
         onClick={() => setOpen((prev) => !prev)}
@@ -122,13 +135,6 @@ export const DBSelector: React.FC<Props> = ({
           ))}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={onAddClick}
-        style={{ marginTop: '0.5rem' }}>
-        추가하기
-      </button>
     </div>
   )
 }
