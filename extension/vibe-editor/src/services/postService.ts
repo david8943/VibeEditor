@@ -95,16 +95,6 @@ export class PostService {
     if (result.success) {
       postUrl = result.data.postUrl
     }
-    // const newPost: PostDetail = {
-    //   postId: Date.now(),
-    //   postTitle: '포스트 제목 예시',
-    //   postContent: '포스트 내용 예시',
-    //   templateId: 0, // 필요시 추후 포함
-    //   promptId: data.promptId,
-    //   parentPostIdList: [],
-    //   createdAt: new Date().toISOString(),
-    //   updatedAt: new Date().toISOString(),
-    // }
     const prev = this.context.globalState.get<PostDetail[]>('posts', [])
     const filtered = prev.filter((post) => post.postId < 1700000000000)
     await this.context.globalState.update('posts', filtered)

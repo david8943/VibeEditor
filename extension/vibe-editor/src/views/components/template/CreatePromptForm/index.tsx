@@ -26,7 +26,7 @@ export function CreatePromptForm({
   selectedPromptId,
 }: CreatePromptFormProps) {
   const {
-    formMethods: { register, handleSubmit, setValue },
+    formMethods: { register, handleSubmit, setValue, watch },
     onSubmit,
     handlePost,
   } = useCreatePromptForm({
@@ -38,6 +38,7 @@ export function CreatePromptForm({
     optionList,
     promptOptionList: defaultPrompt?.promptOptionList || [],
     setValue,
+    watch,
   })
 
   const {

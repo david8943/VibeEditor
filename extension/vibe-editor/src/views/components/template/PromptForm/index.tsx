@@ -41,6 +41,7 @@ export function PromptForm({
     optionList,
     promptOptionList: defaultPrompt?.promptOptionList ?? [],
     setValue,
+    watch,
   })
 
   const {
