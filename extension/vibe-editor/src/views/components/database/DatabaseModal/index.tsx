@@ -24,8 +24,8 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black/60 flex justify-center items-center z-50">
-      <div className="bg-gray-900 p-6 rounded-lg text-white w-96">
+    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 vscode-overlay-background">
+      <div className="bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorWidget-border)] p-6 rounded-lg text-[var(--vscode-editor-foreground)] w-96">
         <h2 className="text-xl mb-4">데이터베이스를 등록해주세요</h2>
         <input
           className="w-full p-2 mb-2 bg-gray-800 border border-gray-600"

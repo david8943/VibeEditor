@@ -61,3 +61,46 @@ button {
 button:hover {
   background: var(--vscode-button-hoverBackground);
 }
+
+.border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--vscode-editorWidget-border);
+}
+
+.small-square-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.notion-status-active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-radius: 9999px; /* rounded-full 효과 */
+  padding: 4px 12px;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.notion-status-inactive {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+}
+
+.vscode-overlay-background {
+  background-color: rgba(0, 0, 0, 0.6);
+}

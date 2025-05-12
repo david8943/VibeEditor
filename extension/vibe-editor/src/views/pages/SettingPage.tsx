@@ -84,7 +84,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                 </h2>
                 {computedUser && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div className="rounded-lg p-6 space-y-4 border">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
                           <svg
@@ -104,7 +104,11 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                           </h3>
                         </div>
                         <div
-                          className={`px-3 py-1 rounded-full text-sm ${computedUser.notionActive ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          className={
+                            computedUser.notionActive
+                              ? 'notion-status-active'
+                              : 'notion-status-inactive'
+                          }>
                           {computedUser.notionActive ? '활성화' : '비활성화'}
                         </div>
                       </div>
@@ -124,7 +128,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                             />
                           </svg>
                           <h3 className="text-base font-medium">
-                            마지막 로그인 일시
+                            마지막 로그인
                           </h3>
                         </div>
                         <div className="text-sm">
@@ -133,7 +137,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <div className="rounded-lg p-6 space-y-4 border">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
                           <svg
@@ -168,7 +172,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                             />
                           </svg>
                           <h3 className="text-base font-medium">
-                            유저 정보 변경일
+                            유저 정보 변경
                           </h3>
                         </div>
                         <div className="text-sm">{computedUser.updatedAt}</div>
