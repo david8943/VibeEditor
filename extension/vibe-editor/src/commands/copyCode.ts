@@ -29,7 +29,10 @@ export class CopyCodeCommand implements ICommand {
   public async execute(): Promise<void> {
     const localTemplates: Template[] =
       await this.templateService.getLocalTemplates()
-
+    if (localTemplates.length == 0) {
+      vscode.window.showInformationMessage(`템플릿이 없습니다.`)
+      await this.templateService.createTemplate()
+    }
     const copyText = await this.snapshotService.copyCode()
 
     const success = await this.snapshotService.createSnapshot({

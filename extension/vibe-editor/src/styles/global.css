@@ -64,9 +64,6 @@ button.unselected {
   border: 1px solid var(--vscode-button-background);
 }
 
-button.selected {
-}
-
 button:hover:not(.unselected) {
   background: var(--vscode-button-hoverBackground);
 }

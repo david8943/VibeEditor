@@ -325,11 +325,9 @@ export class TemplateService {
             prev.push(newPost)
             setDraftData(DraftDataType.selectedPostId, createdPost.postId)
             ViewLoader.currentPanel?.webview.postMessage({
-              type: MessageType.NAVIGATE,
-              payload: {
-                page: PageType.POST,
-              },
+              type: MessageType.GET_CURRENT_POST,
             })
+            // ViewLoader.showWebview(this.context, PageType.POST)
             refreshPostProvider()
             await this.context.globalState.update(
               'posts',

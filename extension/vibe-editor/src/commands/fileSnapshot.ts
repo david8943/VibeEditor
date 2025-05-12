@@ -39,7 +39,10 @@ export class FileSnapshotCommand implements ICommand {
 
     const localTemplates: Template[] =
       await this.templateService.getLocalTemplates()
-
+    if (localTemplates.length == 0) {
+      vscode.window.showInformationMessage(`템플릿이 없습니다.`)
+      await this.templateService.createTemplate()
+    }
     for (const fileUri of selectedUris) {
       const treeText = await this.fileService.captureFileSnapshot(
         fileUri.fsPath,
