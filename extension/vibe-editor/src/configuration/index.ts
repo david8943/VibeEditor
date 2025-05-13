@@ -1,9 +1,15 @@
 import * as vscode from 'vscode'
 
-interface ConfigSchema {}
+interface ConfigSchema {
+  defaultPostType: 'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
+  defaultPromptOptionIds: number[]
+}
 
 // 기본값 정의
-const defaultConfig: ConfigSchema = {}
+const defaultConfig: ConfigSchema = {
+  defaultPostType: 'TECH_CONCEPT',
+  defaultPromptOptionIds: [],
+}
 
 export class Configuration {
   private static readonly configSection = 'vibeEditor'
@@ -15,10 +21,24 @@ export class Configuration {
     return value ?? this.currentConfig[key]
   }
 
+  public static getAll(): ConfigSchema {
+    const config = vscode.workspace.getConfiguration(this.configSection)
+    return {
+      defaultPostType:
+        config.get('defaultPostType') ?? defaultConfig.defaultPostType,
+      defaultPromptOptionIds:
+        config.get('defaultPromptOptionIds') ??
+        defaultConfig.defaultPromptOptionIds,
+    }
+  }
+
   public static async set<K extends keyof ConfigSchema>(
     key: K,
     value: ConfigSchema[K],
   ): Promise<void> {
+    console.log('[CONFIG SET]', key, value)
+    console.log('[CONFIG TYPE]', typeof value, Array.isArray(value))
+
     this.currentConfig[key] = value
     try {
       const config = vscode.workspace.getConfiguration(this.configSection)

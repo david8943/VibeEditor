@@ -58,6 +58,12 @@ button {
   border: none;
 }
 
+button.selected {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+}
+
 button.unselected {
   background: var(--vscode-button-foreground);
   color: var(--vscode-button-background);

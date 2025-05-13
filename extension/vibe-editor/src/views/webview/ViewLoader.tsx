@@ -6,6 +6,7 @@ import {
   removeNotionDatabase,
   retrieveNotionDatabases,
 } from '../../apis/notion'
+import { Configuration } from '../../configuration'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { PostService } from '../../services/postService'
 import { SnapshotService } from '../../services/snapshotService'
@@ -208,6 +209,7 @@ export class ViewLoader {
 
   private async getOptions() {
     const options = await this.templateService.getOptions()
+    console.log('📦 [getOptions] 최종 반환:', options)
     this.panel.webview.postMessage({
       type: MessageType.OPTIONS_LOADED,
       payload: options,
@@ -355,6 +357,12 @@ export class ViewLoader {
           } catch (error) {
             console.error('README 열기 실패:', error)
           }
+        } else if (message.type === MessageType.GET_CONFIG) {
+          const config = Configuration.getAll()
+          this.panel.webview.postMessage({
+            type: MessageType.CONFIG_LOADED,
+            payload: config,
+          })
         }
       },
       null,

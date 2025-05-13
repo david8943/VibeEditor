@@ -6,7 +6,9 @@ import {
   removeNotionDatabase,
   retrieveNotionDatabases,
 } from '../../apis/notion'
+import { getOptionList } from '../../apis/prompt'
 import { getCurrentUser } from '../../apis/user'
+import { Configuration } from '../../configuration'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
@@ -198,6 +200,25 @@ export class SettingViewLoader {
           } catch (error) {
             console.error('README 열기 실패:', error)
           }
+        } else if (message.type === MessageType.GET_OPTIONS) {
+          const result = await getOptionList()
+          if (result.success) {
+            this.panel.webview.postMessage({
+              type: MessageType.OPTIONS_LOADED,
+              payload: result.data,
+            })
+          } else {
+            vscode.window.showErrorMessage('옵션 데이터를 불러오지 못했습니다.')
+          }
+        } else if (message.type === MessageType.SET_CONFIG_VALUE) {
+          const { key, value } = message.payload
+          await Configuration.set(key, value)
+        } else if (message.type === MessageType.GET_CONFIG) {
+          const config = Configuration.getAll()
+          this.panel.webview.postMessage({
+            type: MessageType.CONFIG_LOADED,
+            payload: config,
+          })
         }
       },
       null,

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { CreateDatabase } from '../../types/database'
+import type { Option } from '../../types/template'
 import { User } from '../../types/user'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { formatTime } from '../../utils/formatTime'
@@ -17,9 +18,11 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   })
   const [showDbModal, setShowDbModal] = useState(false)
   const [selectedDbId, setSelectedDbId] = useState(0)
+
   useEffect(() => {
     postMesasgeTypeToExtension(MessageType.GET_LOGIN_STATUS)
   }, [])
+
   const saveDatabase = (database: CreateDatabase) =>
     postMessageToExtension({
       type: MessageType.SAVE_DATABASE,
@@ -46,22 +49,36 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
     }
   }, [user])
 
+  const postMesasgeTypeToExtension = (type: MessageType) =>
+    postMessageToExtension({ type })
+
+  useEffect(() => {
+    postMessageToExtension({ type: MessageType.GET_OPTIONS })
+    postMessageToExtension({ type: MessageType.GET_CONFIG })
+  }, [])
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
+
       if (message.type === MessageType.LOGIN_STATUS_LOADED) {
         setLoginStatus(message.payload)
       } else if (message.type === MessageType.USER_LOADED) {
         setUser(message.payload)
+      } else if (message.type === MessageType.OPTIONS_LOADED) {
+        setOptionList(message.payload)
+      } else if (message.type === MessageType.CONFIG_LOADED) {
+        setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
       }
     }
+
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const postMesasgeTypeToExtension = (type: MessageType) =>
-    postMessageToExtension({ type })
-
+  const [optionList, setOptionList] = useState<Option[]>([])
+  const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([])
+  console.log('optionList:', optionList)
   return (
     <div className="min-h-screen w-full p-8">
       <div className="max-w-4xl mx-auto">
@@ -189,20 +206,87 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   }>
                   노션 PRIVATE API 키 설정
                 </button>
-
                 <DBSelector
                   selectedId={selectedDbId}
                   onChange={setSelectedDbId}
                   getDatabases={getDatabases}
                   onAddClick={() => setShowDbModal(true)}
                 />
-
                 {showDbModal && (
                   <DatabaseModal
                     saveDatabase={saveDatabase}
                     onClose={() => setShowDbModal(false)}
                   />
                 )}
+                <div className="form-group">
+                  <label className="text-sm font-medium">
+                    기본 포스트 종류
+                  </label>
+                  <select
+                    defaultValue="TECH_CONCEPT"
+                    onChange={(e) =>
+                      postMessageToExtension({
+                        type: MessageType.SET_CONFIG_VALUE,
+                        payload: {
+                          key: 'defaultPostType',
+                          value: e.target.value,
+                        },
+                      })
+                    }>
+                    <option value="TECH_CONCEPT">CS 개념</option>
+                    <option value="TROUBLE_SHOOTING">트러블 슈팅</option>
+                  </select>
+                </div>
+                {optionList.map((optionGroup) => (
+                  <div
+                    key={optionGroup.optionName}
+                    className="form-group">
+                    <label className="text-sm font-medium">
+                      {optionGroup.optionName}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {optionGroup.optionItems.map((item) => (
+                        <button
+                          key={item.optionId}
+                          onClick={() => {
+                            const groupOptionIds = optionGroup.optionItems.map(
+                              (o) => o.optionId,
+                            )
+                            const isSelected = selectedOptionIds.includes(
+                              item.optionId,
+                            )
+
+                            const updated = isSelected
+                              ? selectedOptionIds.filter(
+                                  (id) => !groupOptionIds.includes(id),
+                                )
+                              : [
+                                  ...selectedOptionIds.filter(
+                                    (id) => !groupOptionIds.includes(id),
+                                  ),
+                                  item.optionId,
+                                ]
+
+                            setSelectedOptionIds(updated)
+                            postMessageToExtension({
+                              type: MessageType.SET_CONFIG_VALUE,
+                              payload: {
+                                key: 'defaultPromptOptionIds',
+                                value: updated,
+                              },
+                            })
+                          }}
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            selectedOptionIds.includes(item.optionId)
+                              ? 'selected'
+                              : 'unselected'
+                          }`}>
+                          {item.value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
                 <button
                   className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() =>
