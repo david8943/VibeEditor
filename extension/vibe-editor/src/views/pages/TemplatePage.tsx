@@ -36,6 +36,15 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     promptOptionList: [],
     notionDatabaseId: 0,
   })
+  const [notionDatabaseId, setNotionDatabaseId] = useState(0)
+  const [showDbModal, setShowDbModal] = useState(false)
+
+  const [defaultPostType, setDefaultPostType] = useState<
+    'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
+  >('TECH_CONCEPT')
+  const [defaultPromptOptionIds, setDefaultPromptOptionIds] = useState<
+    number[]
+  >([])
 
   const initialized = useRef(false)
 
@@ -44,18 +53,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     initialized.current = true
     postMessageToExtension({ type: MessageType.GET_TEMPLATE })
     postMessageToExtension({ type: MessageType.GET_OPTIONS })
+    postMessageToExtension({ type: MessageType.GET_CONFIG })
     const handleMessage = (event: MessageEvent) => {
-      console.log('handleMessage 템플릿 페이지 안에 있음', event)
       const message = event.data
       if (message.type === MessageType.TEMPLATE_SELECTED) {
-        console.log('TEMPLATE_SELECTED', message.payload.template)
         setSelectedTemplate(message.payload.template)
-      } else if (message.type === MessageType.GET_TEMPLATES) {
-        console.log('GET_TEMPLATES')
-        // postMessageToExtension({ type: MessageType.GET_TEMPLATES })
-      } else if (message.type === MessageType.GET_SNAPSHOTS) {
-        console.log('GET_SNAPSHOTS')
-        // postMessageToExtension({ type: MessageType.GET_SNAPSHOTS })
       } else if (message.type === MessageType.OPTIONS_LOADED) {
         setOptionList(message.payload)
       } else if (message.type === MessageType.START_LOADING) {
@@ -68,9 +70,12 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         setNotionDatabaseId(message.payload.prompt.notionDatabaseId)
       } else if (message.type === MessageType.SNAPSHOT_SELECTED) {
         addSnapshotCode(message.payload.snapshot)
+      } else if (message.type === MessageType.CONFIG_LOADED) {
+        const config = message.payload
+        setDefaultPostType(config.defaultPostType)
+        setDefaultPromptOptionIds(config.defaultPromptOptionIds)
       }
     }
-
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
@@ -81,8 +86,8 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       payload: data,
     })
   }
+
   const addSnapshotCode = (data: PromptAttach) => {
-    console.log('addSnapshotCode', data)
     setSelectedPrompt((currentPrompt) => {
       if (!currentPrompt) return currentPrompt
       return {
@@ -91,6 +96,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       }
     })
   }
+
   const updatePrompt = (data: UpdatePrompt) => {
     const prompt = { ...data, notionDatabaseId }
     postMessageToExtension({
@@ -142,12 +148,12 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }
 
   const saveDatabase = (database: CreateDatabase) => {
-    console.log('saveDatabase', database)
     postMessageToExtension({
       type: MessageType.SAVE_DATABASE,
       payload: database,
     })
   }
+
   const getDatabases = () =>
     postMessageToExtension({
       type: MessageType.GET_DATABASE,
@@ -155,7 +161,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
 
   const deleteSnapshot = (attachId: number) => {
-    console.log('deleteSnapshot', attachId)
     postMessageToExtension({
       type: MessageType.DELETE_SNAPSHOT,
       payload: {
@@ -165,38 +170,25 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       },
     })
   }
-  const [notionDatabaseId, setNotionDatabaseId] = useState(0)
-  const [showDbModal, setShowDbModal] = useState(false)
 
   useEffect(() => {
     if (selectedTemplate?.promptList) {
-      // setSelectedPrompt(
-      //   selectedTemplate.promptList.find(
-      //     (prompt) => prompt.promptId === selectedPromptId,
-      //   ) || null,
-      // )
       setCreatePromptData({
         parentPromptId: null,
         templateId: selectedPromptId,
         promptName: '새 프롬프트 생성하기',
-        postType: 'cs',
+        postType: defaultPostType,
         comment: '',
         promptAttachList: [],
-        promptOptionList: [],
+        promptOptionList: defaultPromptOptionIds,
         notionDatabaseId: notionDatabaseId,
       })
     }
-    // console.log('useEffect selectedPrompt', selectedPrompt)
-  }, [selectedTemplate])
-
-  useEffect(() => {
-    console.log('selectedPrompt changed:', selectedPrompt)
-  }, [selectedPrompt])
+  }, [selectedTemplate, defaultPostType, defaultPromptOptionIds])
 
   return (
     <div className="app-container flex flex-col gap-8">
       <h1>프롬프트 생성기 promptId: {selectedPromptId}</h1>
-
       <h1>
         {selectedTemplate?.templateName} templateId:
         {selectedTemplate?.templateId}
@@ -207,12 +199,14 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           <DotLoader color="var(--vscode-button-background)" />
         </div>
       )}
+
       <div className="flex flex-col gap-8">
         <PromptSelector
           selectedTemplate={selectedTemplate}
           selectedPromptId={selectedPromptId}
           selectPromptId={selectPromptId}
         />
+
         <DBSelector
           selectedId={notionDatabaseId}
           onChange={setNotionDatabaseId}
@@ -226,6 +220,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             onClose={() => setShowDbModal(false)}
           />
         )}
+
         {selectedTemplate && selectedPrompt && (
           <PromptForm
             defaultPrompt={selectedPrompt}
@@ -235,8 +230,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             deleteSnapshot={deleteSnapshot}
             localSnapshots={selectedTemplate.snapshotList || []}
             optionList={optionList}
+            defaultPromptOptionIds={defaultPromptOptionIds}
+            defaultPostType={defaultPostType}
           />
         )}
+
         {selectedTemplate && selectedPromptId == 0 && (
           <CreatePromptForm
             defaultPrompt={createPromptData}
@@ -245,6 +243,8 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             deleteSnapshot={deleteSnapshot}
             localSnapshots={selectedTemplate.snapshotList || []}
             optionList={optionList}
+            defaultPromptOptionIds={defaultPromptOptionIds}
+            defaultPostType={defaultPostType}
           />
         )}
       </div>

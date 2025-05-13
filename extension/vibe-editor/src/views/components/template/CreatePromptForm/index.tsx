@@ -15,6 +15,8 @@ interface CreatePromptFormProps {
   deleteSnapshot: (snapshotId: number) => void
   optionList: Option[]
   selectedPromptId: number
+  defaultPromptOptionIds: number[]
+  defaultPostType: 'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
 }
 
 export function CreatePromptForm({
@@ -24,19 +26,32 @@ export function CreatePromptForm({
   deleteSnapshot,
   optionList,
   selectedPromptId,
+  defaultPromptOptionIds,
+  defaultPostType,
 }: CreatePromptFormProps) {
+  const initializedPrompt = defaultPrompt ?? {
+    postType: defaultPostType,
+    promptName: '',
+    comment: '',
+    promptOptionList: defaultPromptOptionIds,
+    promptAttachList: [],
+    notionDatabaseId: 0,
+    templateId: 0,
+    parentPromptId: null,
+  }
+
   const {
     formMethods: { register, handleSubmit, setValue, watch },
     onSubmit,
     handlePost,
   } = useCreatePromptForm({
-    defaultPrompt,
+    defaultPrompt: initializedPrompt,
     createPrompt,
   })
 
   const { options, handleOption } = usePromptOptions({
     optionList,
-    promptOptionList: defaultPrompt?.promptOptionList || [],
+    promptOptionList: initializedPrompt.promptOptionList,
     setValue,
     watch,
   })
@@ -48,7 +63,7 @@ export function CreatePromptForm({
     addSnapshot,
   } = usePromptSnapshots({
     localSnapshots,
-    promptAttachList: defaultPrompt?.promptAttachList ?? [],
+    promptAttachList: initializedPrompt.promptAttachList,
     deleteSnapshot,
     setValue,
   })

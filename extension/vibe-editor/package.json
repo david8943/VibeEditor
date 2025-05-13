@@ -298,6 +298,19 @@
           "type": "number",
           "default": 0,
           "description": "선택된 프롬프트 ID"
+        },
+        "vibeEditor.defaultPostType": {
+          "type": "string",
+          "default": "TECH_CONCEPT",
+          "description": "기본 포스트 종류"
+        },
+        "vibeEditor.defaultPromptOptionIds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [],
+          "description": "기본 선택 옵션 ID 목록"
         }
       }
     }

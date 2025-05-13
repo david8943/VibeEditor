@@ -471,6 +471,7 @@ export class TemplateService {
       return optionList
     }
     const options = await getOptionList()
+    console.log('🌐 [getOptionList] 응답:', options)
     if (options.success) {
       setDraftData(DraftDataType.optionList, options.data)
       return options.data
