@@ -85,7 +85,7 @@
     "viewsWelcome": [
       {
         "view": "vibeEditorViewerPage",
-        "contents": "Vibe Editor에 로그인이 필요합니다.\n[Google Login](command:vibeEditor.googleLogin)\n[GitHub Login](command:vibeEditor.githubLogin)",
+        "contents": "Vibe Editor에 로그인이 필요합니다.\n[구글 로그인](command:vibeEditor.googleLogin)\n[깃허브 로그인](command:vibeEditor.githubLogin)\n[싸피 로그인](command:vibeEditor.ssafyLogin)",
         "when": "vibeEditor.draftData.loginStatus == false"
       },
       {
@@ -117,6 +117,11 @@
       {
         "command": "vibeEditor.githubLogin",
         "title": "GitHub 로그인",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.ssafyLogin",
+        "title": "SSAFY 로그인",
         "category": "Vibe Editor"
       },
       {

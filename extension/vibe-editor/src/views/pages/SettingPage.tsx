@@ -345,6 +345,13 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   }>
                   깃허브 로그인
                 </button>
+                <button
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(MessageType.SSAFY_LOGIN)
+                  }>
+                  싸피 로그인
+                </button>
               </div>
             )}
           </div>

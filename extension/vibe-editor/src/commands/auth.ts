@@ -37,6 +37,23 @@ export class GithubLoginCommand implements ICommand {
   }
 }
 
+export class SSAFYLoginCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.ssafyLogin'
+  private authService: AuthService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.authService = new AuthService(context)
+  }
+
+  public get commandName(): string {
+    return SSAFYLoginCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    await this.authService.ssafyLogin()
+  }
+}
+
 export class LogoutCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.logout'
   private authService: AuthService

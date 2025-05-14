@@ -121,6 +121,10 @@ export class SettingViewLoader {
     vscode.commands.executeCommand('vibeEditor.githubLogin')
   }
 
+  private async ssafyLogin() {
+    vscode.commands.executeCommand('vibeEditor.ssafyLogin')
+  }
+
   private async setNotionSecretKey() {
     vscode.commands.executeCommand('vibeEditor.setNotionApi')
   }
@@ -187,6 +191,8 @@ export class SettingViewLoader {
           await this.googleLogin()
         } else if (message.type === MessageType.GITHUB_LOGIN) {
           await this.githubLogin()
+        } else if (message.type === MessageType.SSAFY_LOGIN) {
+          await this.ssafyLogin()
         } else if (message.type === MessageType.SET_NOTION_SECRET_KEY) {
           await this.setNotionSecretKey()
         } else if (message.type === MessageType.REQUEST_DELETE_DATABASE) {

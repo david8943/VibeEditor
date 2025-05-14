@@ -20,6 +20,10 @@ export class AuthService {
     await this.auth('github')
   }
 
+  public async ssafyLogin(): Promise<void> {
+    await this.auth('ssafy')
+  }
+
   async auth(domain: string): Promise<void> {
     try {
       const PORT = 5013
