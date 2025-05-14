@@ -311,6 +311,11 @@
           },
           "default": [],
           "description": "기본 선택 옵션 ID 목록"
+        },
+        "vibeEditor.defaultNotionDatabaseId": {
+          "type": "number",
+          "default": 0,
+          "description": "기본 노션 데이터베이스 ID"
         }
       }
     }

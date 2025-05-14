@@ -45,6 +45,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultPromptOptionIds, setDefaultPromptOptionIds] = useState<
     number[]
   >([])
+  const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
 
   const initialized = useRef(false)
 
@@ -74,6 +75,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         const config = message.payload
         setDefaultPostType(config.defaultPostType)
         setDefaultPromptOptionIds(config.defaultPromptOptionIds)
+        setDefaultNotionDatabaseId(config.defaultNotionDatabaseId ?? 0)
       }
     }
     window.addEventListener('message', handleMessage)
@@ -181,10 +183,15 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         comment: '',
         promptAttachList: [],
         promptOptionList: defaultPromptOptionIds,
-        notionDatabaseId: notionDatabaseId,
+        notionDatabaseId: defaultNotionDatabaseId,
       })
     }
-  }, [selectedTemplate, defaultPostType, defaultPromptOptionIds])
+  }, [
+    selectedTemplate,
+    defaultPostType,
+    defaultPromptOptionIds,
+    defaultNotionDatabaseId,
+  ])
 
   return (
     <div className="app-container flex flex-col gap-8">
