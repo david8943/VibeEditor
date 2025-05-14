@@ -26,12 +26,14 @@ export const useCreatePromptForm = ({
   createPrompt,
 }: UseCreatePromptFormProps): UseCreatePromptFormReturn => {
   const setDefaultValues = (defaultPrompt: CreatePrompt | null): EditPrompt => {
+    console.log('useCreatePromptForm setDefaultValues', defaultPrompt)
     if (!defaultPrompt) return {} as EditPrompt
     return {
       templateId: defaultPrompt.templateId,
       promptName: defaultPrompt.promptName,
       postType: defaultPrompt.postType,
       comment: defaultPrompt.comment,
+      notionDatabaseId: defaultPrompt.notionDatabaseId,
       snapshots: [],
       options: {},
     }

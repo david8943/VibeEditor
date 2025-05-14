@@ -44,6 +44,10 @@ export const usePromptOptions = ({
     setLocalOptions(editOptionList)
   }, [optionList, promptOptionList])
 
+  useEffect(() => {
+    setValue('options', localOptions)
+  }, [localOptions])
+
   const handleOption = useCallback((optionName: string, optionId: number) => {
     setLocalOptions((prevOptions) => {
       const currentOptions = prevOptions[optionName]

@@ -48,6 +48,7 @@ export const useUpdatePromptForm = ({
       promptName: defaultPrompt.promptName,
       postType: defaultPrompt.postType,
       comment: defaultPrompt.comment,
+      notionDatabaseId: defaultPrompt.notionDatabaseId,
       snapshots:
         defaultPrompt.promptAttachList?.map((attach) => ({
           attachId: attach.attachId,
