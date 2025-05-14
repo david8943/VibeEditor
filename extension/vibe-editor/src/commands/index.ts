@@ -1,4 +1,9 @@
-import { GithubLoginCommand, GoogleLoginCommand, LogoutCommand } from './auth'
+import {
+  GithubLoginCommand,
+  GoogleLoginCommand,
+  LogoutCommand,
+  SSAFYLoginCommand,
+} from './auth'
 import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
@@ -25,6 +30,7 @@ import {
 export const allCommands = [
   GoogleLoginCommand,
   GithubLoginCommand,
+  SSAFYLoginCommand,
   LogoutCommand,
   CaptureSnapshotCommand,
   CopyCodeCommand,
