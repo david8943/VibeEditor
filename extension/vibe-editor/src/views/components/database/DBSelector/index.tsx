@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { Database } from '../../../../types/database'
 import { MessageType } from '../../../../types/webview'
@@ -19,12 +19,12 @@ export const DBSelector: React.FC<Props> = ({
   const [dbList, setDbList] = useState<Database[]>([])
   const [hovered, setHovered] = useState<number>(0)
   const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     getDatabases()
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
-
       if (message.type === MessageType.GET_DATABASE) {
         setDbList(message.payload)
       } else if (message.type === MessageType.DATABASE_DELETED) {
@@ -43,13 +43,10 @@ export const DBSelector: React.FC<Props> = ({
   const selectedDB = dbList.find((db) => db.notionDatabaseId === selectedId)
 
   return (
-    <div className="form-group">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
+    <div
+      className="form-group relative"
+      ref={containerRef}>
+      <div className="flex justify-between items-center">
         <label>노션 데이터베이스</label>
         <button
           className="small-square-button"
@@ -58,32 +55,15 @@ export const DBSelector: React.FC<Props> = ({
         </button>
       </div>
 
-      {/* 셀렉터 박스 */}
       <div
         onClick={() => setOpen((prev) => !prev)}
-        style={{
-          padding: '8px',
-          border: '1px solid var(--vscode-dropdown-border)',
-          borderRadius: '4px',
-          background: 'var(--vscode-dropdown-background)',
-          color: 'var(--vscode-dropdown-foreground)',
-          cursor: 'pointer',
-        }}>
+        className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
         {selectedDB?.notionDatabaseName || '데이터베이스를 선택하세요'}
       </div>
 
-      {/* 펼쳐지는 옵션 리스트 */}
       {open && (
-        <div
-          style={{
-            border: '1px solid var(--vscode-dropdown-border)',
-            borderRadius: '4px',
-            background: 'var(--vscode-dropdown-background)',
-            marginTop: '4px',
-            maxHeight: '200px',
-            overflowY: 'auto',
-          }}>
-          {dbList.map((db: Database) => (
+        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border rounded bg-[var(--vscode-dropdown-background)] shadow-lg">
+          {dbList.map((db) => (
             <div
               key={db.notionDatabaseId}
               onMouseEnter={() => setHovered(db.notionDatabaseId)}
@@ -92,23 +72,14 @@ export const DBSelector: React.FC<Props> = ({
                 onChange(db.notionDatabaseId)
                 setOpen(false)
               }}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '6px 12px',
-                cursor: 'pointer',
-                backgroundColor:
+              className={`flex justify-between items-center px-3 py-2 cursor-pointer
+                ${
                   selectedId === db.notionDatabaseId
-                    ? 'var(--vscode-list-activeSelectionBackground)'
+                    ? 'bg-[var(--vscode-list-activeSelectionBackground)] text-[var(--vscode-list-activeSelectionForeground)]'
                     : hovered === db.notionDatabaseId
-                      ? 'var(--vscode-list-hoverBackground)'
-                      : 'transparent',
-                color:
-                  selectedId === db.notionDatabaseId
-                    ? 'var(--vscode-list-activeSelectionForeground)'
-                    : 'var(--vscode-dropdown-foreground)',
-              }}>
+                      ? 'bg-[var(--vscode-list-hoverBackground)]'
+                      : ''
+                }`}>
               <span>{db.notionDatabaseName}</span>
               <button
                 onClick={(e) => {
@@ -121,15 +92,12 @@ export const DBSelector: React.FC<Props> = ({
                     },
                   })
                 }}
+                className="ml-2 text-sm"
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--vscode-icon-foreground)',
                   visibility:
                     hovered === db.notionDatabaseId ? 'visible' : 'hidden',
                 }}>
-                🗑️
+                삭제
               </button>
             </div>
           ))}

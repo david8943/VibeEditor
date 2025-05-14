@@ -90,6 +90,7 @@ export interface EditPrompt {
   templateId: number
   promptId?: number
   promptName: string
+  notionDatabaseId: number
   postType: string
   comment: string
   snapshots: EditSnapshot[]

@@ -29,9 +29,9 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [createPromptData, setCreatePromptData] = useState<CreatePrompt>({
     parentPromptId: null,
     templateId: 0,
-    promptName: '',
-    postType: PostType.TECH_CONCEPT,
-    comment: '',
+    promptName: '기본 프롬프트',
+    postType: PostType.TROUBLE_SHOOTING,
+    comment: '합리적 의심',
     promptAttachList: [],
     promptOptionList: [],
     notionDatabaseId: 0,
@@ -45,6 +45,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultPromptOptionIds, setDefaultPromptOptionIds] = useState<
     number[]
   >([])
+  const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
 
   const initialized = useRef(false)
 
@@ -72,8 +73,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         addSnapshotCode(message.payload.snapshot)
       } else if (message.type === MessageType.CONFIG_LOADED) {
         const config = message.payload
+
+        console.log('config', config)
         setDefaultPostType(config.defaultPostType)
         setDefaultPromptOptionIds(config.defaultPromptOptionIds)
+        setDefaultNotionDatabaseId(config.defaultNotionDatabaseId ?? 0)
       }
     }
     window.addEventListener('message', handleMessage)
@@ -172,19 +176,46 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }
 
   useEffect(() => {
+    setCreatePromptData({
+      parentPromptId: null,
+      templateId: selectedPromptId,
+      promptName: '새 프롬프트 생성하기',
+      postType: defaultPostType ?? PostType.TECH_CONCEPT,
+      comment: '',
+      promptAttachList: [],
+      promptOptionList: defaultPromptOptionIds,
+      notionDatabaseId: defaultNotionDatabaseId,
+    })
+
     if (selectedTemplate?.promptList) {
-      setCreatePromptData({
-        parentPromptId: null,
-        templateId: selectedPromptId,
-        promptName: '새 프롬프트 생성하기',
-        postType: defaultPostType,
-        comment: '',
-        promptAttachList: [],
-        promptOptionList: defaultPromptOptionIds,
-        notionDatabaseId: notionDatabaseId,
-      })
+      console.log(
+        'selectedTemplate?.promptList😂',
+        selectedTemplate.promptList,
+        defaultPostType,
+        {
+          parentPromptId: null,
+          templateId: selectedPromptId,
+          promptName: '새 프롬프트 생성하기',
+          postType: defaultPostType,
+          comment: '',
+          promptAttachList: [],
+          promptOptionList: defaultPromptOptionIds,
+          notionDatabaseId: defaultNotionDatabaseId,
+        },
+      )
     }
-  }, [selectedTemplate, defaultPostType, defaultPromptOptionIds])
+  }, [
+    selectedTemplate,
+    defaultPostType,
+    defaultPromptOptionIds,
+    defaultNotionDatabaseId,
+  ])
+
+  useEffect(() => {
+    if (selectedPromptId == 0) {
+      setNotionDatabaseId(defaultNotionDatabaseId)
+    }
+  }, [defaultNotionDatabaseId])
 
   return (
     <div className="app-container flex flex-col gap-8">
@@ -206,7 +237,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           selectedPromptId={selectedPromptId}
           selectPromptId={selectPromptId}
         />
-
         <DBSelector
           selectedId={notionDatabaseId}
           onChange={setNotionDatabaseId}
@@ -221,6 +251,8 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           />
         )}
 
+        {`defaultPostType${defaultPostType}`}
+        {`PostType${createPromptData?.postType}`}
         {selectedTemplate && selectedPrompt && (
           <PromptForm
             defaultPrompt={selectedPrompt}

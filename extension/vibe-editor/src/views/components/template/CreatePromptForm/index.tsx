@@ -32,7 +32,7 @@ export function CreatePromptForm({
   const initializedPrompt = defaultPrompt ?? {
     postType: defaultPostType,
     promptName: '',
-    comment: '',
+    comment: '??',
     promptOptionList: defaultPromptOptionIds,
     promptAttachList: [],
     notionDatabaseId: 0,

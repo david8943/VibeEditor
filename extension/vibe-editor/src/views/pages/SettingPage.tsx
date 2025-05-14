@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { CreateDatabase } from '../../types/database'
+import { Database } from '../../types/database'
 import type { Option } from '../../types/template'
 import { User } from '../../types/user'
 import { MessageType, WebviewPageProps } from '../../types/webview'
@@ -69,6 +70,10 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
         setOptionList(message.payload)
       } else if (message.type === MessageType.CONFIG_LOADED) {
         setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
+        setDefaultPostType(message.payload.defaultPostType ?? 'TECH_CONCEPT')
+        setDefaultNotionDatabaseId(message.payload.defaultNotionDatabaseId ?? 0)
+      } else if (message.type === MessageType.GET_DATABASE) {
+        setNotionDbList(message.payload)
       }
     }
 
@@ -78,7 +83,14 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
 
   const [optionList, setOptionList] = useState<Option[]>([])
   const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([])
-  console.log('optionList:', optionList)
+  const [defaultPostType, setDefaultPostType] = useState('TECH_CONCEPT')
+  const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
+  const [notionDbList, setNotionDbList] = useState<Database[]>([])
+
+  useEffect(() => {
+    postMessageToExtension({ type: MessageType.GET_DATABASE })
+  }, [])
+
   return (
     <div className="min-h-screen w-full p-8">
       <div className="max-w-4xl mx-auto">
@@ -206,33 +218,54 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   }>
                   노션 PRIVATE API 키 설정
                 </button>
+
                 <DBSelector
-                  selectedId={selectedDbId}
-                  onChange={setSelectedDbId}
-                  getDatabases={getDatabases}
+                  selectedId={defaultNotionDatabaseId}
+                  onChange={(id) => {
+                    setDefaultNotionDatabaseId(id)
+                    postMessageToExtension({
+                      type: MessageType.SET_CONFIG_VALUE,
+                      payload: {
+                        key: 'defaultNotionDatabaseId',
+                        value: id,
+                      },
+                    })
+                  }}
+                  getDatabases={() =>
+                    postMessageToExtension({ type: MessageType.GET_DATABASE })
+                  }
                   onAddClick={() => setShowDbModal(true)}
                 />
+
                 {showDbModal && (
                   <DatabaseModal
-                    saveDatabase={saveDatabase}
+                    saveDatabase={(database) =>
+                      postMessageToExtension({
+                        type: MessageType.SAVE_DATABASE,
+                        payload: database,
+                      })
+                    }
                     onClose={() => setShowDbModal(false)}
                   />
                 )}
+
                 <div className="form-group">
                   <label className="text-sm font-medium">
                     기본 포스트 종류
                   </label>
                   <select
-                    defaultValue="TECH_CONCEPT"
-                    onChange={(e) =>
+                    value={defaultPostType}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setDefaultPostType(value)
                       postMessageToExtension({
                         type: MessageType.SET_CONFIG_VALUE,
                         payload: {
                           key: 'defaultPostType',
-                          value: e.target.value,
+                          value: value,
                         },
                       })
-                    }>
+                    }}>
                     <option value="TECH_CONCEPT">CS 개념</option>
                     <option value="TROUBLE_SHOOTING">트러블 슈팅</option>
                   </select>
