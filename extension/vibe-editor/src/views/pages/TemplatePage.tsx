@@ -129,13 +129,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       })
     }
     setSelectedPrompt((currentPrompt) => {
-      console.log('setSelectedPrompt 내부 currentPrompt:', currentPrompt)
       if (!currentPrompt) return currentPrompt
       const updatedPrompt = {
         ...currentPrompt,
         promptAttachList: [...currentPrompt.promptAttachList, data],
       }
-      console.log('업데이트된 prompt:', updatedPrompt)
       return updatedPrompt
     })
   }
