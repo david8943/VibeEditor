@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { marked } from 'marked'
 
@@ -7,6 +7,7 @@ import {
   PostDetail,
   UploadToNotionRequestPost,
 } from '../../../../types/post'
+import TuiEditor, { TuiEditorRef } from '../../../components/editor/TuiEditor'
 import './styles.css'
 
 interface PostFormProps {
@@ -21,8 +22,9 @@ export function PostForm({
   defaultPost,
 }: PostFormProps) {
   const [isViewer, setIsViewer] = useState(true)
-  const [postContent, setPostContent] = useState(defaultPost.postContent)
   const [postTitle, setPostTitle] = useState(defaultPost.postTitle)
+  const [postContent, setPostContent] = useState(defaultPost.postContent)
+  const editorRef = useRef<TuiEditorRef>(null)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,18 +41,26 @@ export function PostForm({
   }, [])
 
   useEffect(() => {
-    setPostContent(defaultPost.postContent)
     setPostTitle(defaultPost.postTitle)
+    setPostContent(defaultPost.postContent)
   }, [defaultPost])
 
   const handleSubmit = () => {
+    const content =
+      isViewer && editorRef.current
+        ? editorRef.current.getMarkdown()
+        : postContent
+
     if (defaultPost.postId) {
-      onSubmit({ postId: defaultPost.postId, postTitle, postContent })
+      onSubmit({
+        postId: defaultPost.postId,
+        postTitle,
+        postContent: content,
+      })
     }
   }
 
   const uploadToNotion = () => {
-    console.log('Notion에 게시')
     if (defaultPost.postId) {
       onUploadToNotion({ postId: defaultPost.postId })
     }
@@ -79,25 +89,25 @@ export function PostForm({
         {isViewer ? (
           <div
             className="markdown-viewer"
-            dangerouslySetInnerHTML={{
-              __html: marked(postContent),
-            }}
+            dangerouslySetInnerHTML={{ __html: marked(postContent) }}
           />
         ) : (
-          <textarea
-            value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
+          <TuiEditor
+            ref={editorRef}
+            initialValue={postContent}
           />
         )}
       </div>
       <div className="flex gap-4">
         <button
+          type="button"
           onClick={handleSubmit}
           className="flex-1 py-2 px-4 rounded text-sm font-medium">
           포스트 저장
         </button>
         {uploadToNotion && (
           <button
+            type="button"
             onClick={uploadToNotion}
             className="flex-1 py-2 px-4 rounded text-sm font-medium">
             Notion에 게시
