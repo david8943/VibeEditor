@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react'
 
-import { AIAPIKey } from 'dist/app/src/types/ai'
-
-import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, Option } from '@/types/template'
-
+import { AIAPIKey } from '../../../../types/ai'
 import { CreateDatabase } from '../../../../types/database'
+import { Snapshot } from '../../../../types/snapshot'
+import { CreatePrompt, Option } from '../../../../types/template'
 import { useCreatePromptForm } from '../../../hooks/useCreatePromptForm'
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
