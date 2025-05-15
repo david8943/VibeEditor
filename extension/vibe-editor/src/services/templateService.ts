@@ -1,13 +1,12 @@
 import * as vscode from 'vscode'
 
 import {
-  generateClaude,
+  generateAIPost,
   getOptionList,
   getPrompt,
   savePrompt,
-  updatePrompt,
+  submitPrompt,
 } from '../apis/prompt'
-import { addSnapshot, getSnapshotDetail } from '../apis/snapshot'
 import {
   addTemplate,
   getTemplateDetail,
@@ -28,86 +27,88 @@ import {
   SubmitPrompt,
   SubmitUpdatePrompt,
   Template,
-  UpdatePrompt,
 } from '../types/template'
-import { MessageType, PageType } from '../types/webview'
-import { SnapshotItem } from '../views/codeSnapshotView'
-import { ViewLoader } from '../views/webview/ViewLoader'
-import { refreshPostProvider } from './postService'
-
-export class TemplateItem extends vscode.TreeItem {
-  constructor(public readonly template: Template) {
-    super(template.templateName, vscode.TreeItemCollapsibleState.None)
-    this.tooltip = `${template.templateName}`
-    this.command = {
-      command: 'vibeEditor.showTemplatePage',
-      title: 'View Template',
-      arguments: [template],
-    }
-    this.iconPath = new vscode.ThemeIcon('notebook')
-    this.contextValue = 'vibeEditorTemplatePage'
-  }
-}
+import { MessageType } from '../types/webview'
+import { refreshPostProvider } from '../views/tree/postTreeView'
+import { refreshTemplateProvider } from '../views/tree/templateTreeView'
+import { getSideViewProvider } from '../views/webview/SideViewProvider'
 
 export class TemplateService {
   private context: vscode.ExtensionContext
-  private page: PageType
-  constructor(context: vscode.ExtensionContext, page: PageType) {
+  constructor(context: vscode.ExtensionContext) {
     this.context = context
-    this.page = page
   }
 
-  async refreshTemplate(): Promise<void> {
-    templateProviderInstance?.refresh()
-  }
-
-  async getLocalPrompt(data: SelectPrompt): Promise<Prompt | null> {
-    const prev = this.context.globalState.get<Template[]>('templates', [])
-    const template = prev.find(
-      (template) => template.templateId === data.templateId,
+  async getLocalPrompt(
+    data: SelectPrompt,
+    prev?: Template[],
+  ): Promise<Prompt | null> {
+    const template = await this.getLocalTemplate(data.templateId, prev)
+    return (
+      template?.promptList?.find(
+        (prompt) => prompt.promptId === data.promptId,
+      ) || null
     )
-    if (template) {
-      return (
-        template.promptList?.find(
-          (prompt) => prompt.promptId === data.promptId,
-        ) || null
-      )
+  }
+
+  async getSelectedTemplateId(): Promise<number> {
+    let selectedTemplateId = getDraftData<number>(
+      DraftDataType.selectedTemplateId,
+    )
+    if (selectedTemplateId) {
+      return selectedTemplateId
+    } else {
+      const templates = await this.getTemplates()
+      if (templates.length > 0) {
+        selectedTemplateId = templates[0].templateId
+        setDraftData(DraftDataType.selectedTemplateId, templates[0].templateId)
+        return templates[0].templateId
+      }
     }
-    return null
+    return 0
+  }
+
+  async getSelectedPromptId(): Promise<number> {
+    let selectdPromptId = getDraftData<number>(DraftDataType.selectedPromptId)
+    if (selectdPromptId) {
+      return selectdPromptId
+    }
+    const selectedTemplateId = await this.getSelectedTemplateId()
+    if (!selectedTemplateId) {
+      return 0
+    }
+
+    const template: Template | null = await this.getTemplate(selectedTemplateId)
+    if (template?.promptList && template?.promptList.length > 0) {
+      selectdPromptId = template?.promptList[0].promptId
+      setDraftData(DraftDataType.selectedPromptId, selectdPromptId)
+      return selectdPromptId
+    }
+    return 0
   }
 
   async selectPrompt(data: SelectPrompt): Promise<Prompt | null> {
     const result = await getPrompt(data.promptId)
     if (result.success) {
-      const prev = this.context.globalState.get<Template[]>('templates', [])
-      const template = prev.find(
-        (template) => template.templateId === data.templateId,
-      )
-      if (template?.promptList) {
-        const prompt = template.promptList?.find(
-          (prompt) => prompt.promptId === data.promptId,
-        )
-        if (prompt) {
-          prompt.promptName = result.data.promptName
-          prompt.postType = result.data.postType
-          prompt.comment = result.data.comment
-          prompt.promptAttachList = result.data.promptAttachList
-          prompt.promptOptionList = result.data.promptOptionList
-          prompt.notionDatabaseId = result.data.notionDatabaseId
-        } else {
-          return null
-        }
-        await this.context.globalState.update('templates', prev)
-        return prompt
+      const prev = await this.getLocalTemplates()
+      const prompt = await this.getLocalPrompt(data, prev)
+      if (prompt) {
+        prompt.promptName = result.data.promptName
+        prompt.postType = result.data.postType
+        prompt.comment = result.data.comment
+        prompt.promptAttachList = result.data.promptAttachList
+        prompt.promptOptionList = result.data.promptOptionList
+        prompt.notionDatabaseId = result.data.notionDatabaseId
+        prompt.userAIProviderId = result.data.userAIProviderId
+      } else {
+        return null
       }
+      await this.updateTemplateToExtension(prev)
+      return prompt
     }
     return null
   }
 
-  async resetTemplate(): Promise<void> {
-    await this.context.globalState.update('templates', [])
-    this.refreshTemplate()
-  }
   async deleteTemplate(templateId: number): Promise<void> {
     const prev = this.context.globalState.get<Template[]>('templates', [])
     const templateIndex = prev.findIndex(
@@ -122,12 +123,29 @@ export class TemplateService {
       .showWarningMessage('템플릿을 삭제하시겠습니까?', { modal: true }, 'Ok')
       .then(async (selection) => {
         if (selection === 'Ok') {
-          await ViewLoader.deleteTemplateIfActive(templateId)
           await this.context.globalState.update('templates', prev)
           const success = await removeTemplate(templateId)
           if (success) {
-            await this.getTemplates()
-            templateProviderInstance?.refresh()
+            const templates = await this.getTemplates()
+            let selectedTemplateId = getDraftData(
+              DraftDataType.selectedTemplateId,
+            )
+            if (templates.length > 0 && selectedTemplateId === templateId) {
+              setDraftData(
+                DraftDataType.selectedTemplateId,
+                templates[0].templateId,
+              )
+              const sideViewProvider = getSideViewProvider()
+              if (sideViewProvider) {
+                sideViewProvider.postMessageToWebview({
+                  type: MessageType.TEMPLATE_SELECTED,
+                  payload: { template: templates[0] },
+                })
+              }
+            } else if (templates.length === 0) {
+              setDraftData(DraftDataType.selectedTemplateId, 0)
+            }
+            refreshTemplateProvider()
             vscode.window.showInformationMessage('템플릿이 삭제되었습니다.')
           }
         }
@@ -135,65 +153,42 @@ export class TemplateService {
   }
 
   async renameTemplate(templateId: number): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates', [])
-    const templateIndex = prev.findIndex(
-      (template) => template.templateId === templateId,
-    )
-    if (templateIndex === -1) {
+    const prev = await this.getLocalTemplates()
+    const template = await this.getLocalTemplate(templateId, prev)
+    if (!template) {
       vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
       return
     }
 
     const templateName = await vscode.window.showInputBox({
-      value: prev[templateIndex].templateName,
+      value: template.templateName,
       prompt: '템플릿 이름을 입력하세요',
-      placeHolder: prev[templateIndex].templateName,
+      placeHolder: template.templateName,
     })
 
     if (templateName) {
-      prev[templateIndex].templateName = templateName
-      await this.context.globalState.update('templates', prev)
+      template.templateName = templateName
+      await this.updateTemplateToExtension(prev)
       const success = await updateTemplate({ templateId, templateName })
       if (success) {
-        templateProviderInstance?.refresh()
+        await vscode.window.showInformationMessage(
+          `템플릿 이름을 <${templateName}>로 변경했습니다.`,
+        )
       }
     }
   }
 
-  async getLocalPromppt(data: SelectPrompt): Promise<Prompt | null> {
-    const prev = await this.getLocalTemplates()
-    const template = prev.find(
-      (template) => template.templateId === data.templateId,
-    )
-    return (
-      template?.promptList?.find(
-        (prompt) => prompt.promptId === data.promptId,
-      ) || null
-    )
-  }
-
   async addAndSaveToPrompt(snapshot: Snapshot): Promise<void> {
-    const selectedTemplateId = Number(
-      getDraftData(DraftDataType.selectedTemplateId),
+    const selectedTemplateId = await this.getSelectedTemplateId()
+    const selectedPromptId = await this.getSelectedPromptId()
+    const prev = await this.getLocalTemplates()
+    const prompt = await this.getLocalPrompt(
+      {
+        promptId: selectedPromptId,
+        templateId: selectedTemplateId,
+      },
+      prev,
     )
-
-    const selectedPromptId = Number(
-      getDraftData(DraftDataType.selectedPromptId),
-    )
-
-    const prev = this.context.globalState.get<Template[]>('templates', [])
-    const template = prev.find(
-      (template) => template.templateId === selectedTemplateId,
-    )
-    if (!template) {
-      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
-      return
-    }
-    const prompt =
-      template.promptList?.find(
-        (prompt) => prompt.promptId === selectedPromptId,
-      ) || null
-
     if (!prompt) {
       vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
       return
@@ -210,14 +205,20 @@ export class TemplateService {
       snapshotId: snapshot.snapshotId,
       description: '설명',
     })
-    await this.context.globalState.update('templates', prev)
-    await updatePrompt({
-      updatePrompt: prompt,
+    await this.updateTemplateToExtension(prev)
+    const { promptId, parentPrompt, templateId, ...submitPromptData } = prompt
+    const success = await submitPrompt({
+      submitPrompt: submitPromptData as SubmitPrompt,
       promptId: selectedPromptId,
     })
+    if (success) {
+      vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
+    }
   }
+
   async addToPrompt(snapshot: Snapshot): Promise<void> {
-    if (ViewLoader.currentPanel) {
+    const sideViewProvider = getSideViewProvider()
+    if (sideViewProvider) {
       const selectedPromptId = Number(
         getDraftData(DraftDataType.selectedPromptId),
       )
@@ -232,28 +233,26 @@ export class TemplateService {
           getDraftData(DraftDataType.selectedTemplateId),
         )
         const template = await this.getLocalTemplate(selectedTemplateId)
-
-        ViewLoader.currentPanel?.webview.postMessage({
+        sideViewProvider.postMessageToWebview({
           type: MessageType.TEMPLATE_SELECTED,
           payload: {
             template: template,
           },
         })
       }
-      ViewLoader.currentPanel?.webview.postMessage({
+      sideViewProvider.postMessageToWebview({
         type: MessageType.SNAPSHOT_SELECTED,
         payload: {
           snapshot: promptAttach,
         },
       })
+      vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
     } else {
       this.addAndSaveToPrompt(snapshot)
     }
-
-    vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
   }
 
-  async createTemplate(): Promise<void> {
+  async createTemplate(): Promise<number> {
     let templateName = new Date().toISOString()
     const value = await vscode.window.showInputBox({
       value: templateName,
@@ -266,19 +265,18 @@ export class TemplateService {
       const success = await addTemplate(templateName)
       if (success) {
         const result = await getTemplateList()
-        console.log('getTemplateList', result)
         if (result.success) {
           const templateList = result.data
           await this.context.globalState.update('templates', templateList)
-          templateProviderInstance?.refresh()
+          refreshTemplateProvider()
+          return templateList[0].templateId
         }
       }
     }
-
-    ViewLoader.showWebview(this.context, this.page)
+    return 0
   }
 
-  async submitPrompt(prompt: Prompt): Promise<Post | null> {
+  async generatePost(prompt: Prompt): Promise<Post | null> {
     const ok = 'Ok'
     vscode.window
       .showInformationMessage(
@@ -308,8 +306,7 @@ export class TemplateService {
           prev.push(loadingPost)
           await this.context.globalState.update('posts', prev)
           refreshPostProvider()
-          const result = await generateClaude({ promptId: prompt.promptId })
-          console.log('result', result)
+          const result = await generateAIPost({ promptId: prompt.promptId })
           if (result.success) {
             const createdPost: Post = result.data
             const newPost: PostDetail = {
@@ -323,11 +320,17 @@ export class TemplateService {
               parentPostIdList: [],
             }
             prev.push(newPost)
+            vscode.window.showInformationMessage(
+              `포스트 미리보기에서 확인해주세요: ${newPost.postTitle}`,
+            )
+
             setDraftData(DraftDataType.selectedPostId, createdPost.postId)
-            ViewLoader.currentPanel?.webview.postMessage({
-              type: MessageType.GET_CURRENT_POST,
-            })
-            // ViewLoader.showWebview(this.context, PageType.POST)
+            const sideViewProvider = getSideViewProvider()
+            if (sideViewProvider) {
+              sideViewProvider.postMessageToWebview({
+                type: MessageType.GET_CURRENT_POST,
+              })
+            }
             refreshPostProvider()
             await this.context.globalState.update(
               'posts',
@@ -345,33 +348,28 @@ export class TemplateService {
       })
     return null
   }
-  async navigate(data: SubmitPrompt): Promise<void> {
-    vscode.window.showInformationMessage(
-      `포스트 수정페이지에서 확인해주세요: ${data.post.postTitle}`,
-    )
-    if (data.navigate) {
-      setDraftData(DraftDataType.selectedPostId, data.post.postId)
-      await data.navigate(PageType.POST)
-    }
+
+  async updateTemplateToExtension(prev: Template[]): Promise<void> {
+    await this.context.globalState.update('templates', prev)
+    refreshTemplateProvider()
   }
-  async upgradePrompt(data: SubmitUpdatePrompt): Promise<boolean> {
-    console.log('updatePrompt', data)
-    const updatedPrompt: UpdatePrompt = data.prompt
+
+  async submitPrompt(data: SubmitUpdatePrompt): Promise<boolean> {
     const prev = await this.getLocalTemplates()
-    const template = prev.find(
-      (template) => template.templateId === data.selectedTemplateId,
+    const prompt = await this.getLocalPrompt(
+      {
+        promptId: data.selectedTemplateId,
+        templateId: data.selectedTemplateId,
+      },
+      prev,
     )
-    if (!template?.promptList) {
-      return false
-    }
-    const prompt = template.promptList?.find(
-      (prompt) => prompt.promptId === data.selectedPromptId,
-    )
-    console.log('prompt', prompt)
     if (prompt) {
-      const success = await updatePrompt({
-        updatePrompt: updatedPrompt,
-        promptId: data.selectedPromptId,
+      const { promptId, parentPrompt, templateId, ...submitPromptData } =
+        data.prompt
+      // submitPromptData.userAIProviderId = 4
+      const success = await submitPrompt({
+        submitPrompt: submitPromptData as SubmitPrompt,
+        promptId: promptId,
       })
       if (success) {
         const result = await getPrompt(data.selectedPromptId)
@@ -382,19 +380,19 @@ export class TemplateService {
           prompt.promptAttachList = result.data.promptAttachList
           prompt.promptOptionList = result.data.promptOptionList
           prompt.notionDatabaseId = result.data.notionDatabaseId
+          prompt.userAIProviderId = result.data.userAIProviderId
         }
-        await this.context.globalState.update('templates', prev)
-        templateProviderInstance?.refresh()
+        await this.updateTemplateToExtension(prev)
         vscode.window.showInformationMessage(
-          `프롬프트가 저장되었습니다: ${updatedPrompt.promptName}`,
+          `프롬프트가 저장되었습니다: ${data.prompt.promptName}`,
         )
         return true
       }
     }
     return false
   }
+
   async createPrompt(data: SubmitCreatePrompt): Promise<SelectPrompt | null> {
-    console.log('createPrompt', data)
     const newPrompt: CreatePrompt = {
       parentPromptId: null,
       templateId: data.selectedTemplateId,
@@ -404,37 +402,27 @@ export class TemplateService {
       promptAttachList: data.prompt.promptAttachList,
       promptOptionList: data.prompt.promptOptionList,
       notionDatabaseId: data.prompt.notionDatabaseId,
+      userAIProviderId: data.prompt.userAIProviderId,
     }
-
-    const prev = await this.getLocalTemplates()
-    console.log('prev', prev)
-    console.log('data.selectedTemplateId', data.selectedTemplateId)
-    const templateIndex = prev.findIndex(
-      (template) => template.templateId === data.selectedTemplateId,
-    )
-    console.log('templateIndex', templateIndex)
-
-    if (templateIndex !== -1) {
-      const success = await savePrompt(newPrompt)
-      console.log('savePrompt', success)
-      if (success) {
-        const template = await this.getTemplate(data.selectedTemplateId)
-        if (template?.promptList) {
-          const newPrompt = template.promptList[0]
-          vscode.window.showInformationMessage(
-            `프롬프트가 생성되었습니다: ${newPrompt.promptName}`,
-          )
-          return {
-            promptId: newPrompt.promptId,
-            templateId: data.selectedTemplateId,
-          }
+    const success = await savePrompt(newPrompt)
+    if (success) {
+      const template = await this.getTemplate(data.selectedTemplateId)
+      if (template?.promptList) {
+        const newPrompt = template.promptList[0]
+        vscode.window.showInformationMessage(
+          `프롬프트가 생성되었습니다: ${newPrompt.promptName}`,
+        )
+        return {
+          promptId: newPrompt.promptId,
+          templateId: data.selectedTemplateId,
         }
       }
     }
     return null
   }
+
   async deletePrompt(data: SelectPrompt): Promise<void> {
-    const prev = this.context.globalState.get<Template[]>('templates', [])
+    const prev = await this.getLocalTemplates()
     const templateIndex = prev.findIndex(
       (template) => template.templateId === data.templateId,
     )
@@ -450,7 +438,7 @@ export class TemplateService {
       ]
       prev[templateIndex].updatedAt = new Date().toISOString()
       await this.context.globalState.update('templates', prev)
-      templateProviderInstance?.refresh()
+      refreshTemplateProvider()
     }
     vscode.window.showInformationMessage(`프롬프트가 삭제되었습니다:`)
   }
@@ -458,9 +446,29 @@ export class TemplateService {
   async getLocalTemplates(): Promise<Template[]> {
     return this.context.globalState.get<Template[]>('templates', [])
   }
-  async getLocalTemplate(templateId: number): Promise<Template | null> {
-    const prev = this.context.globalState.get<Template[]>('templates', [])
-    return prev.find((template) => template.templateId === templateId) || null
+
+  async getLocalTemplate(
+    templateId: number,
+    prev?: Template[],
+  ): Promise<Template | null> {
+    const templates = prev ?? (await this.getLocalTemplates())
+    return templates.find((t) => t.templateId === templateId) || null
+  }
+
+  async getDefaultTemplate(): Promise<Template | null> {
+    const selectedTemplateId = getDraftData<number>(
+      DraftDataType.selectedTemplateId,
+    )
+    if (selectedTemplateId) {
+      return this.getLocalTemplate(selectedTemplateId)
+    } else {
+      const templates = await this.getLocalTemplates()
+      if (templates.length > 0) {
+        setDraftData(DraftDataType.selectedTemplateId, templates[0].templateId)
+        return templates[0]
+      }
+    }
+    return null
   }
 
   async getOptions(): Promise<Option[]> {
@@ -471,7 +479,6 @@ export class TemplateService {
       return optionList
     }
     const options = await getOptionList()
-    console.log('🌐 [getOptionList] 응답:', options)
     if (options.success) {
       setDraftData(DraftDataType.optionList, options.data)
       return options.data
@@ -480,7 +487,6 @@ export class TemplateService {
   }
 
   async updateTemplateDetail(templateId: number): Promise<Template | null> {
-    console.log('updateTemplateDetail', templateId)
     const result = await getTemplateDetail(templateId)
     if (result.success) {
       const prev = this.context.globalState.get<Template[]>('templates', [])
@@ -508,7 +514,6 @@ export class TemplateService {
   }
 
   async getTemplates(): Promise<Template[]> {
-    console.log('getTemplates 호출')
     const result = await getTemplateList()
     if (result.success) {
       const templates = result.data
@@ -530,7 +535,6 @@ export class TemplateService {
       this.context.globalState.update('templates', [...newTemplate])
     }
     const localTemplates: Template[] = await this.getLocalTemplates()
-    console.log('localTemplates', localTemplates)
     return localTemplates
   }
 
@@ -617,39 +621,4 @@ export class TemplateService {
     }
   }
 }
-
-let templateProviderInstance: TemplateProvider | undefined
-
-export function setTemplateProvider(provider: TemplateProvider) {
-  templateProviderInstance = provider
-}
-export class TemplateProvider
-  implements vscode.TreeDataProvider<vscode.TreeItem>
-{
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    vscode.TreeItem | undefined | void
-  > = new vscode.EventEmitter<vscode.TreeItem | undefined | void>()
-  readonly onDidChangeTreeData: vscode.Event<
-    vscode.TreeItem | undefined | void
-  > = this._onDidChangeTreeData.event
-
-  private templateService: TemplateService
-
-  refresh(): void {
-    this._onDidChangeTreeData.fire()
-  }
-
-  constructor(private context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
-  }
-
-  getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
-    element.contextValue = 'vibeEditorTemplatePage'
-    return element
-  }
-
-  async getChildren(): Promise<vscode.TreeItem[]> {
-    const templates: Template[] = await this.templateService.getTemplates()
-    return templates?.map((template) => new TemplateItem(template))
-  }
-}
+// TODO : 절반 이하로 줄인다 671

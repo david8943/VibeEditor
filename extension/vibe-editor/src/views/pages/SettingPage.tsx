@@ -92,7 +92,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   }, [])
 
   return (
-    <div className="min-h-screen w-full p-8">
+    <div className="min-h-screen w-full">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="text-2xl font-bold">Vibe Editor 설정</div>
@@ -218,7 +218,9 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   }>
                   노션 PRIVATE API 키 설정
                 </button>
-
+                <h2 className="text-xl font-semibold border-b pb-4">
+                  기본 설정
+                </h2>
                 <DBSelector
                   selectedId={defaultNotionDatabaseId}
                   onChange={(id) => {
@@ -250,9 +252,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                 )}
 
                 <div className="form-group">
-                  <label className="text-sm font-medium">
-                    기본 포스트 종류
-                  </label>
+                  <label className="text-sm font-medium">포스트 종류</label>
                   <select
                     value={defaultPostType}
                     onChange={(e) => {

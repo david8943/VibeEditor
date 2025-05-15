@@ -48,7 +48,6 @@ export const usePromptSnapshots = ({
           const localSnapshot = localSnapshots.find(
             (localSnapshot) => localSnapshot.snapshotId === snapshot.snapshotId,
           )
-          console.log('로컬 스냅샷 localSnapshot', localSnapshot)
           return {
             attachId: snapshot.attachId,
             snapshotId: snapshot.snapshotId,

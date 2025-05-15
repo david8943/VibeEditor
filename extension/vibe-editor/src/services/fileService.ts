@@ -2,11 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as vscode from 'vscode'
 
-import { getDraftData } from '../configuration/draftData'
-import { DraftDataType } from '../types/configuration'
-import { Snapshot, SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
-import { refreshAllProviders } from './snapshotService'
 
 export class FileService {
   private context: vscode.ExtensionContext

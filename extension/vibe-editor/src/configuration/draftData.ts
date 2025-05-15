@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { DraftDataType } from '../types/configuration'
+import { PageType } from '../types/webview'
 
 //Test
 const initialDraftData: Record<DraftDataType, unknown> = {
@@ -10,6 +11,7 @@ const initialDraftData: Record<DraftDataType, unknown> = {
   [DraftDataType.selectedPromptId]: 0,
   [DraftDataType.selectedPostId]: 0,
   [DraftDataType.optionList]: [],
+  [DraftDataType.selectedPage]: PageType.SETTING,
 }
 
 let draftData: Record<DraftDataType, unknown> = { ...initialDraftData }

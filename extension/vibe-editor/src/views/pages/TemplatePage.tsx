@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
+import { AIAPIKey } from 'dist/app/src/types/ai'
+
 import { CreateDatabase } from '../../types/database'
 import {
   CreatePrompt,
@@ -8,9 +10,8 @@ import {
   PostType,
   Prompt,
   PromptAttach,
-  SelectPrompt,
+  SubmitPrompt,
   Template,
-  UpdatePrompt,
 } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
@@ -35,6 +36,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     promptAttachList: [],
     promptOptionList: [],
     notionDatabaseId: 0,
+    userAIProviderId: null,
   })
   const [notionDatabaseId, setNotionDatabaseId] = useState(0)
   const [showDbModal, setShowDbModal] = useState(false)
@@ -66,45 +68,83 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       } else if (message.type === MessageType.STOP_LOADING) {
         setLoading(false)
       } else if (message.type === MessageType.PROMPT_SELECTED) {
-        setSelectedPrompt(message.payload.prompt)
-        setSelectedPromptId(message.payload.prompt.promptId)
-        setNotionDatabaseId(message.payload.prompt.notionDatabaseId)
+        console.log('PROMPT_SELECTED', message.payload.prompt)
+        if (message.payload.prompt) {
+          setSelectedPrompt(message.payload.prompt)
+          setSelectedPromptId(message.payload.prompt.promptId)
+          setNotionDatabaseId(message.payload.prompt.notionDatabaseId)
+        }
       } else if (message.type === MessageType.SNAPSHOT_SELECTED) {
         addSnapshotCode(message.payload.snapshot)
       } else if (message.type === MessageType.CONFIG_LOADED) {
         const config = message.payload
-
         console.log('config', config)
         setDefaultPostType(config.defaultPostType)
         setDefaultPromptOptionIds(config.defaultPromptOptionIds)
         setDefaultNotionDatabaseId(config.defaultNotionDatabaseId ?? 0)
+      } else if (message.type === MessageType.NAVIGATE) {
+        postMessageToExtension({ type: MessageType.GET_TEMPLATE })
+        postMessageToExtension({ type: MessageType.GET_OPTIONS })
+        postMessageToExtension({ type: MessageType.GET_PROMPT })
+      } else if (message.type === MessageType.RESET_CREATE_PROMPT) {
+        resetCreatePrompt()
       }
     }
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const submitPrompt = (data: Prompt) => {
+  const resetCreatePrompt = () => {
+    setCreatePromptData({
+      parentPromptId: null,
+      templateId: selectedPromptId,
+      promptName: '새 프롬프트 생성하기',
+      postType: defaultPostType,
+      comment: '',
+      promptAttachList: [],
+      promptOptionList: defaultPromptOptionIds,
+      notionDatabaseId: notionDatabaseId,
+      userAIProviderId: null,
+    })
+  }
+  const generatePost = (selectedPromptId: number) => {
     postMessageToExtension({
-      type: MessageType.SUBMIT_PROMPT,
-      payload: data,
+      type: MessageType.GENERATE_POST,
+      payload: {
+        templateId: selectedPrompt?.templateId,
+        promptId: selectedPromptId,
+      },
     })
   }
 
   const addSnapshotCode = (data: PromptAttach) => {
+    console.log('addSnapshotCode', data)
+    console.log('selectedPromptId', selectedPromptId)
+    if (selectedPromptId == 0) {
+      setCreatePromptData((currentPrompt) => {
+        if (!currentPrompt) return currentPrompt
+        return {
+          ...currentPrompt,
+          promptAttachList: [...currentPrompt.promptAttachList, data],
+        }
+      })
+    }
     setSelectedPrompt((currentPrompt) => {
+      console.log('setSelectedPrompt 내부 currentPrompt:', currentPrompt)
       if (!currentPrompt) return currentPrompt
-      return {
+      const updatedPrompt = {
         ...currentPrompt,
         promptAttachList: [...currentPrompt.promptAttachList, data],
       }
+      console.log('업데이트된 prompt:', updatedPrompt)
+      return updatedPrompt
     })
   }
 
-  const updatePrompt = (data: UpdatePrompt) => {
+  const submitPrompt = (data: SubmitPrompt) => {
     const prompt = { ...data, notionDatabaseId }
     postMessageToExtension({
-      type: MessageType.UPDATE_PROMPT,
+      type: MessageType.SUBMIT_PROMPT,
       payload: {
         prompt: prompt,
         selectedTemplateId: selectedTemplate?.templateId,
@@ -164,6 +204,17 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       payload: null,
     })
 
+  const getAIProviders = () =>
+    postMessageToExtension({
+      type: MessageType.GET_AI_PROVIDERS,
+    })
+
+  const saveAIProvider = (aiProvider: AIAPIKey) =>
+    postMessageToExtension({
+      type: MessageType.SAVE_AI_PROVIDER,
+      payload: aiProvider,
+    })
+
   const deleteSnapshot = (attachId: number) => {
     postMessageToExtension({
       type: MessageType.DELETE_SNAPSHOT,
@@ -176,34 +227,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }
 
   useEffect(() => {
-    setCreatePromptData({
-      parentPromptId: null,
-      templateId: selectedPromptId,
-      promptName: '새 프롬프트 생성하기',
-      postType: defaultPostType ?? PostType.TECH_CONCEPT,
-      comment: '',
-      promptAttachList: [],
-      promptOptionList: defaultPromptOptionIds,
-      notionDatabaseId: defaultNotionDatabaseId,
-    })
-
-    if (selectedTemplate?.promptList) {
-      console.log(
-        'selectedTemplate?.promptList😂',
-        selectedTemplate.promptList,
-        defaultPostType,
-        {
-          parentPromptId: null,
-          templateId: selectedPromptId,
-          promptName: '새 프롬프트 생성하기',
-          postType: defaultPostType,
-          comment: '',
-          promptAttachList: [],
-          promptOptionList: defaultPromptOptionIds,
-          notionDatabaseId: defaultNotionDatabaseId,
-        },
-      )
-    }
+    resetCreatePrompt()
   }, [
     selectedTemplate,
     defaultPostType,
@@ -219,9 +243,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   return (
     <div className="app-container flex flex-col gap-8">
-      <h1>프롬프트 생성기 promptId: {selectedPromptId}</h1>
       <h1>
-        {selectedTemplate?.templateName} templateId:
+        {selectedTemplate?.templateName}의 템플릿 promptId: {selectedPromptId}
+      </h1>
+      <h1>
+        templateId:
         {selectedTemplate?.templateId}
       </h1>
 
@@ -251,19 +277,21 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
           />
         )}
 
-        {`defaultPostType${defaultPostType}`}
-        {`PostType${createPromptData?.postType}`}
         {selectedTemplate && selectedPrompt && (
           <PromptForm
             defaultPrompt={selectedPrompt}
             selectedPromptId={selectedPromptId}
+            generatePost={generatePost}
             submitPrompt={submitPrompt}
-            updatePrompt={updatePrompt}
             deleteSnapshot={deleteSnapshot}
             localSnapshots={selectedTemplate.snapshotList || []}
             optionList={optionList}
             defaultPromptOptionIds={defaultPromptOptionIds}
             defaultPostType={defaultPostType}
+            saveDatabase={saveDatabase}
+            getDatabases={getDatabases}
+            getAIProviders={getAIProviders}
+            saveAIProvider={saveAIProvider}
           />
         )}
 
@@ -277,6 +305,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             optionList={optionList}
             defaultPromptOptionIds={defaultPromptOptionIds}
             defaultPostType={defaultPostType}
+            saveDatabase={saveDatabase}
+            getDatabases={getDatabases}
+            getAIProviders={getAIProviders}
+            saveAIProvider={saveAIProvider}
           />
         )}
       </div>

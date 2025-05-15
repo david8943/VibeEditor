@@ -34,6 +34,7 @@ export const useCreatePromptForm = ({
       postType: defaultPrompt.postType,
       comment: defaultPrompt.comment,
       notionDatabaseId: defaultPrompt.notionDatabaseId,
+      userAIProviderId: defaultPrompt.userAIProviderId,
       snapshots: [],
       options: {},
     }
@@ -62,6 +63,7 @@ export const useCreatePromptForm = ({
         .map((option) => option.optionId),
       notionDatabaseId: defaultPrompt?.notionDatabaseId ?? 0,
       parentPromptId: defaultPrompt?.parentPromptId ?? null,
+      userAIProviderId: defaultPrompt?.userAIProviderId ?? null,
     }
   }
 

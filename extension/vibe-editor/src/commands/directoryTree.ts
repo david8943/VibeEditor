@@ -2,15 +2,13 @@ import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
 import { DirectoryTreeService } from '../services/directoryTreeService'
-import {
-  SnapshotService,
-  refreshAllProviders,
-} from '../services/snapshotService'
+import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
 import { DraftDataType } from '../types/configuration'
 import { SnapshotType } from '../types/snapshot'
 import { PageType } from '../types/webview'
+import { refreshTemplateProvider } from '../views/tree/templateTreeView'
 
 export class DirectoryTreeCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.exportDirectoryTreeSnapshot'
@@ -21,7 +19,7 @@ export class DirectoryTreeCommand implements ICommand {
   constructor(context: vscode.ExtensionContext) {
     this.directoryTreeService = new DirectoryTreeService(context)
     this.snapshotService = new SnapshotService(context)
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
@@ -55,13 +53,13 @@ export class DirectoryTreeCommand implements ICommand {
       vscode.window.showErrorMessage('스냅샷 생성에 실패했습니다.')
       return
     }
-    const selectedTemplateId: number | undefined = getDraftData(
+    const selectedTemplateId = getDraftData<number>(
       DraftDataType.selectedTemplateId,
     )
     if (selectedTemplateId) {
       await this.templateService.updateTemplateDetail(selectedTemplateId)
     }
-    refreshAllProviders()
+    refreshTemplateProvider()
     await this.snapshotService.openTextDocument(treeText)
   }
 }

@@ -7,7 +7,6 @@ import {
 import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
-  RefreshSnapshotCommand,
   RenameSnapshotCommand,
   ViewCodeSnapshotCommand,
 } from './captureSnapshot'
@@ -15,17 +14,27 @@ import { CopyCodeCommand } from './copyCode'
 import { DirectoryTreeCommand } from './directoryTree'
 import { FileSnapshotCommand } from './fileSnapshot'
 import { SetNotionApiCommand } from './notion'
-import { DeletePostCommand, ShowPostPageCommand } from './post'
-import { ShowSettingPageCommand } from './setting'
+import {
+  CreatePostCommand,
+  DeletePostCommand,
+  ResetPostCommand,
+  ShowDefaultPostPageCommand,
+  ShowPostPageCommand,
+} from './post'
+import { ShowReadmeCommand, ShowSettingPageCommand } from './setting'
 import {
   AddToPromptCommand,
   CreateTemplateCommand,
   DeleteTemplateCommand,
+  GenaratePostCommand,
   GetTemplatesCommand,
   RenameTemplateCommand,
   ResetTemplateCommand,
+  ShowDefaultTemplatePageCommand,
+  ShowPromptCommand,
   ShowTemplatePageCommand,
 } from './template'
+import { ShowSideViewCommand } from './view'
 
 export const allCommands = [
   GoogleLoginCommand,
@@ -44,11 +53,18 @@ export const allCommands = [
   ShowSettingPageCommand,
   AddToPromptCommand,
   DeleteSnapshotCommand,
-  RefreshSnapshotCommand,
   FileSnapshotCommand,
   ViewCodeSnapshotCommand,
   GetTemplatesCommand,
   ShowPostPageCommand,
   RenameSnapshotCommand,
   DeletePostCommand,
+  ShowSideViewCommand,
+  ShowPromptCommand,
+  ShowDefaultTemplatePageCommand,
+  ShowDefaultPostPageCommand,
+  ResetPostCommand,
+  ShowReadmeCommand,
+  GenaratePostCommand,
+  CreatePostCommand,
 ]

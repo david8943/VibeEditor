@@ -6,39 +6,15 @@ import {
   removeSnapshot,
   updateSnapshot,
 } from '../apis/snapshot'
-import { getDraftData } from '../configuration/draftData'
+import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
-import {
-  CreateSnapshotRequest,
-  Snapshot,
-  SnapshotType,
-} from '../types/snapshot'
+import { Snapshot, SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
-import { SnapshotProvider } from '../views/codeSnapshotView'
-import { SnapshotItem } from '../views/codeSnapshotView'
-
-let codeProviderInstance: SnapshotProvider | undefined
-let directoryProviderInstance: SnapshotProvider | undefined
-
-let logProviderInstance: SnapshotProvider | undefined
-
-export function setCodeSnapshotProvider(provider: SnapshotProvider) {
-  codeProviderInstance = provider
-}
-
-export function setDirectorySnapshotProvider(provider: SnapshotProvider) {
-  directoryProviderInstance = provider
-}
-
-export function setLogSnapshotProvider(provider: SnapshotProvider) {
-  logProviderInstance = provider
-}
-
-export function refreshAllProviders() {
-  codeProviderInstance?.refresh()
-  directoryProviderInstance?.refresh()
-  logProviderInstance?.refresh()
-}
+import { formatTime } from '../utils/formatTime'
+import {
+  SnapshotItem,
+  refreshTemplateProvider,
+} from '../views/tree/templateTreeView'
 
 export class SnapshotService {
   private context: vscode.ExtensionContext
@@ -46,27 +22,65 @@ export class SnapshotService {
   constructor(context: vscode.ExtensionContext) {
     this.context = context
   }
-  public async refreshSnapshot(): Promise<void> {
-    refreshAllProviders()
-  }
   public async selectTemplate(templates: Template[]): Promise<Template | null> {
     let selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
     console.log('selectTemplate', selectedTemplateId, templates)
+
     if (!selectedTemplateId) {
-      const selected = await vscode.window.showQuickPick(
-        templates.map((template) => ({
+      return new Promise<Template | null>((resolve) => {
+        const quickPick = vscode.window.createQuickPick()
+        quickPick.items = templates.map((template) => ({
           label: template.templateName,
           templateId: template.templateId,
-        })),
-        { placeHolder: '템플릿을 선택하세요' },
-      )
+        }))
+        quickPick.placeholder = '템플릿을 선택하세요'
+        quickPick.buttons = [
+          {
+            iconPath: new vscode.ThemeIcon('add'),
+            tooltip: '템플릿 추가',
+          },
+        ]
 
-      if (!selected) {
-        vscode.window.showInformationMessage(`선택해주세요.`)
-        return null
-      }
-      selectedTemplateId = selected.templateId
+        quickPick.onDidTriggerButton(async () => {
+          quickPick.hide()
+          const templateName = await vscode.window.showInputBox({
+            placeHolder: '새 템플릿 이름을 입력하세요',
+            prompt: '새로운 템플릿의 이름을 입력해주세요',
+          })
+
+          if (templateName) {
+            // TODO: 템플릿 추가 로직 구현 필요
+            vscode.window.showInformationMessage(
+              `새 템플릿 "${templateName}"이(가) 추가되었습니다.`,
+            )
+          }
+          resolve(null)
+        })
+
+        quickPick.onDidAccept(() => {
+          const selected = quickPick.selectedItems[0] as {
+            label: string
+            templateId: number
+          }
+          if (selected) {
+            const template = templates.find(
+              (t) => t.templateId === selected.templateId,
+            )
+            quickPick.hide()
+            resolve(template ?? null)
+          } else {
+            resolve(null)
+          }
+        })
+
+        quickPick.onDidHide(() => {
+          resolve(null)
+        })
+
+        quickPick.show()
+      })
     }
+
     return (
       templates.find(
         (template) => template.templateId === selectedTemplateId,
@@ -144,11 +158,11 @@ export class SnapshotService {
 
     await this.context.globalState.update('templates', updatedTemplates)
     vscode.window.showInformationMessage(`스냅샷이 삭제되었습니다.`)
-    refreshAllProviders()
+    refreshTemplateProvider()
   }
 
-  async renameSnapshot(snapshotId: number): Promise<void> {
-    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+  async renameSnapshot(snapshotItem: SnapshotItem): Promise<void> {
+    const selectedTemplateId = snapshotItem.templateId
     const templates = this.context.globalState.get<Template[]>('templates', [])
 
     const template = templates.find(
@@ -158,7 +172,7 @@ export class SnapshotService {
       return
     }
     const snapshot: Snapshot | undefined = template.snapshotList?.find(
-      (snapshot) => snapshot.snapshotId === snapshotId,
+      (snapshot) => snapshot.snapshotId === snapshotItem.snapshot.snapshotId,
     )
 
     if (!snapshot) {
@@ -176,12 +190,12 @@ export class SnapshotService {
         if (value) {
           snapshot.snapshotName = value
           const success = await updateSnapshot({
-            snapshotId: snapshotId,
+            snapshotId: snapshotItem.snapshot.snapshotId,
             snapshotName: snapshot.snapshotName,
           })
           if (success) {
             await this.context.globalState.update('templates', templates)
-            refreshAllProviders()
+            refreshTemplateProvider()
           }
         }
       })
@@ -236,6 +250,7 @@ export class SnapshotService {
 
   public async updateCodeSnapshot(
     snapshotId: number,
+    templateId: number,
   ): Promise<Snapshot | null> {
     const result = await getSnapshotDetail(snapshotId)
     if (!result.success) {
@@ -250,7 +265,7 @@ export class SnapshotService {
       updatedAt,
     } = result.data
 
-    const selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    const selectedTemplateId = templateId
     if (selectedTemplateId) {
       const templates = this.context.globalState.get<Template[]>(
         'templates',
@@ -277,8 +292,12 @@ export class SnapshotService {
     return null
   }
 
-  public async viewCodeSnapshot(snapshotId: number): Promise<void> {
-    const snapshot = await this.updateCodeSnapshot(snapshotId)
+  public async viewCodeSnapshot(
+    snapshotId: number,
+    templateId: number,
+  ): Promise<void> {
+    setDraftData(DraftDataType.selectedTemplateId, templateId)
+    const snapshot = await this.updateCodeSnapshot(snapshotId, templateId)
     if (!snapshot) {
       vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
       return
@@ -287,36 +306,66 @@ export class SnapshotService {
       'captureCodeSnapshot',
       `📸 ${snapshot.snapshotName}`,
       vscode.ViewColumn.One,
-      { enableScripts: false },
+      {
+        enableScripts: false,
+        localResourceRoots: [vscode.Uri.file(this.context.extensionPath)],
+      },
     )
     panel.webview.html = this.getCodeWebviewHTML(snapshot)
   }
 
   getCodeWebviewHTML(snapshot: Snapshot): string {
+    let label = ''
+    switch (snapshot.snapshotType) {
+      case SnapshotType.BLOCK:
+        label = '코드 스냅샷'
+        break
+      case SnapshotType.FILE:
+        label = '파일 스냅샷'
+        break
+      case SnapshotType.DIRECTORY:
+        label = '디렉토리 구조 시각화'
+        break
+      case SnapshotType.LOG:
+        label = '로그 스냅샷'
+        break
+      default:
+        break
+    }
+
+    const cssPath = vscode.Uri.file(
+      this.context.asAbsolutePath('src/styles/highlight-vscode.css'),
+    ).with({ scheme: 'vscode-resource' })
+
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <title>${snapshot.snapshotName}</title>
+      <link rel="stylesheet" type="text/css" href="${cssPath}">
       <style>
         body {
-          font-family: monospace;
+          font-family: 'var(--vscode-font-family)';
           padding: 1rem;
-          background-color: #1e1e1e;
-          color: #d4d4d4;
+          background-color: 'var(--vscode-editor-background)';
+          color:'var(--vscode-foreground)';
+          font-size: 'var(--vscode-font-size)';
         }
         pre {
+          font-family: var(--vscode-editor-font-family);
           white-space: pre-wrap;
           word-wrap: break-word;
-          background-color: #2d2d2d;
           padding: 1rem;
+          background-color: 'var(--vscode-editor-background)';
+          color:'var(--vscode-editor-foreground)';
           border-radius: 6px;
         }
       </style>
     </head>
     <body>
-      <h3>${snapshot.snapshotName} | ${snapshot.createdAt}</h3>
+      <label>${label}</label>
+      <h3>${snapshot.snapshotName} | ${formatTime(snapshot.createdAt)}</h3>
       <pre>${snapshot.snapshotContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
     </body>
     </html>

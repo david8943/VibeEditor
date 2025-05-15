@@ -9,12 +9,13 @@ import {
   useForm,
 } from 'react-hook-form'
 
-import { EditPrompt, Prompt, UpdatePrompt } from '../../types/template'
+import { EditPrompt, Prompt, SubmitPrompt } from '../../types/template'
 
 interface UsePromptFormProps {
   defaultPrompt: Prompt | null
+  generatePost: (selectedPromptId: number) => void
   submitPrompt: (data: Prompt) => void
-  updatePrompt: (data: UpdatePrompt) => void
+  selectedPromptId: number
 }
 
 interface UsePromptFormReturn {
@@ -29,21 +30,20 @@ interface UsePromptFormReturn {
   onSubmit: (data: EditPrompt) => void
   handlePost: (() => void) | null
   defaultValues: EditPrompt
-  editPromptToPrompt: (editPrompt: EditPrompt) => Prompt
-  editPromptToUpdatePrompt: (editPrompt: EditPrompt) => UpdatePrompt
+  editPromptToSubmitPrompt: (editPrompt: EditPrompt) => SubmitPrompt
   setDefaultValues: (defaultPrompt: Prompt | null) => EditPrompt
 }
 
 export const useUpdatePromptForm = ({
   defaultPrompt,
   submitPrompt,
-  updatePrompt,
+  generatePost,
+  selectedPromptId,
 }: UsePromptFormProps): UsePromptFormReturn => {
   const setDefaultValues = (defaultPrompt: Prompt | null): EditPrompt => {
     if (!defaultPrompt) return {} as EditPrompt
     console.log('setDefaultValues', defaultPrompt)
     const editPrompt: EditPrompt = {
-      promptId: defaultPrompt.promptId,
       templateId: defaultPrompt.templateId,
       promptName: defaultPrompt.promptName,
       postType: defaultPrompt.postType,
@@ -58,6 +58,7 @@ export const useUpdatePromptForm = ({
           snapshotName: '',
         })) ?? [],
       options: {},
+      userAIProviderId: defaultPrompt.userAIProviderId,
     }
     return editPrompt
   }
@@ -76,17 +77,20 @@ export const useUpdatePromptForm = ({
   })
 
   useEffect(() => {
-    if (defaultPrompt?.promptId) {
+    if (selectedPromptId) {
       const newDefaultValues = setDefaultValues(defaultPrompt)
       reset(newDefaultValues)
     }
-  }, [defaultPrompt?.promptId, reset])
+  }, [selectedPromptId, reset])
 
   const editPromptToPrompt = (editPrompt: EditPrompt): Prompt => {
     return {
-      parentPrompt: null,
-      templateId: defaultPrompt?.templateId ?? 0,
       promptId: defaultPrompt?.promptId ?? 0,
+      parentPrompt: {
+        parentPromptId: defaultPrompt?.parentPrompt?.parentPromptId ?? 0,
+        parentPromptName: defaultPrompt?.parentPrompt?.parentPromptName ?? '',
+      },
+      templateId: defaultPrompt?.templateId ?? 0,
       promptName: editPrompt.promptName,
       postType: editPrompt.postType,
       comment: editPrompt.comment,
@@ -100,27 +104,25 @@ export const useUpdatePromptForm = ({
         .filter((option) => option.isSelected)
         .map((option) => option.optionId),
       notionDatabaseId: defaultPrompt?.notionDatabaseId ?? 0,
+      userAIProviderId: editPrompt.userAIProviderId,
     }
   }
 
-  const editPromptToUpdatePrompt = (editPrompt: EditPrompt): UpdatePrompt => {
-    const { promptId, parentPrompt, ...updatePrompt } =
-      editPromptToPrompt(editPrompt)
-    return updatePrompt
+  const editPromptToSubmitPrompt = (editPrompt: EditPrompt): SubmitPrompt => {
+    const { ...submitPrompt } = editPromptToPrompt(editPrompt)
+    return submitPrompt
   }
 
   const onSubmit = (data: EditPrompt) => {
     console.log('onSubmit', data)
-    if (defaultPrompt?.promptId) {
-      const prompt = editPromptToUpdatePrompt(data)
-      updatePrompt(prompt)
-    }
+    const prompt = editPromptToPrompt(data)
+    submitPrompt(prompt)
   }
 
   const handlePost = () => {
     const formData = editPromptToPrompt(watch())
-    console.log('handlePost', formData)
-    submitPrompt(formData)
+    //TODO: onSubmit안 하면 비활성화
+    generatePost(selectedPromptId)
   }
 
   return {
@@ -135,8 +137,7 @@ export const useUpdatePromptForm = ({
     onSubmit,
     handlePost,
     defaultValues,
-    editPromptToPrompt,
-    editPromptToUpdatePrompt,
+    editPromptToSubmitPrompt,
     setDefaultValues,
   }
 }

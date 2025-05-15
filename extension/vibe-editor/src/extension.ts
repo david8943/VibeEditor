@@ -1,28 +1,20 @@
-import * as fs from 'fs'
-import * as path from 'path'
 import * as vscode from 'vscode'
 
 import { setExtensionContext } from './apis/api'
 import { getCurrentUser } from './apis/user'
 import { allCommands } from './commands'
-import { Configuration } from './configuration'
+import { ConfigType, Configuration } from './configuration'
 import { setDraftData } from './configuration/draftData'
-import { PostProvider, setPostProvider } from './services/postService'
-import {
-  setCodeSnapshotProvider,
-  setDirectorySnapshotProvider,
-  setLogSnapshotProvider,
-} from './services/snapshotService'
+import { DraftDataType, SecretType } from './types/configuration'
+import { PostProvider, setPostProvider } from './views/tree/postTreeView'
 import {
   TemplateProvider,
   setTemplateProvider,
-} from './services/templateService'
-import { DraftDataType, SecretType } from './types/configuration'
+} from './views/tree/templateTreeView'
 import {
-  CodeSnapshotProvider,
-  DirectoryTreeSnapshotProvider,
-  LogSnapshotProvider,
-} from './views/codeSnapshotView'
+  SideViewProvider,
+  setSideViewProvider,
+} from './views/webview/SideViewProvider'
 
 async function setUser(context: vscode.ExtensionContext) {
   const accessToken = await context.secrets.get(SecretType.accessToken)
@@ -46,12 +38,12 @@ async function addStatusBarItem(context: vscode.ExtensionContext) {
     vscode.StatusBarAlignment.Right,
     100,
   )
-  statusBarItem.text = 'VibeEditor $(gear)'
-  statusBarItem.tooltip = '$(gear) VibeEditor 설정 열기'
-  statusBarItem.command = 'vibeEditor.showSettingPage' // ← 이미 정의한 command 사용
+  statusBarItem.text = 'VibeEditor'
+  statusBarItem.tooltip = 'VibeEditor 열기'
+  statusBarItem.command = 'vibeEditor.showSideViewPage'
   statusBarItem.show()
-
   context.subscriptions.push(statusBarItem)
+  vscode.commands.executeCommand('vibeEditor.showSideViewPage')
 }
 
 async function registerCommand(context: vscode.ExtensionContext) {
@@ -67,41 +59,23 @@ async function registerCommand(context: vscode.ExtensionContext) {
 
 async function registerProvider(context: vscode.ExtensionContext) {
   const tp = new TemplateProvider(context)
-  const csp = new CodeSnapshotProvider(context)
-  const dsp = new DirectoryTreeSnapshotProvider(context)
-  const lsp = new LogSnapshotProvider(context)
   const pp = new PostProvider(context)
+  const svp = new SideViewProvider(context)
 
   vscode.window.registerTreeDataProvider('vibeEditorTemplatePage', tp)
-  vscode.window.registerTreeDataProvider('vibeEditorCodeSnapshot', csp)
-  vscode.window.registerTreeDataProvider('vibeEditorDirectoryTreeSnapshot', dsp)
-  vscode.window.registerTreeDataProvider('vibeEditorLogSnapshot', lsp)
   vscode.window.registerTreeDataProvider('vibeEditorPostList', pp)
+  vscode.window.registerWebviewViewProvider('vibeEditorSideView', svp)
 
   setTemplateProvider(tp)
-  setCodeSnapshotProvider(csp)
-  setDirectorySnapshotProvider(dsp)
-  setLogSnapshotProvider(lsp)
   setPostProvider(pp)
+  setSideViewProvider(svp)
 }
 
 async function maybeShowReadme(context: vscode.ExtensionContext) {
-  const key = 'vibeEditor.hasShownReadme'
-  const hasShown = context.globalState.get<boolean>(key)
-
-  if (!hasShown) {
-    const readmePath = path.join(context.extensionPath, 'README.md')
-    const readmeUri = vscode.Uri.file(readmePath)
-
-    try {
-      const doc = await vscode.workspace.openTextDocument(readmeUri)
-      await vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true)
-      await vscode.commands.executeCommand('markdown.showPreview', readmeUri)
-    } catch (error) {
-      console.error('README 띄우기 실패:', error)
-    }
-
-    await context.globalState.update(key, true)
+  const hasShownReadme = Configuration.get(ConfigType.showReadme)
+  if (!hasShownReadme) {
+    await vscode.commands.executeCommand('vibeEditor.showReadme')
+    Configuration.set(ConfigType.showReadme, true)
   }
 }
 
@@ -114,10 +88,7 @@ export async function activate(
   await registerProvider(context)
   await maybeShowReadme(context)
   addStatusBarItem(context)
-
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
 }
 
-export function deactivate(): void {
-  // 정리 작업이 필요한 경우 여기에 추가
-}
+export function deactivate(): void {}

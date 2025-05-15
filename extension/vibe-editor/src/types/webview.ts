@@ -1,5 +1,3 @@
-import { SnapshotItem } from '@/views/codeSnapshotView'
-
 import { Prompt, SubmitPrompt } from './template'
 
 export const PageType = {
@@ -19,14 +17,17 @@ export const MessageType = {
   INITIAL_PAGE: 'INITIAL_PAGE',
   CONFIG_CHANGE: 'CONFIG_CHANGE',
   WEBVIEW_READY: 'WEBVIEW_READY',
+  // 프로젝트 목록 페이지
+  CREATE_TEMPLATE: 'CREATE_TEMPLATE',
+
   // 템플릿 페이지
   SUBMIT_PROMPT: 'SUBMIT_PROMPT',
-  UPDATE_PROMPT: 'UPDATE_PROMPT',
+  GENERATE_POST: 'GENERATE_POST',
   CREATE_PROMPT: 'CREATE_PROMPT',
   DELETE_PROMPT: 'DELETE_PROMPT',
-  GET_TEMPLATES: 'GET_TEMPLATES',
   GET_TEMPLATE: 'GET_TEMPLATE',
   GET_SNAPSHOTS: 'GET_SNAPSHOTS',
+  GET_PROMPT: 'GET_PROMPT',
   TEMPLATE_SELECTED: 'TEMPLATE_SELECTED',
   SNAPSHOTS_LOADED: 'SNAPSHOTS_LOADED',
   PROMPT_SELECTED: 'PROMPT_SELECTED',
@@ -40,7 +41,10 @@ export const MessageType = {
   GET_CONFIG: 'GET_CONFIG',
   CONFIG_LOADED: 'CONFIG_LOADED',
   SET_CONFIG_VALUE: 'SET_CONFIG_VALUE',
-
+  RESET_CREATE_PROMPT: 'RESET_CREATE_PROMPT',
+  GET_AI_PROVIDERS: 'GET_AI_PROVIDERS',
+  AI_PROVIDERS_LOADED: 'AI_PROVIDERS_LOADED',
+  SAVE_AI_PROVIDER: 'SAVE_AI_PROVIDER',
   // 포스트 페이지
   GET_CURRENT_POST: 'GET_CURRENT_POST',
   CURRENT_POST_LOADED: 'CURRENT_POST_LOADED',
@@ -48,6 +52,7 @@ export const MessageType = {
   SHOW_POST_VIEWER: 'SHOW_POST_VIEWER',
   START_LOADING: 'START_LOADING',
   STOP_LOADING: 'STOP_LOADING',
+  UPLOAD_POST: 'UPLOAD_POST',
 
   // 설정 페이지
   GET_USER: 'GET_USER',
@@ -86,7 +91,6 @@ export interface NavigateMessage extends Message {
     page: string
   }
 }
-
 export interface SubmitPromptMessage extends Message {
   type: typeof MessageType.SUBMIT_PROMPT
   payload: SubmitPrompt
