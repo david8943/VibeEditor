@@ -274,7 +274,7 @@ export class SettingViewLoader {
       if (page === PageType.TEMPLATE && payload) {
         setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
         vscode.commands.executeCommand(
-          'vibeEditor.refreshSnapshot',
+          'vibeEditor.resetTemplate',
           payload.templateId,
         )
 

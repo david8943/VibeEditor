@@ -1,35 +1,16 @@
 import * as vscode from 'vscode'
 
-import { uploadPost } from '../apis/post'
+import { upgradePost, uploadPost } from '../apis/post'
+import { getDraftData } from '../configuration/draftData'
+import { DraftDataType } from '../types/configuration'
 import {
   CreatePost,
+  Post,
   PostDetail,
-  PostSummary,
-  UploadToNotionRequest,
   UploadToNotionRequestPost,
 } from '../types/post'
-
-export function refreshPostProvider() {
-  console.log('Refreshing post provider...')
-  if (postProviderInstance) {
-    postProviderInstance?.refresh()
-  }
-}
-export class PostItem extends vscode.TreeItem {
-  constructor(public readonly post: PostSummary) {
-    super(post.postTitle, vscode.TreeItemCollapsibleState.None)
-    this.tooltip = `${post.postTitle}`
-    this.command = {
-      command: 'vibeEditor.showPostPage',
-      title: 'View Post',
-      arguments: [post.postId],
-    }
-    this.contextValue = 'vibeEditorPostList'
-    this.iconPath = post.isLoading
-      ? new vscode.ThemeIcon('sync~spin')
-      : new vscode.ThemeIcon('book')
-  }
-}
+import { isLoading } from '../utils/isLoading'
+import { refreshPostProvider } from '../views/tree/postTreeView'
 
 export class PostService {
   private context: vscode.ExtensionContext
@@ -39,12 +20,13 @@ export class PostService {
 
   async resetPost(): Promise<void> {
     await this.context.globalState.update('posts', [])
+    refreshPostProvider()
   }
 
-  async createPost(data: CreatePost): Promise<void> {
+  async createPost(postId: number): Promise<void> {
     const newPost: PostDetail = {
-      postId: Date.now(),
-      postTitle: '임시 포스트 제목',
+      postId: postId,
+      postTitle: `임시 포스트 제목 ${postId}`,
       postContent: '임시 포스트 내용입니다.',
       templateId: 0,
       promptId: 0,
@@ -52,53 +34,72 @@ export class PostService {
       updatedAt: new Date().toISOString(),
       parentPostIdList: [],
     }
-
     const prev = this.context.globalState.get<PostDetail[]>('posts', [])
     prev.push(newPost)
     await this.context.globalState.update('posts', prev)
-    postProviderInstance?.refresh()
-
+    refreshPostProvider()
     vscode.window.showInformationMessage(
       `포스트가 생성되었습니다: ${newPost.postTitle}`,
     )
   }
 
   async deletePost(postId: number): Promise<void> {
-    const prev = this.context.globalState.get<PostDetail[]>('posts') || []
+    const prev = await this.getLocalPosts()
     const updated = prev.filter((post) => post.postId !== postId)
     await this.context.globalState.update('posts', updated)
-    postProviderInstance?.refresh()
-
+    refreshPostProvider()
     vscode.window.showInformationMessage(`포스트가 삭제되었습니다.`)
   }
 
-  async getCurrentPost(): Promise<PostDetail> {
-    const posts = this.context.globalState.get<PostDetail[]>('posts') || []
-    return posts[0]
+  async getCurrentPost(): Promise<PostDetail | null> {
+    const posts = await this.getLocalPosts()
+    const postId = getDraftData(DraftDataType.selectedPostId)
+    return posts.find((post) => post.postId === postId) || posts[0] || null
   }
 
   async getPost(postId: number): Promise<PostDetail | null> {
     return this.getLocalPost(postId)
   }
-
-  async getLocalPost(postId: number): Promise<PostDetail | null> {
-    const posts = this.context.globalState.get<PostDetail[]>('posts') || []
+  async getLocalPosts(): Promise<PostDetail[]> {
+    return this.context.globalState.get<PostDetail[]>('posts') || []
+  }
+  async getLocalPost(
+    postId: number,
+    prev?: PostDetail[],
+  ): Promise<PostDetail | null> {
+    const posts = prev || (await this.getLocalPosts())
     return posts.find((post) => post.postId === postId) || null
   }
 
+  async updatePost(data: Post): Promise<void> {
+    const prev = await this.getLocalPosts()
+    const updated = prev.map((post) =>
+      post.postId === data.postId ? { ...post, ...data } : post,
+    )
+    await this.context.globalState.update('posts', updated)
+    const success = await upgradePost({
+      postId: data.postId,
+      updatePost: {
+        postContent: data.postContent,
+        postTitle: data.postTitle,
+      },
+    })
+    if (success) {
+      vscode.window.showInformationMessage('포스트가 업데이트되었습니다.')
+    }
+    refreshPostProvider()
+  }
   async submitToNotion(data: UploadToNotionRequestPost): Promise<string> {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
-    // 여기선 로컬에서 임의 생성 (mocking)
-
     const result = await uploadPost(data)
     let postUrl = 'http://www.naver.com'
     if (result.success) {
       postUrl = result.data.postUrl
     }
-    const prev = this.context.globalState.get<PostDetail[]>('posts', [])
-    const filtered = prev.filter((post) => post.postId < 1700000000000)
+    const prev = await this.getLocalPosts()
+    const filtered = prev.filter((post) => !isLoading(post.postId))
     await this.context.globalState.update('posts', filtered)
-    postProviderInstance?.refresh()
+    refreshPostProvider()
     return postUrl
   }
   moveToNotion = (postUrl: string) => {
@@ -110,50 +111,8 @@ export class PostService {
       )
       .then(async (selection) => {
         if (selection === 'Ok') {
-          await vscode.env.openExternal(
-            vscode.Uri.parse(postUrl), // 실제 Notion URL로 변경 필요
-          )
+          await vscode.env.openExternal(vscode.Uri.parse(postUrl))
         }
       })
-  }
-}
-let postProviderInstance: PostProvider | undefined
-
-export function setPostProvider(provider: PostProvider) {
-  postProviderInstance = provider
-}
-
-export class PostProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    vscode.TreeItem | undefined | void
-  > = new vscode.EventEmitter()
-  readonly onDidChangeTreeData = this._onDidChangeTreeData.event
-
-  constructor(private context: vscode.ExtensionContext) {}
-
-  refresh(): void {
-    this._onDidChangeTreeData.fire()
-  }
-
-  getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
-    return element
-  }
-
-  getChildren(): vscode.ProviderResult<vscode.TreeItem[]> {
-    const posts = this.context.globalState.get<PostDetail[]>('posts', [])
-
-    const summaries: PostSummary[] = posts.map((post) => ({
-      postId: post.postId,
-      postTitle: post.postTitle,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-      isLoading: post.postId > 1700000000000,
-    }))
-
-    return Promise.resolve(
-      summaries
-        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-        .map((summary) => new PostItem(summary)),
-    )
   }
 }

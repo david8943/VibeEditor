@@ -2,16 +2,14 @@ import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
 import { FileService } from '../services/fileService'
-import {
-  SnapshotService,
-  refreshAllProviders,
-} from '../services/snapshotService'
+import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
 import { DraftDataType } from '../types/configuration'
 import { SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
 import { PageType } from '../types/webview'
+import { refreshTemplateProvider } from '../views/tree/templateTreeView'
 
 export class FileSnapshotCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.captureFileSnapshot'
@@ -21,7 +19,7 @@ export class FileSnapshotCommand implements ICommand {
 
   constructor(context: vscode.ExtensionContext) {
     this.fileService = new FileService(context)
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
     this.snapshotService = new SnapshotService(context)
   }
 
@@ -69,6 +67,6 @@ export class FileSnapshotCommand implements ICommand {
     if (selectedTemplateId) {
       await this.templateService.updateTemplateDetail(selectedTemplateId)
     }
-    refreshAllProviders()
+    refreshTemplateProvider()
   }
 }

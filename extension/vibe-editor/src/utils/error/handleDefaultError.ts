@@ -30,7 +30,7 @@ export const handleDefaultError = (
   if (!isAxiosError(error)) {
     fetchErrorModal({
       title: `error.999.title`,
-      content: `error.999.content`,
+      content: `알 수 없는 에러가 발생했습니다.`,
       useSecondaryButton: true,
       useI18n: true,
       extensionContext,
@@ -70,7 +70,7 @@ export const handleDefaultError = (
 
   fetchErrorModal({
     title: `error.${status}.title`,
-    content: `error.${status}.content`,
+    content: error.message,
     useSecondaryButton: true,
     useI18n: true,
     extensionContext,

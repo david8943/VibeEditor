@@ -25,3 +25,9 @@ export interface CreateSnapshotRequest {
   snapshotType: SnapshotType
   snapshotContent: string
 }
+
+export const TypeOrder = {
+  [SnapshotType.FILE]: 1,
+  [SnapshotType.DIRECTORY]: 2,
+  [SnapshotType.LOG]: 3,
+}

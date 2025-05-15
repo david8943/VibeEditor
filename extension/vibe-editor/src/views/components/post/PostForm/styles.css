@@ -59,21 +59,6 @@
   background-color: #00508a;
 }
 
-.code-block {
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 4px;
-  font-family: monospace;
-  margin: 10px 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.code-block code {
-  color: #333;
-  font-size: 14px;
-}
-
 .viewer-header {
   display: flex;
   justify-content: space-between;

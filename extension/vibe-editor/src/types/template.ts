@@ -15,12 +15,8 @@ export interface UpdateTemplateRequest {
   templateId: number
   templateName: string
 }
-export interface SubmitPrompt {
-  post: Post
-  navigate?: (page: PageType) => Promise<void>
-}
 export interface SubmitUpdatePrompt {
-  prompt: UpdatePrompt
+  prompt: Prompt
   selectedTemplateId: number
   selectedPromptId: number
   navigate?: (page: PageType) => Promise<void>
@@ -67,34 +63,36 @@ export interface CreatePrompt
   extends Omit<Prompt, 'promptId' | 'parentPrompt'> {
   parentPromptId: number | null
 }
-export interface UpdatePrompt
-  extends Omit<Prompt, 'promptId' | 'parentPrompt'> {}
+export interface SubmitPrompt
+  extends Omit<Prompt, 'promptId' | 'parentPrompt' | 'templateId'> {}
 export interface ParentPrompt {
   parentPromptId: number
   parentPromptName: string
 }
 
 export interface Prompt {
-  parentPrompt: ParentPrompt | null
+  promptId: number
+  parentPrompt: ParentPrompt
+  userAIProviderId: number | null
   templateId: number
   promptAttachList: PromptAttach[]
-  promptId: number
   promptName: string
   postType: string
   comment: string
-  promptOptionList: number[]
   notionDatabaseId: number
+  promptOptionList: number[]
 }
+export interface PromptResponse extends Omit<Prompt, 'promptId'> {}
 
 export interface EditPrompt {
   templateId: number
-  promptId?: number
   promptName: string
   notionDatabaseId: number
   postType: string
   comment: string
   snapshots: EditSnapshot[]
   options: EditOptionList
+  userAIProviderId: number | null
 }
 
 export interface EditSnapshot {

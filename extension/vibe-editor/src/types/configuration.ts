@@ -12,6 +12,7 @@ export const DraftDataType = {
   selectedPromptId: 'selectedPromptId',
   selectedPostId: 'selectedPostId',
   optionList: 'optionList',
+  selectedPage: 'selectedPage',
 } as const
 
 export type DraftDataType = (typeof DraftDataType)[keyof typeof DraftDataType]

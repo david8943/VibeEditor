@@ -55,6 +55,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      requestData: error.config?.data,
+      status: error.response?.status,
+      responseData: error.response?.data,
+    })
     return handleDefaultError(error, extensionContext)
   },
 )

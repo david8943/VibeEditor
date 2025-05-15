@@ -1,18 +1,25 @@
 import * as vscode from 'vscode'
 
 import { SnapshotService } from '../services/snapshotService'
-import { TemplateItem, TemplateService } from '../services/templateService'
+import { TemplateService } from '../services/templateService'
+import { ViewService } from '../services/viewService'
 import { ICommand } from '../types/command'
-import { PageType } from '../types/webview'
-import { SnapshotItem } from '../views/codeSnapshotView'
-import { ViewLoader } from '../views/webview/ViewLoader'
+import { Prompt } from '../types/template'
+import {
+  PromptItem,
+  SnapshotItem,
+  TemplateItem,
+  refreshTemplateProvider,
+} from '../views/tree/templateTreeView'
 
 export class CreateTemplateCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.createTemplate'
   private templateService: TemplateService
+  private viewService: ViewService
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
+    this.viewService = new ViewService(context)
   }
 
   public get commandName(): string {
@@ -20,44 +27,65 @@ export class CreateTemplateCommand implements ICommand {
   }
 
   public async execute(): Promise<void> {
-    this.templateService.createTemplate()
+    const templateId = await this.templateService.createTemplate()
+    if (templateId) {
+      await this.viewService.showTemplatePage(templateId)
+    }
   }
 }
 
 export class ShowTemplatePageCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.showTemplatePage'
+  private viewService: ViewService
   private templateService: TemplateService
-
-  constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+  constructor(private context: vscode.ExtensionContext) {
+    this.viewService = new ViewService(context)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
     return ShowTemplatePageCommand.commandName
   }
-
-  public async execute(template?: any): Promise<void> {
-    console.log('showTemplatePage', template)
-    await this.templateService.updateTemplateDetail(template.templateId)
-
-    ViewLoader.showWebview(this.context, PageType.TEMPLATE, template)
+  public async execute(templateId: number): Promise<void> {
+    await this.templateService.updateTemplateDetail(templateId)
+    await this.viewService.showTemplatePage(templateId)
   }
 }
-
-export class CreatePostCommand implements ICommand {
-  public static readonly commandName = 'vibeEditor.createPost'
-  private templateService: TemplateService
-
-  constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.POST)
+export class ShowDefaultTemplatePageCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.showDefaultTemplatePage'
+  private viewService: ViewService
+  constructor(private context: vscode.ExtensionContext) {
+    this.viewService = new ViewService(context)
   }
 
   public get commandName(): string {
-    return CreatePostCommand.commandName
+    return ShowDefaultTemplatePageCommand.commandName
+  }
+  public async execute(): Promise<void> {
+    await this.viewService.showDefaultTemplatePage()
+  }
+}
+export class ShowPromptCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.showPrompt'
+  private viewService: ViewService
+  private templateService: TemplateService
+  constructor(private context: vscode.ExtensionContext) {
+    this.viewService = new ViewService(context)
+    this.templateService = new TemplateService(context)
   }
 
-  public async execute(): Promise<void> {
-    ViewLoader.showWebview(this.context, PageType.POST)
+  public get commandName(): string {
+    return ShowPromptCommand.commandName
+  }
+  public async execute({
+    prompt,
+    templateId,
+  }: {
+    prompt: Prompt
+    templateId: number
+  }): Promise<void> {
+    await this.templateService.updateTemplateDetail(templateId)
+    await this.viewService.showPrompt(prompt)
   }
 }
 export class RenameTemplateCommand implements ICommand {
@@ -65,14 +93,13 @@ export class RenameTemplateCommand implements ICommand {
   private templateService: TemplateService
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
     return RenameTemplateCommand.commandName
   }
   public async execute(treeItem: TemplateItem): Promise<void> {
-    console.log(treeItem)
     this.templateService.renameTemplate(treeItem.template.templateId)
   }
 }
@@ -81,7 +108,7 @@ export class DeleteTemplateCommand implements ICommand {
   private templateService: TemplateService
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.POST)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
@@ -95,18 +122,15 @@ export class DeleteTemplateCommand implements ICommand {
 
 export class ResetTemplateCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.resetTemplate'
-  private templateService: TemplateService
 
-  constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.POST)
-  }
+  constructor(private readonly context: vscode.ExtensionContext) {}
 
   public get commandName(): string {
     return ResetTemplateCommand.commandName
   }
 
   public async execute(): Promise<void> {
-    this.templateService.resetTemplate()
+    refreshTemplateProvider()
   }
 }
 
@@ -116,7 +140,7 @@ export class AddToPromptCommand implements ICommand {
   private snapshotService: SnapshotService
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.POST)
+    this.templateService = new TemplateService(context)
     this.snapshotService = new SnapshotService(context)
   }
 
@@ -127,6 +151,7 @@ export class AddToPromptCommand implements ICommand {
   public async execute(snapshotItem: SnapshotItem): Promise<void> {
     const snapshot = await this.snapshotService.updateCodeSnapshot(
       snapshotItem.snapshot.snapshotId,
+      snapshotItem.templateId,
     )
     if (snapshot) {
       this.templateService.addToPrompt(snapshot)
@@ -139,7 +164,7 @@ export class GetTemplatesCommand implements ICommand {
   private templateService: TemplateService
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.templateService = new TemplateService(context, PageType.POST)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
@@ -148,6 +173,23 @@ export class GetTemplatesCommand implements ICommand {
 
   public async execute(): Promise<void> {
     await this.templateService.getTemplates()
-    await this.templateService.refreshTemplate()
+    refreshTemplateProvider()
+  }
+}
+
+export class GenaratePostCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.generatePost'
+  private templateService: TemplateService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.templateService = new TemplateService(context)
+  }
+
+  public get commandName(): string {
+    return GenaratePostCommand.commandName
+  }
+
+  public async execute(item: PromptItem): Promise<void> {
+    this.templateService.generatePost(item.prompt)
   }
 }
