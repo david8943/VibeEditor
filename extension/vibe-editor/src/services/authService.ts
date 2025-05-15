@@ -123,7 +123,9 @@ export class AuthService {
 
       await vscode.env.openExternal(
         vscode.Uri.parse(
-          `https://vibeeditor.site/oauth2/authorization/${domain}`,
+          domain === 'ssafy'
+            ? `https://project.ssafy.com/oauth/sso-check?client_id=74261878-69ac-4133-9729-39dff3a38aca&redirect_uri=https://vibeeditor.site/api/v1/user/login/ssafy/callback&response_type=code`
+            : `https://vibeeditor.site/oauth2/authorization/${domain}`,
         ),
       )
     } catch (error) {
