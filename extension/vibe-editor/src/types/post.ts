@@ -30,6 +30,7 @@ export interface Post {
   postTitle: string
   postContent: string
 }
+export type UpdatePost = Omit<Post, 'postId'>
 
 export interface CreatePostRequest {
   promptId: number

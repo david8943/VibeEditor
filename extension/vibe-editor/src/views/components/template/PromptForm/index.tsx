@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
 
-import { Snapshot } from '@/types/snapshot'
-import { EditPrompt, Option, Prompt, UpdatePrompt } from '@/types/template'
-
+import { AIAPIKey } from '../../../../types/ai'
+import { CreateDatabase } from '../../../../types/database'
+import { Snapshot } from '../../../../types/snapshot'
+import { EditPrompt, Option, Prompt } from '../../../../types/template'
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
 import { useUpdatePromptForm } from '../../../hooks/useUpdatePromptForm'
@@ -10,28 +11,34 @@ import { PromptFormUI } from '../PromptFormUI'
 
 interface PromptFormProps {
   defaultPrompt: Prompt | null
+  generatePost: (data: number) => void
   submitPrompt: (data: Prompt) => void
-  updatePrompt: (data: UpdatePrompt) => void
   localSnapshots: Snapshot[]
   deleteSnapshot: (snapshotId: number) => void
   optionList: Option[]
   selectedPromptId: number
-
-  // ✅ 새로 추가할 설정값
   defaultPromptOptionIds: number[]
   defaultPostType: 'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
+  saveDatabase: (database: CreateDatabase) => void
+  getDatabases: () => void
+  getAIProviders: () => void
+  saveAIProvider: (aiProvider: AIAPIKey) => void
 }
 
 export function PromptForm({
   defaultPrompt,
   submitPrompt,
-  updatePrompt,
+  generatePost,
   localSnapshots,
   deleteSnapshot,
   optionList,
   selectedPromptId,
   defaultPromptOptionIds,
   defaultPostType,
+  saveDatabase,
+  getDatabases,
+  getAIProviders,
+  saveAIProvider,
 }: PromptFormProps) {
   const initializedPrompt: Prompt = defaultPrompt ?? {
     postType: defaultPostType,
@@ -41,8 +48,12 @@ export function PromptForm({
     promptAttachList: [],
     notionDatabaseId: 0,
     templateId: 0,
-    promptId: 0, // 필수
-    parentPrompt: null, // 필수
+    userAIProviderId: null,
+    promptId: 0,
+    parentPrompt: {
+      parentPromptId: 0,
+      parentPromptName: '',
+    },
   }
 
   const {
@@ -51,8 +62,9 @@ export function PromptForm({
     handlePost,
   } = useUpdatePromptForm({
     defaultPrompt: initializedPrompt,
+    generatePost,
     submitPrompt,
-    updatePrompt,
+    selectedPromptId,
   })
 
   const { options, handleOption, updateFormOptions } = usePromptOptions({
@@ -82,13 +94,9 @@ export function PromptForm({
     })
   }
 
-  useEffect(() => {
-    console.log('프롬프트폼useEffect selectedPromptId', selectedPromptId)
-  }, [selectedPromptId])
-
   return (
     <PromptFormUI
-      formMethods={{ register, handleSubmit }}
+      formMethods={{ register, handleSubmit, watch, setValue }}
       options={options}
       snapshots={snapshots}
       onSubmit={onSubmit}
@@ -97,6 +105,10 @@ export function PromptForm({
       handleDeleteSnapshot={handleDeleteSnapshot}
       handleDescriptionChange={handleDescriptionChange}
       addSnapshot={addSnapshot}
+      saveDatabase={saveDatabase}
+      getDatabases={getDatabases}
+      getAIProviders={getAIProviders}
+      saveAIProvider={saveAIProvider}
     />
   )
 }

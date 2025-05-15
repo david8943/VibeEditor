@@ -4,6 +4,7 @@ interface ConfigSchema {
   defaultPostType: 'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
   defaultPromptOptionIds: number[]
   defaultNotionDatabaseId: number
+  showReadme: boolean
 }
 
 // 기본값 정의
@@ -11,7 +12,15 @@ const defaultConfig: ConfigSchema = {
   defaultPostType: 'TECH_CONCEPT',
   defaultPromptOptionIds: [],
   defaultNotionDatabaseId: 0,
+  showReadme: false,
 }
+
+export const ConfigType = {
+  defaultPostType: 'defaultPostType',
+  defaultPromptOptionIds: 'defaultPromptOptionIds',
+  defaultNotionDatabaseId: 'defaultNotionDatabaseId',
+  showReadme: 'showReadme',
+} as const
 
 export class Configuration {
   private static readonly configSection = 'vibeEditor'
@@ -27,13 +36,14 @@ export class Configuration {
     const config = vscode.workspace.getConfiguration(this.configSection)
     return {
       defaultPostType:
-        config.get('defaultPostType') ?? defaultConfig.defaultPostType,
+        config.get(ConfigType.defaultPostType) ?? defaultConfig.defaultPostType,
       defaultPromptOptionIds:
-        config.get('defaultPromptOptionIds') ??
+        config.get(ConfigType.defaultPromptOptionIds) ??
         defaultConfig.defaultPromptOptionIds,
       defaultNotionDatabaseId:
-        config.get('defaultNotionDatabaseId') ??
+        config.get(ConfigType.defaultNotionDatabaseId) ??
         defaultConfig.defaultNotionDatabaseId,
+      showReadme: config.get(ConfigType.showReadme) ?? defaultConfig.showReadme,
     }
   }
 

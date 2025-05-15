@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
-import { PostDetail, UploadToNotionRequestPost } from '../../types/post'
+import { Post, PostDetail, UploadToNotionRequestPost } from '../../types/post'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PostForm } from '../components'
 
@@ -39,22 +39,31 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
         setLoading(false)
       } else if (message.type === MessageType.GET_CURRENT_POST) {
         postMessageToExtension({ type: MessageType.GET_CURRENT_POST })
+      } else if (message.type === MessageType.NAVIGATE) {
+        postMessageToExtension({ type: MessageType.GET_CURRENT_POST })
       }
     }
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const onSubmit = (data: UploadToNotionRequestPost) => {
+  const onUploadToNotion = (data: UploadToNotionRequestPost) => {
     postMessageToExtension({
-      type: MessageType.SUBMIT_POST,
+      type: MessageType.UPLOAD_POST,
       payload: data,
     })
   }
-
+  //TODO: 연타 안 되게 막아야 함
+  const onSubmit = (data: Post) => {
+    console.log('onSubmit 이 작동함', data)
+    // postMessageToExtension({
+    //   type: MessageType.SUBMIT_POST,
+    //   payload: data,
+    // })
+  }
   return (
     <div className="app-container">
-      <h1>포스트 생성기</h1>
+      <h1>포스트 미리보기</h1>
       {loading && (
         <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
           <DotLoader color="var(--vscode-button-background)" />
@@ -63,6 +72,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
       <PostForm
         defaultPost={defaultPost}
         onSubmit={onSubmit}
+        onUploadToNotion={onUploadToNotion}
       />
     </div>
   )

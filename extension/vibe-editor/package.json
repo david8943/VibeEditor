@@ -3,7 +3,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.21",
+  "version": "0.0.23",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -54,30 +54,18 @@
           "id": "vibeEditorPostList",
           "name": "포스트 목록",
           "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true"
+          "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.selectedPage == 'POST'"
         },
         {
           "id": "vibeEditorTemplatePage",
-          "name": "템플릿 목록",
+          "name": "프로젝트 목록",
           "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true"
+          "when": "vibeEditor.draftData.loginStatus == true  && vibeEditor.draftData.selectedPage == 'TEMPLATE'"
         },
         {
-          "id": "vibeEditorCodeSnapshot",
-          "name": "코드 스냅샷",
-          "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true"
-        },
-        {
-          "id": "vibeEditorDirectoryTreeSnapshot",
-          "name": "디렉토리 구조 시각화",
-          "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true"
-        },
-        {
-          "id": "vibeEditorLogSnapshot",
-          "name": "로그 스냅 샷",
-          "icon": "media/icon.svg",
+          "type": "webview",
+          "id": "vibeEditorSideView",
+          "name": "Vibe Editor Side View",
           "when": "vibeEditor.draftData.loginStatus == true"
         }
       ]
@@ -87,21 +75,6 @@
         "view": "vibeEditorViewerPage",
         "contents": "Vibe Editor에 로그인이 필요합니다.\n[구글 로그인](command:vibeEditor.googleLogin)\n[깃허브 로그인](command:vibeEditor.githubLogin)\n[싸피 로그인](command:vibeEditor.ssafyLogin)",
         "when": "vibeEditor.draftData.loginStatus == false"
-      },
-      {
-        "view": "vibeEditorCodeSnapshot",
-        "when": "vibeEditor.draftData.selectedTemplateId == 0",
-        "contents": "코드 스냅샷입니다."
-      },
-      {
-        "view": "vibeEditorDirectoryTreeSnapshot",
-        "when": "vibeEditor.draftData.selectedTemplateId == 0",
-        "contents": "디렉토리 구조 시각화 스냅샷입니다."
-      },
-      {
-        "view": "vibeEditorLogSnapshot",
-        "when": "vibeEditor.draftData.selectedTemplateId == 0",
-        "contents": "로그 스냅샷입니다."
       }
     ],
     "commands": [
@@ -215,18 +188,58 @@
         "command": "vibeEditor.deletePost",
         "title": "포스트 삭제하기",
         "icon": "$(trash)"
+      },
+      {
+        "command": "vibeEditor.showSettingPage",
+        "title": "Vibe Editor 설정",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "vibeEditor.showSideViewPage",
+        "title": "Vibe Editor 보기",
+        "icon": "$(wand)"
+      },
+      {
+        "command": "vibeEditor.showDefaultPostPage",
+        "title": "포스트 보기",
+        "icon": "$(wand)"
+      },
+      {
+        "command": "vibeEditor.showDefaultTemplatePage",
+        "title": "템플릿 보기",
+        "icon": "$(notebook)"
+      },
+      {
+        "command": "vibeEditor.generatePost",
+        "title": "AI 포스트 생성",
+        "icon": "$(wand)"
+      },
+      {
+        "command": "vibeEditor.createPost",
+        "title": "포스트 목록 일괄",
+        "icon": "$(wand)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "vibeEditor.createTemplate",
-          "when": "view == vibeEditorTemplatePage",
-          "group": "navigation"
+          "command": "vibeEditor.showDefaultPostPage",
+          "when": "view == vibeEditorSideView",
+          "group": "navigation@1"
         },
         {
-          "command": "vibeEditor.copyCode",
-          "when": "view == vibeEditorLogSnapshot",
+          "command": "vibeEditor.showDefaultTemplatePage",
+          "when": "view == vibeEditorSideView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "vibeEditor.showSettingPage",
+          "when": "view == vibeEditorSideView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "vibeEditor.createTemplate",
+          "when": "view == vibeEditorTemplatePage",
           "group": "navigation"
         }
       ],
@@ -242,23 +255,33 @@
         },
         {
           "command": "vibeEditor.renameSnapshot",
-          "when": "viewItem == vibeEditorCodeSnapshot || viewItem == vibeEditorDirectoryTreeSnapshot || viewItem == vibeEditorLogSnapshot",
+          "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
           "group": "navigation"
         },
         {
-          "command": "vibeEditor.addToPrompt",
-          "when": "viewItem == vibeEditorCodeSnapshot",
-          "group": "inline@1"
-        },
-        {
           "command": "vibeEditor.deleteSnapshot",
-          "when": "viewItem == vibeEditorCodeSnapshot",
+          "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
           "group": "inline@2"
         },
         {
           "command": "vibeEditor.deletePost",
           "when": "viewItem == vibeEditorPostList",
           "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.generatePost",
+          "when": "viewItem == vibeEditorPrompt",
+          "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.addToPrompt",
+          "when": "viewItem == vibeEditorSelectedSnapshot",
+          "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.copyCode",
+          "when": "viewItem == vibeEditorCategory",
+          "group": "navigation"
         }
       ],
       "terminal/context": [
@@ -306,6 +329,10 @@
         },
         "vibeEditor.defaultPostType": {
           "type": "string",
+          "enum": [
+            "TECH_CONCEPT",
+            "TROUBLE_SHOOTING"
+          ],
           "default": "TECH_CONCEPT",
           "description": "기본 포스트 종류"
         },
@@ -321,6 +348,11 @@
           "type": "number",
           "default": 0,
           "description": "기본 노션 데이터베이스 ID"
+        },
+        "vibeEditor.showReadme": {
+          "type": "boolean",
+          "default": false,
+          "description": "README 파일 보이기 여부"
         }
       }
     }

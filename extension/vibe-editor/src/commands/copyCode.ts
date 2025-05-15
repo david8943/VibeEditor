@@ -1,16 +1,14 @@
 import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
-import {
-  SnapshotService,
-  refreshAllProviders,
-} from '../services/snapshotService'
+import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
 import { DraftDataType } from '../types/configuration'
 import { SnapshotType } from '../types/snapshot'
 import { Template } from '../types/template'
 import { PageType } from '../types/webview'
+import { refreshTemplateProvider } from '../views/tree/templateTreeView'
 
 export class CopyCodeCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.copyCode'
@@ -20,7 +18,7 @@ export class CopyCodeCommand implements ICommand {
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this.snapshotService = new SnapshotService(context)
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
   }
   public get commandName(): string {
     return CopyCodeCommand.commandName
@@ -53,6 +51,6 @@ export class CopyCodeCommand implements ICommand {
     if (selectedTemplateId) {
       await this.templateService.updateTemplateDetail(selectedTemplateId)
     }
-    refreshAllProviders()
+    refreshTemplateProvider()
   }
 }

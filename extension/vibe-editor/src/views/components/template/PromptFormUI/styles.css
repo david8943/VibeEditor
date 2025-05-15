@@ -79,7 +79,6 @@
   padding: 10px;
   border-radius: 4px;
   font-family: var(--vscode-editor-font-family);
-  margin: 10px 0;
   white-space: pre-wrap;
   word-wrap: break-word;
   border: 1px solid var(--vscode-input-border);

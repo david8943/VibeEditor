@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 
 body {
-  padding: 20px;
   color: var(--vscode-editor-foreground);
   font-family: var(--vscode-font-family);
+  margin: 0 !important;
+  padding: 0 !important;
   background-color: var(--vscode-editor-background);
 }
 
@@ -11,7 +12,9 @@ body {
   max-width: 800px;
   margin: 0 auto;
 }
-
+.tab {
+  background-color: var(--vscode-sideBar-background);
+}
 h1 {
   color: var(--vscode-editor-foreground);
   font-size: 24px;

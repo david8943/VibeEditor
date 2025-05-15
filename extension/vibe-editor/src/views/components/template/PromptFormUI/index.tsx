@@ -1,14 +1,20 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import MinusIcon from '@/assets/icons/minus_circle.svg'
+
+import { AIAPIKey } from '../../../../types/ai'
+import { CreateDatabase } from '../../../../types/database'
 import {
   EditOptionList,
   EditPrompt,
   EditSnapshot,
   PostType,
   PromptAttach,
-} from '@/types/template'
-
+} from '../../../../types/template'
+import { DBSelector } from '../../../components'
+import { DatabaseModal } from '../../../components/database/DatabaseModal'
+import { AIProviderModal } from '../../aiProvider/AIProviderModal'
+import { AIProviderSelector } from '../../aiProvider/AIProviderSelector'
 import { HighlightedCode } from '../../code/HighLightedCode'
 import './styles.css'
 
@@ -16,6 +22,8 @@ interface PromptFormUIProps {
   formMethods: {
     register: any
     handleSubmit: any
+    watch: any
+    setValue: any
   }
   options: EditOptionList
   snapshots: EditSnapshot[]
@@ -25,10 +33,14 @@ interface PromptFormUIProps {
   handleDeleteSnapshot: (attachId: number | null) => void
   handleDescriptionChange: (attachId: number | null, value: string) => void
   addSnapshot: (newSnapshot: PromptAttach) => void
+  saveDatabase: (database: CreateDatabase) => void
+  getDatabases: () => void
+  getAIProviders: () => void
+  saveAIProvider: (aiProvider: AIAPIKey) => void
 }
 
 export function PromptFormUI({
-  formMethods: { register, handleSubmit },
+  formMethods: { register, handleSubmit, watch, setValue },
   options,
   snapshots,
   onSubmit,
@@ -36,7 +48,15 @@ export function PromptFormUI({
   handleOption,
   handleDeleteSnapshot,
   handleDescriptionChange,
+  saveDatabase,
+  getDatabases,
+  saveAIProvider,
+  getAIProviders,
 }: PromptFormUIProps) {
+  const postTypeValue = watch('postType')
+  const notionDatabaseId = watch('notionDatabaseId')
+
+  //TODO: 스냅 샷 코드 너무 길면 삐져나옴
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -49,32 +69,15 @@ export function PromptFormUI({
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
-
+  const [showDbModal, setShowDbModal] = useState(false)
+  const [showAIProviderModal, setShowAIProviderModal] = useState(false)
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-6">
-      <div className="form-group">
-        <label
-          htmlFor="category"
-          className="text-sm font-medium">
-          포스트 종류
-        </label>
-        <select
-          id="postType"
-          title="postType"
-          {...register('postType')}
-          className="w-full p-2 rounded border border-[var(--vscode-dropdown-border)] bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)]"
-          required>
-          <option value={PostType.TECH_CONCEPT}>CS 개념</option>
-          <option value={PostType.TROUBLE_SHOOTING}>트러블 슈팅</option>
-        </select>
-      </div>
+    <form className="flex flex-col gap-6">
       <div className="form-group">
         <label
           htmlFor="promptName"
           className="text-sm font-medium">
-          프롬프트 제목
+          포스트 제목
         </label>
         <input
           type="text"
@@ -83,6 +86,41 @@ export function PromptFormUI({
           {...register('promptName')}
           required
         />
+      </div>
+      <div className="form-group">
+        <label
+          htmlFor="category"
+          className="text-sm font-medium">
+          포스트 유형
+        </label>
+
+        <div className="flex flex-wrap gap-2 items-center p-2">
+          <button
+            type="button"
+            onClick={() => setValue('postType', PostType.TECH_CONCEPT)}
+            className={`px-3 py-1 rounded-full text-sm ${
+              postTypeValue === PostType.TECH_CONCEPT
+                ? 'selected'
+                : 'unselected'
+            }`}>
+            CS 개념
+          </button>
+          <button
+            type="button"
+            onClick={() => setValue('postType', PostType.TROUBLE_SHOOTING)}
+            className={`px-3 py-1 rounded-full text-sm ${
+              postTypeValue === PostType.TROUBLE_SHOOTING
+                ? 'selected'
+                : 'unselected'
+            }`}>
+            트러블 슈팅
+          </button>
+          <input
+            type="hidden"
+            {...register('postType')}
+            required
+          />
+        </div>
       </div>
 
       <div className="form-group">
@@ -103,8 +141,8 @@ export function PromptFormUI({
                   {snapshot.snapshotName}
                 </label>
               </div>
-              <div className="flex flex-1 gap-4 items-start w-full">
-                <div className="code-block flex-1 w-1/2">
+              <div className="flex flex-col flex-1 gap-4 items-start w-full">
+                <div className="code-block flex-1">
                   <HighlightedCode code={snapshot.snapshotContent} />
                 </div>
                 <textarea
@@ -113,7 +151,8 @@ export function PromptFormUI({
                   onChange={(e) =>
                     handleDescriptionChange(snapshot.attachId, e.target.value)
                   }
-                  className="flex-1 min-h-[100px] p-2 rounded w-1/2"
+                  className="flex-1 min-h-[100px] p-2 rounded"
+                  placeholder="코드에 대한 설명을 입력해주세요."
                   required
                 />
                 <button
@@ -156,23 +195,52 @@ export function PromptFormUI({
           ))}
         </div>
       )}
+
+      <DBSelector
+        selectedId={notionDatabaseId}
+        onChange={(e) => {
+          setValue('notionDatabaseId', e)
+        }}
+        getDatabases={getDatabases}
+        onAddClick={() => setShowDbModal(true)}
+      />
+      {showDbModal && (
+        <DatabaseModal
+          saveDatabase={saveDatabase}
+          onClose={() => setShowDbModal(false)}
+        />
+      )}
+      <AIProviderSelector
+        selectedId={notionDatabaseId}
+        onChange={(e) => {
+          setValue('notionDatabaseId', e)
+        }}
+        getAIProviders={getAIProviders}
+        onAddClick={() => setShowAIProviderModal(true)}
+      />
+      {showAIProviderModal && (
+        <AIProviderModal
+          saveAIProvider={saveAIProvider}
+          onClose={() => setShowAIProviderModal(false)}
+        />
+      )}
       <div className="form-group">
         <label
           htmlFor="comment"
           className="text-sm font-medium">
-          프롬프트 내용
+          유저 프롬프트
         </label>
         <textarea
           id="comment"
           className="w-full min-h-[150px] p-2 rounded"
           {...register('comment')}
           required
-          placeholder="프롬프트 내용을 입력해주세요."
+          placeholder="유저 프롬프트 내용을 입력해주세요."
         />
       </div>
       <div className="flex gap-4">
         <button
-          type="submit"
+          onClick={handleSubmit(onSubmit)}
           className="flex-1 py-2 px-4 rounded text-sm font-medium">
           프롬프트 저장
         </button>
@@ -180,7 +248,7 @@ export function PromptFormUI({
           <button
             onClick={handlePost}
             className="flex-1 py-2 px-4 rounded text-sm font-medium">
-            해당 프롬프트로 포스트 생성
+            해당 프롬프트로 AI 포스트 생성
           </button>
         )}
       </div>

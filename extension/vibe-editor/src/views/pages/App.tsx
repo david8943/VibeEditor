@@ -16,7 +16,6 @@ declare global {
 }
 
 export function App() {
-  // 초기 상태를 LOADING으로 설정하여 즉시 렌더링
   const [currentPage, setCurrentPage] = useState<PageType>(PageType.LOADING)
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -37,7 +36,6 @@ export function App() {
         message.type === MessageType.INITIAL_PAGE ||
         message.type === MessageType.NAVIGATE
       ) {
-        console.log('handleMessage', message)
         setCurrentPage(message.payload.page)
       }
     }
@@ -46,7 +44,6 @@ export function App() {
     return () => window.removeEventListener('message', handleMessage)
   }, [isInitialized, postMessageToExtension])
 
-  // 페이지 컴포넌트를 메모이제이션하여 불필요한 리렌더링 방지
   const renderPage = useMemo(() => {
     console.log('renderPage', currentPage)
     switch (currentPage) {
@@ -68,7 +65,13 @@ export function App() {
     }
   }, [currentPage, postMessageToExtension])
 
-  return <React.StrictMode>{renderPage}</React.StrictMode>
+  return (
+    <React.StrictMode>
+      <div className="">
+        <div className="p-4">{renderPage}</div>
+      </div>
+    </React.StrictMode>
+  )
 }
 
 // React 앱 마운트

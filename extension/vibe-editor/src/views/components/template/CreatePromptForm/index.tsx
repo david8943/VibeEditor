@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
 
-import { Snapshot } from '@/types/snapshot'
-import { CreatePrompt, Option } from '@/types/template'
-
+import { AIAPIKey } from '../../../../types/ai'
+import { CreateDatabase } from '../../../../types/database'
+import { Snapshot } from '../../../../types/snapshot'
+import { CreatePrompt, Option } from '../../../../types/template'
 import { useCreatePromptForm } from '../../../hooks/useCreatePromptForm'
 import { usePromptOptions } from '../../../hooks/usePromptOptions'
 import { usePromptSnapshots } from '../../../hooks/usePromptSnapshots'
@@ -17,6 +18,10 @@ interface CreatePromptFormProps {
   selectedPromptId: number
   defaultPromptOptionIds: number[]
   defaultPostType: 'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
+  saveDatabase: (database: CreateDatabase) => void
+  getDatabases: () => void
+  getAIProviders: () => void
+  saveAIProvider: (aiProvider: AIAPIKey) => void
 }
 
 export function CreatePromptForm({
@@ -28,6 +33,10 @@ export function CreatePromptForm({
   selectedPromptId,
   defaultPromptOptionIds,
   defaultPostType,
+  saveDatabase,
+  getDatabases,
+  getAIProviders,
+  saveAIProvider,
 }: CreatePromptFormProps) {
   const initializedPrompt = defaultPrompt ?? {
     postType: defaultPostType,
@@ -38,6 +47,7 @@ export function CreatePromptForm({
     notionDatabaseId: 0,
     templateId: 0,
     parentPromptId: null,
+    userAIProviderId: null,
   }
 
   const {
@@ -75,7 +85,7 @@ export function CreatePromptForm({
   return (
     <div>
       <PromptFormUI
-        formMethods={{ register, handleSubmit }}
+        formMethods={{ register, handleSubmit, watch, setValue }}
         options={options}
         snapshots={snapshots}
         onSubmit={onSubmit}
@@ -84,6 +94,10 @@ export function CreatePromptForm({
         handleDeleteSnapshot={handleDeleteSnapshot}
         handleDescriptionChange={handleDescriptionChange}
         addSnapshot={addSnapshot}
+        saveDatabase={saveDatabase}
+        getDatabases={getDatabases}
+        getAIProviders={getAIProviders}
+        saveAIProvider={saveAIProvider}
       />
     </div>
   )

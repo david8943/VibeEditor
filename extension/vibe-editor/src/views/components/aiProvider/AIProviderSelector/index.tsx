@@ -1,38 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { Database } from '../../../../types/database'
+import { AIProvider } from '../../../../types/ai'
 import { MessageType } from '../../../../types/webview'
 
 interface Props {
   selectedId: number
   onChange: (id: number) => void
-  getDatabases: () => void
+  getAIProviders: () => void
   onAddClick: () => void
 }
 
-export const DBSelector: React.FC<Props> = ({
+export const AIProviderSelector: React.FC<Props> = ({
   selectedId,
   onChange,
-  getDatabases,
+  getAIProviders,
   onAddClick,
 }) => {
-  const [dbList, setDbList] = useState<Database[]>([])
+  const [aiList, setAiList] = useState<AIProvider[]>([])
   const [hovered, setHovered] = useState<number>(0)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    getDatabases()
+    getAIProviders()
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
-      if (message.type === MessageType.GET_DATABASE) {
-        setDbList(message.payload)
-      } else if (message.type === MessageType.DATABASE_DELETED) {
-        const { notionDatabaseId } = message.payload
-        setDbList((prev) =>
-          prev.filter((db) => db.notionDatabaseId !== notionDatabaseId),
-        )
-        if (selectedId === notionDatabaseId) onChange(0)
+      if (message.type === MessageType.GET_AI_PROVIDERS) {
+        setAiList(message.payload)
+      } else if (message.type === MessageType.AI_PROVIDERS_LOADED) {
+        setAiList(message.payload)
       }
     }
 
@@ -40,65 +36,47 @@ export const DBSelector: React.FC<Props> = ({
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const selectedDB = dbList.find((db) => db.notionDatabaseId === selectedId)
+  const selectedAI = aiList.find((ai) => ai.userAIProviderId === selectedId)
 
   return (
     <div
       className="form-group relative"
       ref={containerRef}>
       <div className="flex justify-between items-center">
-        <label>노션 데이터베이스</label>
+        <label>AI 종류</label>
         <button
           className="small-square-button"
           onClick={onAddClick}>
           +
         </button>
       </div>
-
+      <label>AI를 선택하지 않을 경우 포스트가 생성되지 않습니다.</label>
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
-        {selectedDB?.notionDatabaseName || '데이터베이스를 선택하세요'}
+        {selectedAI?.brand || 'AI를 선택하세요'}
       </div>
 
       {open && (
         <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border rounded bg-[var(--vscode-dropdown-background)] shadow-lg">
-          {dbList.map((db) => (
+          {aiList.map((ai) => (
             <div
-              key={db.notionDatabaseId}
-              onMouseEnter={() => setHovered(db.notionDatabaseId)}
+              key={ai.userAIProviderId}
+              onMouseEnter={() => setHovered(ai.userAIProviderId)}
               onMouseLeave={() => setHovered(0)}
               onClick={() => {
-                onChange(db.notionDatabaseId)
+                onChange(ai.userAIProviderId)
                 setOpen(false)
               }}
               className={`flex justify-between items-center px-3 py-2 cursor-pointer
                 ${
-                  selectedId === db.notionDatabaseId
+                  selectedId === ai.userAIProviderId
                     ? 'bg-[var(--vscode-list-activeSelectionBackground)] text-[var(--vscode-list-activeSelectionForeground)]'
-                    : hovered === db.notionDatabaseId
+                    : hovered === ai.userAIProviderId
                       ? 'bg-[var(--vscode-list-hoverBackground)]'
                       : ''
                 }`}>
-              <span>{db.notionDatabaseName}</span>
-              {/* <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  window.vscode.postMessage({
-                    type: MessageType.REQUEST_DELETE_DATABASE,
-                    payload: {
-                      notionDatabaseId: db.notionDatabaseId,
-                      notionDatabaseName: db.notionDatabaseName,
-                    },
-                  })
-                }}
-                className="ml-2 text-sm"
-                style={{
-                  visibility:
-                    hovered === db.notionDatabaseId ? 'visible' : 'hidden',
-                }}>
-                삭제
-              </button> */}
+              <span>{ai.model}</span>
             </div>
           ))}
         </div>

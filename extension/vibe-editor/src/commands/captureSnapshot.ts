@@ -1,16 +1,15 @@
 import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
-import {
-  SnapshotService,
-  refreshAllProviders,
-} from '../services/snapshotService'
+import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
 import { DraftDataType } from '../types/configuration'
 import { Snapshot, SnapshotType } from '../types/snapshot'
-import { PageType } from '../types/webview'
-import { SnapshotItem } from '../views/codeSnapshotView'
+import {
+  SnapshotItem,
+  refreshTemplateProvider,
+} from '../views/tree/templateTreeView'
 
 export class CaptureSnapshotCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.captureCodeSnapshot'
@@ -20,7 +19,7 @@ export class CaptureSnapshotCommand implements ICommand {
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this.snapshotService = new SnapshotService(context)
-    this.templateService = new TemplateService(context, PageType.TEMPLATE)
+    this.templateService = new TemplateService(context)
   }
 
   public get commandName(): string {
@@ -58,7 +57,7 @@ export class CaptureSnapshotCommand implements ICommand {
     if (selectedTemplateId) {
       await this.templateService.updateTemplateDetail(selectedTemplateId)
     }
-    refreshAllProviders()
+    refreshTemplateProvider()
   }
 }
 
@@ -80,23 +79,6 @@ export class DeleteSnapshotCommand implements ICommand {
   }
 }
 
-export class RefreshSnapshotCommand implements ICommand {
-  public static readonly commandName = 'vibeEditor.refreshSnapshot'
-
-  private snapshotService: SnapshotService
-
-  constructor(private readonly context: vscode.ExtensionContext) {
-    this.snapshotService = new SnapshotService(context)
-  }
-  public get commandName(): string {
-    return RefreshSnapshotCommand.commandName
-  }
-
-  public async execute(): Promise<void> {
-    await this.snapshotService.refreshSnapshot()
-  }
-}
-
 export class ViewCodeSnapshotCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.viewCodeSnapshot'
 
@@ -109,8 +91,14 @@ export class ViewCodeSnapshotCommand implements ICommand {
     return ViewCodeSnapshotCommand.commandName
   }
 
-  public async execute(snapshot: Snapshot): Promise<void> {
-    await this.snapshotService.viewCodeSnapshot(snapshot.snapshotId)
+  public async execute({
+    snapshot,
+    templateId,
+  }: {
+    snapshot: Snapshot
+    templateId: number
+  }): Promise<void> {
+    await this.snapshotService.viewCodeSnapshot(snapshot.snapshotId, templateId)
   }
 }
 
@@ -127,6 +115,6 @@ export class RenameSnapshotCommand implements ICommand {
   }
 
   public async execute(item: SnapshotItem): Promise<void> {
-    await this.snapshotService.renameSnapshot(item.snapshot.snapshotId)
+    await this.snapshotService.renameSnapshot(item)
   }
 }
