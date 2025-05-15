@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 
-import { EditPrompt, EditSnapshot } from '@/types/template'
-import { PromptAttach } from '@/types/template'
-
 import { Snapshot } from '../../types/snapshot'
+import { PromptAttach } from '../../types/template'
+import { EditPrompt, EditSnapshot } from '../../types/template'
 
 interface UsePromptSnapshotsProps {
   localSnapshots: Snapshot[]

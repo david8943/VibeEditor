@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 
 import MinusIcon from '@/assets/icons/minus_circle.svg'
+
+import { AIAPIKey } from '../../../../types/ai'
+import { CreateDatabase } from '../../../../types/database'
 import {
   EditOptionList,
   EditPrompt,
   EditSnapshot,
   PostType,
   PromptAttach,
-} from '@/types/template'
-
-import { AIAPIKey } from '../../../../types/ai'
-import { CreateDatabase } from '../../../../types/database'
+} from '../../../../types/template'
 import { DBSelector } from '../../../components'
 import { DatabaseModal } from '../../../components/database/DatabaseModal'
 import { AIProviderModal } from '../../aiProvider/AIProviderModal'
