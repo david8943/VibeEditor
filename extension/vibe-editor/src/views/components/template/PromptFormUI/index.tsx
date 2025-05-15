@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 
-import { AIAPIKey } from 'dist/app/src/types/ai'
-
 import MinusIcon from '@/assets/icons/minus_circle.svg'
 import {
   EditOptionList,
@@ -11,6 +9,7 @@ import {
   PromptAttach,
 } from '@/types/template'
 
+import { AIAPIKey } from '../../../../types/ai'
 import { CreateDatabase } from '../../../../types/database'
 import { DBSelector } from '../../../components'
 import { DatabaseModal } from '../../../components/database/DatabaseModal'

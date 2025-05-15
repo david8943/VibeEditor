@@ -1,4 +1,3 @@
-import { AIAPIKey } from 'dist/app/src/types/ai'
 import * as vscode from 'vscode'
 
 import {
@@ -14,6 +13,7 @@ import { SettingService } from '../../services/settingService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
 import { ViewService } from '../../services/viewService'
+import { AIAPIKey } from '../../types/ai'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
 import { Post, UploadToNotionRequestPost } from '../../types/post'

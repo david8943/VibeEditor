@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
-import { AIAPIKey } from 'dist/app/src/types/ai'
-
+import { AIAPIKey } from '../../types/ai'
 import { CreateDatabase } from '../../types/database'
 import {
   CreatePrompt,
