@@ -94,17 +94,6 @@ export function PromptForm({
     })
   }
 
-  useEffect(() => {
-    console.log('프롬프트폼useEffect selectedPromptId', selectedPromptId)
-  }, [selectedPromptId])
-
-  useEffect(() => {
-    console.log('프롬프트폼promptAttachList', defaultPrompt?.promptAttachList)
-  }, [defaultPrompt?.promptAttachList])
-
-  useEffect(() => {
-    console.log('defaultPrompt', defaultPrompt)
-  }, [defaultPrompt])
   return (
     <PromptFormUI
       formMethods={{ register, handleSubmit, watch, setValue }}
