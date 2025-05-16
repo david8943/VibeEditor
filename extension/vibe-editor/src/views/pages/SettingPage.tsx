@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { AIProvider } from '../../types/ai'
-import { CreateDatabase } from '../../types/database'
 import { Database } from '../../types/database'
 import type { Option } from '../../types/template'
 import { User } from '../../types/user'
@@ -21,25 +19,15 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
     createdAt: '',
   })
   const [showDbModal, setShowDbModal] = useState(false)
-  const [selectedDbId, setSelectedDbId] = useState(0)
   const [showAIProviderModal, setShowAIProviderModal] = useState(false)
 
   useEffect(() => {
-    postMesasgeTypeToExtension(MessageType.GET_LOGIN_STATUS)
-  }, [])
-
-  const saveDatabase = (database: CreateDatabase) =>
-    postMessageToExtension({
-      type: MessageType.SAVE_DATABASE,
-      payload: database,
-    })
-
-  const getDatabases = () =>
-    postMesasgeTypeToExtension(MessageType.GET_DATABASE)
-
-  useEffect(() => {
+    console.log('로그인 스테이터스', loginStatus)
     if (loginStatus) {
+      postMessageToExtension({ type: MessageType.GET_DATABASE })
       postMesasgeTypeToExtension(MessageType.GET_USER)
+      postMessageToExtension({ type: MessageType.GET_OPTIONS })
+      postMessageToExtension({ type: MessageType.GET_CONFIG })
     }
   }, [loginStatus])
 
@@ -58,14 +46,9 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
     postMessageToExtension({ type })
 
   useEffect(() => {
-    postMessageToExtension({ type: MessageType.GET_OPTIONS })
-    postMessageToExtension({ type: MessageType.GET_CONFIG })
-  }, [])
-
-  useEffect(() => {
+    postMesasgeTypeToExtension(MessageType.GET_LOGIN_STATUS)
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
-
       if (message.type === MessageType.LOGIN_STATUS_LOADED) {
         setLoginStatus(message.payload)
       } else if (message.type === MessageType.USER_LOADED) {
@@ -91,10 +74,6 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
   const [notionDbList, setNotionDbList] = useState<Database[]>([])
   const [defaultUserAIProviderId, setDefaultUserAIProviderId] = useState(0)
-  const [userAIProviderList, setUserAIProviderList] = useState<AIProvider[]>([])
-  useEffect(() => {
-    postMessageToExtension({ type: MessageType.GET_DATABASE })
-  }, [])
 
   return (
     <div className="min-h-screen w-full">
@@ -102,7 +81,8 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
         <div className="flex items-center gap-3 mb-6">
           <div className="text-2xl font-bold">Vibe Editor 설정</div>
           <button
-            className="text-base font-medium px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+            className="transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+            text-base font-medium px-3 py-1.5 rounded"
             onClick={() =>
               postMessageToExtension({ type: MessageType.SHOW_README })
             }>
@@ -356,6 +336,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   </div>
                 ))}
                 <button
+                  type="button"
                   className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() =>
                     postMesasgeTypeToExtension(MessageType.LOG_OUT)
@@ -366,6 +347,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
             )}
             {!loginStatus && (
               <div className="space-y-4">
+                <h2 className="text-xl font-semibold border-b pb-4">로그인</h2>
                 <button
                   className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() =>

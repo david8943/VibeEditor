@@ -29,22 +29,22 @@ export function getDraftData<T = unknown>(key: DraftDataType): T | undefined {
   return draftData[key] as T | undefined
 }
 
-export function clearDraftData(key?: DraftDataType): void {
+export async function clearDraftData(key?: DraftDataType): Promise<void> {
   if (key) {
     delete draftData[key]
-    vscode.commands.executeCommand(
+    await vscode.commands.executeCommand(
       'setContext',
       `vibeEditor.draftData.${key}`,
       initialDraftData[key],
     )
   } else {
     draftData = { ...initialDraftData }
-    Object.entries(initialDraftData).forEach(([key, value]) => {
-      vscode.commands.executeCommand(
+    for (const [key, value] of Object.entries(initialDraftData)) {
+      await vscode.commands.executeCommand(
         'setContext',
         `vibeEditor.draftData.${key}`,
         value,
       )
-    })
+    }
   }
 }

@@ -66,18 +66,10 @@
           "type": "webview",
           "id": "vibeEditorSideView",
           "name": "Vibe Editor Side View",
-          "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true"
+          "icon": "media/icon.svg"
         }
       ]
     },
-    "viewsWelcome": [
-      {
-        "view": "vibeEditorViewerPage",
-        "contents": "Vibe Editor에 로그인이 필요합니다.\n[구글 로그인](command:vibeEditor.googleLogin)\n[깃허브 로그인](command:vibeEditor.githubLogin)\n[싸피 로그인](command:vibeEditor.ssafyLogin)",
-        "when": "vibeEditor.draftData.loginStatus == false"
-      }
-    ],
     "commands": [
       {
         "command": "vibeEditor.googleLogin",
@@ -221,12 +213,12 @@
       "view/title": [
         {
           "command": "vibeEditor.showDefaultPostPage",
-          "when": "view == vibeEditorSideView",
+          "when": "view == vibeEditorSideView && vibeEditor.draftData.loginStatus == true",
           "group": "navigation@1"
         },
         {
           "command": "vibeEditor.showDefaultTemplatePage",
-          "when": "view == vibeEditorSideView",
+          "when": "view == vibeEditorSideView && vibeEditor.draftData.loginStatus == true",
           "group": "navigation@2"
         },
         {
@@ -236,7 +228,7 @@
         },
         {
           "command": "vibeEditor.createTemplate",
-          "when": "view == vibeEditorTemplatePage",
+          "when": "view == vibeEditorTemplatePage && vibeEditor.draftData.loginStatus == true",
           "group": "navigation"
         }
       ],
@@ -355,6 +347,11 @@
           "type": "boolean",
           "default": false,
           "description": "README 파일 보이기 여부"
+        },
+        "vibeEditor.showStartingGuide": {
+          "type": "boolean",
+          "default": true,
+          "description": "시작 가이드 보이기 여부"
         }
       }
     }

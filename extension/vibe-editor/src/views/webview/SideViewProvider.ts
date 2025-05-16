@@ -68,8 +68,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
       type: MessageType.INITIAL_PAGE,
       payload: { page: this.currentPage },
     })
-
-    this.getTemplates(webviewView.webview)
+    // this.getTemplates(webviewView.webview)
   }
 
   private async navigate(page: PageType) {
@@ -236,7 +235,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async logout() {
-    vscode.commands.executeCommand('vibeEditor.logout')
+    await vscode.commands.executeCommand('vibeEditor.logout')
     this.postMessageToWebview({
       type: MessageType.LOGIN_STATUS_LOADED,
       payload: false,
@@ -385,9 +384,16 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
         case MessageType.SAVE_AI_PROVIDER:
           await this.saveAIProvider(message.payload)
           break
+        case MessageType.CREATE_TEMPLATE:
+          await this.createTemplate()
+          break
       }
     }, this.disposables)
   }
+  private async createTemplate() {
+    vscode.commands.executeCommand('vibeEditor.createTemplate')
+  }
+
   private async setConfigValue(message: Message) {
     const { key, value } = message.payload
     await Configuration.set(key, value)

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
+import CreateProjectImage from '../../assets/images/create-project.svg'
 import { AIAPIKey } from '../../types/ai'
 import { CreateDatabase } from '../../types/database'
 import {
@@ -36,8 +37,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     userAIProviderId: null,
   })
   const [notionDatabaseId, setNotionDatabaseId] = useState(0)
-  const [showDbModal, setShowDbModal] = useState(false)
-
   const [defaultPostType, setDefaultPostType] = useState<
     'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
   >('TECH_CONCEPT')
@@ -47,6 +46,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
   const [showOnboarding, setShowOnboarding] = useState(true)
   const initialized = useRef(false)
+  const [configLoaded, setConfigLoaded] = useState(false)
 
   useEffect(() => {
     if (initialized.current) return
@@ -56,9 +56,11 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     postMessageToExtension({ type: MessageType.GET_CONFIG })
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
+      console.log('템플릿 페이지', message.type, message.payload)
       if (message.type === MessageType.TEMPLATE_SELECTED) {
+        console.log('TEMPLATE_SELECTED🐦‍🔥🐦‍🔥', message.payload.template)
+        setShowOnboarding(false)
         setSelectedTemplate(message.payload.template)
-        resetCreatePrompt()
       } else if (message.type === MessageType.OPTIONS_LOADED) {
         setOptionList(message.payload)
       } else if (message.type === MessageType.START_LOADING) {
@@ -76,15 +78,17 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         addSnapshotCode(message.payload.snapshot)
       } else if (message.type === MessageType.CONFIG_LOADED) {
         const config = message.payload
-        console.log('config', config)
+        console.log('config✅', config)
         setDefaultPostType(config.defaultPostType)
         setDefaultPromptOptionIds(config.defaultPromptOptionIds)
         setDefaultNotionDatabaseId(config.defaultNotionDatabaseId ?? 0)
+        setConfigLoaded(true)
       } else if (message.type === MessageType.NAVIGATE) {
         postMessageToExtension({ type: MessageType.GET_TEMPLATE })
         postMessageToExtension({ type: MessageType.GET_OPTIONS })
         postMessageToExtension({ type: MessageType.GET_PROMPT })
       } else if (message.type === MessageType.RESET_CREATE_PROMPT) {
+        console.log('리셋')
         resetCreatePrompt()
       }
     }
@@ -93,6 +97,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }, [])
 
   const resetCreatePrompt = () => {
+    console.log('resetCreatePrompt')
     setCreatePromptData({
       parentPromptId: null,
       templateId: selectedPromptId,
@@ -198,7 +203,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const getDatabases = () =>
     postMessageToExtension({
       type: MessageType.GET_DATABASE,
-      payload: null,
     })
 
   const getAIProviders = () =>
@@ -210,6 +214,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     postMessageToExtension({
       type: MessageType.SAVE_AI_PROVIDER,
       payload: aiProvider,
+    })
+  const createProject = () =>
+    postMessageToExtension({
+      type: MessageType.CREATE_TEMPLATE,
     })
 
   const deleteSnapshot = (attachId: number) => {
@@ -224,13 +232,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }
 
   useEffect(() => {
-    resetCreatePrompt()
-  }, [
-    selectedTemplate,
-    defaultPostType,
-    defaultPromptOptionIds,
-    defaultNotionDatabaseId,
-  ])
+    if (configLoaded && selectedTemplate) {
+      resetCreatePrompt()
+    }
+  }, [selectedTemplate, configLoaded])
 
   useEffect(() => {
     if (selectedPromptId == 0) {
@@ -239,11 +244,37 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }, [defaultNotionDatabaseId])
 
   return (
-    <div>
-      showOnboarding &&
-      {}
-      !showOnboarding &&
-      {
+    <div className="flex items-center justify-center">
+      {showOnboarding && (
+        <div
+          id="container"
+          style={{ height: '90vh' }}
+          className="max-w-lg w-full flex items-center justify-center">
+          <div
+            id="item"
+            className="flex flex-col items-center gap-6">
+            <div className="rounded-full p-8 flex items-center justify-center border-2">
+              <CreateProjectImage
+                width={80}
+                height={80}
+                className="text-[var(--vscode-foreground)]"
+              />
+            </div>
+            <div className="space-y-3">
+              <h1 className="text-3xl font-bold">프로젝트를 생성해주세요</h1>
+              <p className="text-base opacity-75">
+                프로젝트 생성 후, 템플릿을 작성할 수 있습니다
+              </p>
+            </div>
+            <button
+              className="px-6 py-3 rounded-full text-base font-medium transition-all hover:scale-105 active:scale-100"
+              onClick={createProject}>
+              프로젝트 생성하기
+            </button>
+          </div>
+        </div>
+      )}
+      {!showOnboarding && (
         <div className="app-container flex flex-col gap-8">
           <h1 className="text-2xl font-bold whitespace-pre-wrap">
             {selectedPrompt?.promptName ??
@@ -285,7 +316,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
               />
             )}
             {createPromptData.promptName}
-            {selectedTemplate && selectedPromptId == 0 && (
+            {createPromptData && selectedTemplate && selectedPromptId == 0 && (
               <CreatePromptForm
                 defaultPrompt={createPromptData}
                 selectedPromptId={selectedPromptId}
@@ -303,7 +334,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             )}
           </div>
         </div>
-      }
+      )}
     </div>
   )
 }

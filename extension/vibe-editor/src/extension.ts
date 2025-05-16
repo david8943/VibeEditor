@@ -28,6 +28,7 @@ async function setUser(context: vscode.ExtensionContext) {
   } else {
     const result = await getCurrentUser()
     if (result.success) {
+      await initFetchData(context)
       setDraftData(DraftDataType.notionStatus, result.data.notionActive)
       if (!result.data.notionActive) {
         vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
@@ -95,7 +96,6 @@ export async function activate(
   setExtensionContext(context)
   await registerCommand(context)
   await setUser(context)
-  await initFetchData(context)
   await registerProvider(context)
   await maybeShowReadme(context)
   addStatusBarItem(context)

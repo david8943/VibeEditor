@@ -139,13 +139,6 @@ Vibe Editor를 통해 Notion에 글을 게시하려면 아래 순서를 따라 �
 
 ---
 
-## 📞 문의 및 기여
-
-- 문제가 발생하거나 기능 제안이 있다면 [이슈 페이지](https://github.com/your-org/vibe-editor/issues)를 이용해주세요.
-- Pull Request도 환영합니다! 😊
-
----
-
 ## 🧠 License
 
 MIT License

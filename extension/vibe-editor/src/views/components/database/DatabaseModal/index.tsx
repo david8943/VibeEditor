@@ -13,7 +13,6 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
 
   const handleSubmit = () => {
     console.log('[DBModal] window.vscode =', window.vscode)
-    const now = Date.now().toString()
 
     const database: CreateDatabase = {
       notionDatabaseName: notionDatabaseName,
