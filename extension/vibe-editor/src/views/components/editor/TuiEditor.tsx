@@ -18,6 +18,7 @@ interface TuiEditorProps {
   initialValue?: string
   events?: Record<string, (...args: any[]) => void>
   usageStatistics?: boolean
+  onChange?: (value: string) => void
 }
 
 export interface TuiEditorRef {
@@ -39,6 +40,13 @@ const TuiEditor = forwardRef<TuiEditorRef, TuiEditorProps>((props, ref) => {
         usageStatistics: props.usageStatistics ?? false,
         events: props.events || {},
         plugins: [codeSyntaxHighlight],
+      })
+
+      editorRef.current.on('change', () => {
+        const value = editorRef.current?.getMarkdown()
+        if (value !== undefined && props.onChange) {
+          props.onChange(value)
+        }
       })
     }
 

@@ -95,6 +95,7 @@ export function PostForm({
           <TuiEditor
             ref={editorRef}
             initialValue={postContent}
+            onChange={(value) => setPostContent(value)}
           />
         )}
       </div>
