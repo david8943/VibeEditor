@@ -7,7 +7,12 @@ import {
   UploadToNotionRequestPost,
   UploadToNotionResponse,
 } from '../types/post'
-import { getRequest, postRequest, putBooleanRequest } from './api'
+import {
+  deleteRequest,
+  getRequest,
+  postRequest,
+  putBooleanRequest,
+} from './api'
 
 // 넣음
 export const uploadPost = async (data: UploadToNotionRequestPost) =>
@@ -25,6 +30,8 @@ export const upgradePost = async ({
 export const getPostList = async () =>
   await getRequest<PostListItem[]>('/ai-post')
 
-// 포스트 조회
 export const getPostDetail = async (postId: number) =>
   await getRequest<PostDetail>(`/ai-post/${postId}`)
+
+export const deletePost = async (postId: number) =>
+  await deleteRequest<boolean>(`/ai-post/${postId}`)

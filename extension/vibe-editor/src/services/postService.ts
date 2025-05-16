@@ -1,7 +1,12 @@
 import * as vscode from 'vscode'
 
-import { getPostList, upgradePost, uploadPost } from '../apis/post'
-import { getPostDetail } from '../apis/post'
+import {
+  deletePost,
+  getPostDetail,
+  getPostList,
+  upgradePost,
+  uploadPost,
+} from '../apis/post'
 import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { Post, PostDetail, UploadToNotionRequestPost } from '../types/post'
@@ -45,11 +50,16 @@ export class PostService {
   }
 
   async deletePost(postId: number): Promise<void> {
-    const prev = await this.getLocalPosts()
-    const updated = prev.filter((post) => post.postId !== postId)
-    await this.context.globalState.update('posts', updated)
-    refreshPostProvider()
-    vscode.window.showInformationMessage(`포스트가 삭제되었습니다.`)
+    const result = await deletePost(postId)
+
+    if (result.success) {
+      vscode.window.showInformationMessage(`포스트가 삭제되었습니다.`)
+      setDraftData(DraftDataType.selectedPostId, 0) // 선택된 포스트 ID 초기화 (필요시)
+      await this.getPosts()
+      refreshPostProvider()
+    } else {
+      vscode.window.showErrorMessage(`포스트 삭제에 실패했습니다.`)
+    }
   }
 
   async getSelectedPostId(): Promise<number> {
