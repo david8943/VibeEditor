@@ -53,7 +53,9 @@ export class ViewService {
 
   public async showPostPage(postId: number): Promise<void> {
     setDraftData(DraftDataType.selectedPage, PageType.POST)
-    setDraftData(DraftDataType.selectedPostId, postId)
+    if (postId) {
+      setDraftData(DraftDataType.selectedPostId, postId)
+    }
     await this.focusSideView()
     getSideViewProvider()?.navigateToPageIfExists(PageType.POST)
   }

@@ -1,14 +1,9 @@
 import * as vscode from 'vscode'
 
-import { upgradePost, uploadPost } from '../apis/post'
-import { getDraftData } from '../configuration/draftData'
+import { getPostList, upgradePost, uploadPost } from '../apis/post'
+import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
-import {
-  CreatePost,
-  Post,
-  PostDetail,
-  UploadToNotionRequestPost,
-} from '../types/post'
+import { Post, PostDetail, UploadToNotionRequestPost } from '../types/post'
 import { isLoading } from '../utils/isLoading'
 import { refreshPostProvider } from '../views/tree/postTreeView'
 
@@ -51,10 +46,23 @@ export class PostService {
     vscode.window.showInformationMessage(`포스트가 삭제되었습니다.`)
   }
 
+  async getSelectedPostId(): Promise<number> {
+    let selectedPostId = getDraftData<number>(DraftDataType.selectedPostId)
+    if (selectedPostId) {
+      return selectedPostId
+    } else {
+      const posts = await this.getPosts()
+      if (posts.length > 0) {
+        selectedPostId = posts[0].postId
+        setDraftData(DraftDataType.selectedPostId, posts[0].postId)
+        return posts[0].postId
+      }
+    }
+    return 0
+  }
   async getCurrentPost(): Promise<PostDetail | null> {
-    const posts = await this.getLocalPosts()
-    const postId = getDraftData(DraftDataType.selectedPostId)
-    return posts.find((post) => post.postId === postId) || posts[0] || null
+    const postId = await this.getSelectedPostId()
+    return await this.getPost(postId)
   }
 
   async getPost(postId: number): Promise<PostDetail | null> {
@@ -63,12 +71,44 @@ export class PostService {
   async getLocalPosts(): Promise<PostDetail[]> {
     return this.context.globalState.get<PostDetail[]>('posts') || []
   }
+  async getPosts(): Promise<PostDetail[]> {
+    const prev = await this.getLocalPosts()
+
+    const result = await getPostList()
+    let posts: PostDetail[] = []
+    if (result.success) {
+      posts = result.data
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+        .map((post) => {
+          const localPost = prev.find((p) => p.postId === post.postId)
+          if (localPost) {
+            localPost.postTitle = post.postTitle
+            localPost.createdAt = post.createdAt
+            localPost.updatedAt = post.updatedAt
+            return localPost
+          } else {
+            return {
+              postId: post.postId,
+              postTitle: post.postTitle,
+              postContent: '',
+              templateId: 0,
+              promptId: 0,
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              parentPostIdList: [],
+            }
+          }
+        })
+      await this.context.globalState.update('posts', posts)
+    }
+    return posts
+  }
   async getLocalPost(
     postId: number,
     prev?: PostDetail[],
   ): Promise<PostDetail | null> {
     const posts = prev || (await this.getLocalPosts())
-    return posts.find((post) => post.postId === postId) || null
+    return postId ? posts.find((post) => post.postId === postId) || null : null
   }
 
   async updatePost(data: Post): Promise<void> {

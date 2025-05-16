@@ -45,27 +45,28 @@
     "views": {
       "vibeEditorViewer": [
         {
+          "type": "webview",
           "id": "vibeEditorViewerPage",
-          "name": "Vibe Editor",
-          "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == false"
+          "name": "Vibe Editor 시작 가이드",
+          "icon": "media/icon.svg"
         },
         {
           "id": "vibeEditorPostList",
           "name": "포스트 목록",
           "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.selectedPage == 'POST'"
+          "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.selectedPage != 'TEMPLATE'"
         },
         {
           "id": "vibeEditorTemplatePage",
           "name": "프로젝트 목록",
           "icon": "media/icon.svg",
-          "when": "vibeEditor.draftData.loginStatus == true  && vibeEditor.draftData.selectedPage == 'TEMPLATE'"
+          "when": "vibeEditor.draftData.loginStatus == true  && vibeEditor.draftData.selectedPage != 'POST'"
         },
         {
           "type": "webview",
           "id": "vibeEditorSideView",
           "name": "Vibe Editor Side View",
+          "icon": "media/icon.svg",
           "when": "vibeEditor.draftData.loginStatus == true"
         }
       ]
@@ -78,10 +79,6 @@
       }
     ],
     "commands": [
-      {
-        "command": "vibeEditor.showSettingPage",
-        "title": "Vibe Editor 설정"
-      },
       {
         "command": "vibeEditor.googleLogin",
         "title": "Google 로그인",
@@ -348,6 +345,11 @@
           "type": "number",
           "default": 0,
           "description": "기본 노션 데이터베이스 ID"
+        },
+        "vibeEditor.defaultUserAIProviderId": {
+          "type": "number",
+          "default": 0,
+          "description": "기본 AI 선택"
         },
         "vibeEditor.showReadme": {
           "type": "boolean",

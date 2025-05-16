@@ -91,7 +91,7 @@ export class AuthService {
                   <body>
                     <div class="container">
                       <h1>로그인 성공!</h1>
-                      <button onclick="closeWindow()">VSCode로 돌아가주세요.</button>
+                      <button  type="button" onclick="closeWindow()">VSCode로 돌아가주세요.</button>
                     </div>
                   </body>
                 </html>

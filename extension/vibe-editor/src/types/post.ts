@@ -30,6 +30,13 @@ export interface Post {
   postTitle: string
   postContent: string
 }
+export interface PostListItem {
+  postId: number
+  postTitle: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type UpdatePost = Omit<Post, 'postId'>
 
 export interface CreatePostRequest {

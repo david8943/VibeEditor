@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
 
-import { Message, MessageType, PageType } from '../../../types/webview'
+import { Message, MessageType, PageType } from '../../../../types/webview'
 
 interface TabProps {
   currentPage: PageType

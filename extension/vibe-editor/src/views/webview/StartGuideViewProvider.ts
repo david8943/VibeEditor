@@ -1,10 +1,6 @@
 import * as vscode from 'vscode'
 
-import {
-  addNotionDatabase,
-  removeNotionDatabase,
-  retrieveNotionDatabases,
-} from '../../apis/notion'
+import { retrieveNotionDatabases } from '../../apis/notion'
 import { getCurrentUser } from '../../apis/user'
 import { Configuration } from '../../configuration'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
@@ -25,7 +21,7 @@ import {
 } from '../../types/template'
 import { Message, MessageType, PageType } from '../../types/webview'
 
-export class SideViewProvider implements vscode.WebviewViewProvider {
+export class StartGuideViewProvider implements vscode.WebviewViewProvider {
   private templateService: TemplateService
   private snapshotService: SnapshotService
   private postService: PostService
@@ -33,7 +29,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   private disposables: vscode.Disposable[] = []
   private currentTemplateId?: number
   private _view?: vscode.WebviewView
-  private currentPage: PageType = PageType.TEMPLATE
+  private currentPage: PageType = PageType.STARTING_GUIDE
   private settingService: SettingService
 
   constructor(private readonly context: vscode.ExtensionContext) {
@@ -69,9 +65,15 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
       payload: { page: this.currentPage },
     })
 
-    this.getTemplates(webviewView.webview)
+    // this.getTemplates(webviewView.webview)
   }
 
+  private async navigateToInitialPage() {
+    this.postMessageToWebview({
+      type: MessageType.INITIAL_PAGE,
+      payload: { page: this.currentPage },
+    })
+  }
   private async navigate(page: PageType) {
     setDraftData(DraftDataType.selectedPage, page)
     this.currentPage = page
@@ -288,9 +290,9 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     webview.onDidReceiveMessage(async (message: Message) => {
       console.log('Received message:', message)
       switch (message.type) {
-        case MessageType.NAVIGATE:
-          await this.navigate(message.payload?.page)
-          break
+        // case MessageType.NAVIGATE:
+        //   await this.navigate(message.payload?.page)
+        //   break
         case MessageType.GET_TEMPLATE:
           await this.getTemplate()
           break
@@ -338,7 +340,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
           await this.deleteDatabase(message.payload)
           break
         case MessageType.WEBVIEW_READY:
-          await this.navigateToSelectedPage()
+          await this.navigateToInitialPage()
           break
         case MessageType.GET_LOGIN_STATUS:
           await this.getLoginStatus()
@@ -385,8 +387,17 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
         case MessageType.SAVE_AI_PROVIDER:
           await this.saveAIProvider(message.payload)
           break
+        case MessageType.START_GUIDE:
+          await this.startGuide(message.payload)
+          break
       }
     }, this.disposables)
+  }
+
+  private async startGuide(payload: string) {
+    if (payload === 'isLogin') {
+      // await this.googleLogin()
+    }
   }
   private async setConfigValue(message: Message) {
     const { key, value } = message.payload
@@ -510,11 +521,13 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     `
   }
 }
-let sideViewProvider: SideViewProvider | undefined
+let startGuideViewProvider: StartGuideViewProvider | undefined
 
-export function getSideViewProvider(): SideViewProvider | undefined {
-  return sideViewProvider
+export function getStartGuideViewProvider():
+  | StartGuideViewProvider
+  | undefined {
+  return startGuideViewProvider
 }
-export function setSideViewProvider(provider: SideViewProvider) {
-  sideViewProvider = provider
+export function setStartGuideViewProvider(provider: StartGuideViewProvider) {
+  startGuideViewProvider = provider
 }

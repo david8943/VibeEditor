@@ -1,6 +1,8 @@
 import * as vscode from 'vscode'
 
+import { PostService } from '../services/postService'
 import { SettingService } from '../services/settingService'
+import { TemplateService } from '../services/templateService'
 import { ViewService } from '../services/viewService'
 import { ICommand } from '../types/command'
 
@@ -30,5 +32,23 @@ export class ShowReadmeCommand implements ICommand {
   }
   public async execute(): Promise<void> {
     await this.settingService.showReadme()
+  }
+}
+export class InitFetchDataCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.initFetchData'
+  private postService: PostService
+  private templateService: TemplateService
+
+  constructor(private context: vscode.ExtensionContext) {
+    this.postService = new PostService(context)
+    this.templateService = new TemplateService(context)
+  }
+
+  public get commandName(): string {
+    return InitFetchDataCommand.commandName
+  }
+  public async execute(): Promise<void> {
+    await this.postService.getPosts()
+    await this.templateService.getTemplates()
   }
 }

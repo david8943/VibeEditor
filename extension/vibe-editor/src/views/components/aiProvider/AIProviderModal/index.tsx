@@ -48,11 +48,13 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
         />
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             className="bg-gray-600 px-4 py-1"
             onClick={onClose}>
             취소
           </button>
           <button
+            type="button"
             className="bg-blue-600 px-4 py-1"
             onClick={handleSubmit}>
             등록하기

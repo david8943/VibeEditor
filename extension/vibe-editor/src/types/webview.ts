@@ -6,6 +6,7 @@ export const PageType = {
   SETTING: 'SETTING',
   LOADING: 'LOADING',
   POST_VIEWER: 'POST_VIEWER',
+  STARTING_GUIDE: 'STARTING_GUIDE',
 } as const
 
 export type PageType = (typeof PageType)[keyof typeof PageType]
@@ -67,6 +68,9 @@ export const MessageType = {
   SSAFY_LOGIN: 'SSAFY_LOGIN',
   REQUEST_DELETE_DATABASE: 'REQUEST_DELETE_DATABASE',
   DATABASE_DELETED: 'DATABASE_DELETED',
+
+  // 스타트 가이드 페이지
+  START_GUIDE: 'START_GUIDE',
 } as const
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]
