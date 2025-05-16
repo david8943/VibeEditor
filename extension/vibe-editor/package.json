@@ -174,6 +174,11 @@
         "category": "Vibe Editor"
       },
       {
+        "command": "vibeEditor.openNotionLink",
+        "title": "노션 바로가기",
+        "icon": "$(link-external)"
+      },
+      {
         "command": "vibeEditor.deletePost",
         "title": "포스트 삭제하기",
         "icon": "$(trash)"
@@ -251,6 +256,11 @@
           "command": "vibeEditor.deleteSnapshot",
           "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
           "group": "inline@2"
+        },
+        {
+          "command": "vibeEditor.openNotionLink",
+          "when": "viewItem == vibeEditorPostList",
+          "group": "inline@0"
         },
         {
           "command": "vibeEditor.deletePost",

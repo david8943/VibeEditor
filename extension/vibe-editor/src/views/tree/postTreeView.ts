@@ -27,6 +27,7 @@ export class PostProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       isLoading: isLoading(post.postId),
+      uploadStatus: post.uploadStatus,
     }))
     return Promise.resolve(
       summaries
@@ -39,6 +40,11 @@ export class PostProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 export class PostItem extends vscode.TreeItem {
   constructor(public readonly post: PostSummary) {
     super(post.postTitle, vscode.TreeItemCollapsibleState.None)
+
+    console.log(
+      `[PostItem] postId=${post.postId}, title=${post.postTitle}, isLoading=${post.isLoading}, uploadStatus=${post.uploadStatus}`,
+    )
+
     this.tooltip = `${post.postTitle}`
     this.command = {
       command: 'vibeEditor.showPostPage',
@@ -46,9 +52,23 @@ export class PostItem extends vscode.TreeItem {
       arguments: [post.postId],
     }
     this.contextValue = 'vibeEditorPostList'
-    this.iconPath = post.isLoading
-      ? new vscode.ThemeIcon('sync~spin')
-      : new vscode.ThemeIcon('book')
+
+    this.iconPath = this.getIconForStatus(post)
+  }
+
+  private getIconForStatus(post: PostSummary): vscode.ThemeIcon {
+    if (post.isLoading) return new vscode.ThemeIcon('sync~spin')
+
+    switch (post.uploadStatus) {
+      case 'SUCCESS':
+        return new vscode.ThemeIcon('check')
+      case 'FAIL':
+        return new vscode.ThemeIcon('error')
+      case 'PENDING':
+        return new vscode.ThemeIcon('debug-breakpoint-function')
+      default:
+        return new vscode.ThemeIcon('book')
+    }
   }
 }
 

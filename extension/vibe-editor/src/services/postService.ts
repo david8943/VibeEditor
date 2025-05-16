@@ -85,6 +85,7 @@ export class PostService {
             localPost.postTitle = post.postTitle
             localPost.createdAt = post.createdAt
             localPost.updatedAt = post.updatedAt
+            localPost.uploadStatus = post.uploadStatus
             return localPost
           } else {
             return {
@@ -96,6 +97,7 @@ export class PostService {
               createdAt: post.createdAt,
               updatedAt: post.updatedAt,
               parentPostIdList: [],
+              uploadStatus: post.uploadStatus,
             }
           }
         })

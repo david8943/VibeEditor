@@ -33,6 +33,32 @@ export class ShowDefaultPostPageCommand implements ICommand {
     await this.viewService.showDefaultPostPage()
   }
 }
+export class OpenNotionLinkCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.openNotionLink'
+
+  private postService: PostService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.postService = new PostService(context)
+  }
+
+  public get commandName(): string {
+    return OpenNotionLinkCommand.commandName
+  }
+
+  public async execute(item: PostItem): Promise<void> {
+    // 실제 포스트의 노션 URL이 있다면 여기에서 가져올 수 있어야 함
+    const post = item.post
+    let notionUrl = 'https://www.naver.com'
+
+    // 추후에 post.notionUrl이 있다면 그걸로
+    if ((post as any).notionUrl) {
+      notionUrl = (post as any).notionUrl
+    }
+
+    vscode.env.openExternal(vscode.Uri.parse(notionUrl))
+  }
+}
 export class DeletePostCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.deletePost'
 

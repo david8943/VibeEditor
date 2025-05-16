@@ -18,6 +18,7 @@ import { SetNotionApiCommand } from './notion'
 import {
   CreatePostCommand,
   DeletePostCommand,
+  OpenNotionLinkCommand,
   ResetPostCommand,
   ShowDefaultPostPageCommand,
   ShowPostPageCommand,
@@ -63,6 +64,7 @@ export const allCommands = [
   GetTemplatesCommand,
   ShowPostPageCommand,
   RenameSnapshotCommand,
+  OpenNotionLinkCommand,
   DeletePostCommand,
   ShowSideViewCommand,
   ShowPromptCommand,
