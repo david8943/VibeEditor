@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { getPostList, upgradePost, uploadPost } from '../apis/post'
+import { getPostDetail } from '../apis/post'
 import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
 import { Post, PostDetail, UploadToNotionRequestPost } from '../types/post'
@@ -15,6 +16,11 @@ export class PostService {
 
   async resetPost(): Promise<void> {
     await this.context.globalState.update('posts', [])
+    refreshPostProvider()
+  }
+
+  async updatePostToExtension(prev: PostDetail[]): Promise<void> {
+    await this.context.globalState.update('posts', prev)
     refreshPostProvider()
   }
 
@@ -66,8 +72,33 @@ export class PostService {
   }
 
   async getPost(postId: number): Promise<PostDetail | null> {
-    return this.getLocalPost(postId)
+    const result = await getPostDetail(postId)
+    if (!result.success) {
+      vscode.window.showErrorMessage(
+        `포스트 ${postId}를 불러오는 데 실패했습니다.`,
+      )
+      return null
+    }
+
+    const post = result.data
+    const prev = await this.getLocalPosts()
+    const index = prev.findIndex((p) => p.postId === postId)
+    const updatedPost: PostDetail = {
+      ...post,
+      parentPostIdList: prev[index]?.parentPostIdList ?? [],
+      uploadStatus: prev[index]?.uploadStatus, // 필요 시 보존
+    }
+
+    if (index !== -1) {
+      prev[index] = updatedPost
+    } else {
+      prev.push(updatedPost)
+    }
+
+    await this.context.globalState.update('posts', prev)
+    return updatedPost
   }
+
   async getLocalPosts(): Promise<PostDetail[]> {
     return this.context.globalState.get<PostDetail[]>('posts') || []
   }
@@ -101,7 +132,7 @@ export class PostService {
             }
           }
         })
-      await this.context.globalState.update('posts', posts)
+      await this.updatePostToExtension(posts)
     }
     return posts
   }

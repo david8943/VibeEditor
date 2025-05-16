@@ -27,6 +27,9 @@ export interface PostDetail {
   updatedAt: string
   parentPostIdList: ParentPost[]
   uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
+  postUrl?: string | null
+  usedAIBrand?: string
+  usedAIModel?: string
 }
 export interface Post {
   postId: number

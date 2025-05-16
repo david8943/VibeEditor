@@ -1,5 +1,6 @@
 import {
   Post,
+  PostDetail,
   PostListItem,
   UpdatePost,
   UploadToNotionRequest,
@@ -23,3 +24,7 @@ export const upgradePost = async ({
 // getPostList
 export const getPostList = async () =>
   await getRequest<PostListItem[]>('/ai-post')
+
+// 포스트 조회
+export const getPostDetail = async (postId: number) =>
+  await getRequest<PostDetail>(`/ai-post/${postId}`)
