@@ -56,10 +56,11 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
   //TODO: 연타 안 되게 막아야 함
   const onSubmit = (data: Post) => {
     console.log('onSubmit 이 작동함', data)
-    // postMessageToExtension({
-    //   type: MessageType.SUBMIT_POST,
-    //   payload: data,
-    // })
+    setLoading(true)
+    postMessageToExtension({
+      type: MessageType.SUBMIT_POST,
+      payload: data,
+    })
   }
   return (
     <div className="app-container">
