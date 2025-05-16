@@ -4,15 +4,16 @@ import InfoIcon from '@/assets/icons/info.svg'
 
 interface InfoToolTipProps {
   description: string
+  size?: number
 }
 
-export const InfoToolTip = ({ description }: InfoToolTipProps) => {
+export const InfoToolTip = ({ description, size = 16 }: InfoToolTipProps) => {
   return (
     <div className="relative group">
       <div className="flex items-center">
         <InfoIcon
-          width={24}
-          height={24}
+          width={size}
+          height={size}
           className="text-[var(--vscode-foreground)]"
         />
       </div>

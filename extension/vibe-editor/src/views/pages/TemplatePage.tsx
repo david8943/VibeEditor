@@ -7,7 +7,6 @@ import { CreateDatabase } from '../../types/database'
 import {
   CreatePrompt,
   Option,
-  PostType,
   Prompt,
   PromptAttach,
   SubmitPrompt,
@@ -25,17 +24,9 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     null,
   )
   const [selectedPromptId, setSelectedPromptId] = useState<number>(0)
-  const [createPromptData, setCreatePromptData] = useState<CreatePrompt>({
-    parentPromptId: null,
-    templateId: 0,
-    promptName: '기본 프롬프트',
-    postType: PostType.TROUBLE_SHOOTING,
-    comment: '합리적 의심',
-    promptAttachList: [],
-    promptOptionList: [],
-    notionDatabaseId: 0,
-    userAIProviderId: null,
-  })
+  const [createPromptData, setCreatePromptData] = useState<CreatePrompt | null>(
+    null,
+  )
   const [notionDatabaseId, setNotionDatabaseId] = useState(0)
   const [defaultPostType, setDefaultPostType] = useState<
     'TECH_CONCEPT' | 'TROUBLE_SHOOTING'
@@ -68,7 +59,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       } else if (message.type === MessageType.STOP_LOADING) {
         setLoading(false)
       } else if (message.type === MessageType.PROMPT_SELECTED) {
-        console.log('PROMPT_SELECTED', message.payload.prompt)
+        console.log('PROMPT_SELECTED❣️', message.payload.prompt)
         if (message.payload.prompt) {
           setSelectedPrompt(message.payload.prompt)
           setSelectedPromptId(message.payload.prompt.promptId)
@@ -88,8 +79,9 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         postMessageToExtension({ type: MessageType.GET_OPTIONS })
         postMessageToExtension({ type: MessageType.GET_PROMPT })
       } else if (message.type === MessageType.RESET_CREATE_PROMPT) {
-        console.log('리셋')
-        resetCreatePrompt()
+        console.log('리셋2')
+        setSelectedPromptId(0)
+        // resetCreatePrompt()
       }
     }
     window.addEventListener('message', handleMessage)
@@ -230,9 +222,15 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       },
     })
   }
-
+  useEffect(() => {
+    if (selectedPromptId == 0) {
+      console.log('여기서 또 리셋3')
+      setSelectedPrompt(null)
+    }
+  }, [selectedPromptId])
   useEffect(() => {
     if (configLoaded && selectedTemplate) {
+      console.log('여기서 또 리셋1')
       resetCreatePrompt()
     }
   }, [selectedTemplate, configLoaded])
@@ -244,7 +242,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }, [defaultNotionDatabaseId])
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center w-full">
       {showOnboarding && (
         <div
           id="container"
@@ -275,7 +273,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         </div>
       )}
       {!showOnboarding && (
-        <div className="app-container flex flex-col gap-8">
+        <div className="flex flex-col gap-8">
           <h1 className="text-2xl font-bold whitespace-pre-wrap">
             {selectedPrompt?.promptName ??
               `${selectedTemplate?.templateName}의 새 템플릿`}
@@ -298,7 +296,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
               selectedPromptId={selectedPromptId}
               selectPromptId={selectPromptId}
             />
-            {selectedTemplate && selectedPrompt && (
+            {selectedTemplate && selectedPrompt && selectedPromptId != 0 && (
               <PromptForm
                 defaultPrompt={selectedPrompt}
                 selectedPromptId={selectedPromptId}
@@ -315,7 +313,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
                 saveAIProvider={saveAIProvider}
               />
             )}
-            {createPromptData.promptName}
             {createPromptData && selectedTemplate && selectedPromptId == 0 && (
               <CreatePromptForm
                 defaultPrompt={createPromptData}

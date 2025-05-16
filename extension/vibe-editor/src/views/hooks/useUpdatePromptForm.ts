@@ -41,8 +41,8 @@ export const useUpdatePromptForm = ({
   selectedPromptId,
 }: UsePromptFormProps): UsePromptFormReturn => {
   const setDefaultValues = (defaultPrompt: Prompt | null): EditPrompt => {
+    console.log('useUpdatePromptForm setDefaultValues', defaultPrompt)
     if (!defaultPrompt) return {} as EditPrompt
-    console.log('setDefaultValues', defaultPrompt)
     const editPrompt: EditPrompt = {
       templateId: defaultPrompt.templateId,
       promptName: defaultPrompt.promptName,

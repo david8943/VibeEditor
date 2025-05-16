@@ -165,7 +165,10 @@ export function StartingGuidePage({
                             className="text-[var(--vscode-foreground)]"
                           />
                         ) : (
-                          <InfoToolTip description={item.description} />
+                          <InfoToolTip
+                            description={item.description}
+                            size={24}
+                          />
                         )}
                       </div>
                     </div>

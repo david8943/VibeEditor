@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { AIProvider } from '../../../../types/ai'
 import { MessageType } from '../../../../types/webview'
+import { InfoToolTip } from '../../common/InfoToolTip'
 
 interface Props {
   selectedId: number
@@ -43,7 +44,10 @@ export const AIProviderSelector: React.FC<Props> = ({
       className="form-group relative"
       ref={containerRef}>
       <div className="flex justify-between items-center">
-        <label>AI 종류</label>
+        <div className="flex justify-start items-center">
+          <label>AI 종류</label>
+          <InfoToolTip description="AI를 선택하지 않을 경우 포스트가 생성되지 않습니다." />
+        </div>
         <button
           type="button"
           className="small-square-button"
@@ -51,7 +55,6 @@ export const AIProviderSelector: React.FC<Props> = ({
           +
         </button>
       </div>
-      <label>AI를 선택하지 않을 경우 포스트가 생성되지 않습니다.</label>
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">

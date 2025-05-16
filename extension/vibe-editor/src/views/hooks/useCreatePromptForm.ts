@@ -1,4 +1,13 @@
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import {
+  FieldErrors,
+  UseFormHandleSubmit,
+  UseFormRegister,
+  UseFormReset,
+  UseFormSetValue,
+  UseFormWatch,
+  useForm,
+} from 'react-hook-form'
 
 import { CreatePrompt, EditPrompt } from '../../types/template'
 
@@ -9,10 +18,12 @@ interface UseCreatePromptFormProps {
 
 interface UseCreatePromptFormReturn {
   formMethods: {
-    register: any
-    handleSubmit: any
-    setValue: any
-    watch: any
+    register: UseFormRegister<EditPrompt>
+    handleSubmit: UseFormHandleSubmit<EditPrompt>
+    reset: UseFormReset<EditPrompt>
+    setValue: UseFormSetValue<EditPrompt>
+    watch: UseFormWatch<EditPrompt>
+    formState: { errors: FieldErrors<EditPrompt> }
   }
   onSubmit: (data: EditPrompt) => void
   handlePost: null
@@ -42,9 +53,24 @@ export const useCreatePromptForm = ({
 
   const defaultValues = setDefaultValues(defaultPrompt)
 
-  const { register, handleSubmit, setValue, watch } = useForm<EditPrompt>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<EditPrompt>({
     defaultValues,
   })
+
+  useEffect(() => {
+    if (defaultPrompt) {
+      console.log('이게 리셋의 원인인가요?')
+      const newDefaultValues = setDefaultValues(defaultPrompt)
+      reset(newDefaultValues)
+    }
+  }, [defaultPrompt, reset])
 
   const editPromptToCreatePrompt = (editPrompt: EditPrompt): CreatePrompt => {
     return {
@@ -79,6 +105,8 @@ export const useCreatePromptForm = ({
       handleSubmit,
       setValue,
       watch,
+      reset,
+      formState: { errors },
     },
     onSubmit,
     handlePost: null,
