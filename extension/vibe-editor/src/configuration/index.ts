@@ -5,6 +5,7 @@ interface ConfigSchema {
   defaultPromptOptionIds: number[]
   defaultNotionDatabaseId: number
   showReadme: boolean
+  showStartingGuide: boolean
 }
 
 // 기본값 정의
@@ -13,6 +14,7 @@ const defaultConfig: ConfigSchema = {
   defaultPromptOptionIds: [],
   defaultNotionDatabaseId: 0,
   showReadme: false,
+  showStartingGuide: true,
 }
 
 export const ConfigType = {
@@ -20,6 +22,7 @@ export const ConfigType = {
   defaultPromptOptionIds: 'defaultPromptOptionIds',
   defaultNotionDatabaseId: 'defaultNotionDatabaseId',
   showReadme: 'showReadme',
+  showStartingGuide: 'showStartingGuide',
 } as const
 
 export class Configuration {
@@ -44,6 +47,9 @@ export class Configuration {
         config.get(ConfigType.defaultNotionDatabaseId) ??
         defaultConfig.defaultNotionDatabaseId,
       showReadme: config.get(ConfigType.showReadme) ?? defaultConfig.showReadme,
+      showStartingGuide:
+        config.get(ConfigType.showStartingGuide) ??
+        defaultConfig.showStartingGuide,
     }
   }
 

@@ -1,5 +1,8 @@
 import * as vscode from 'vscode'
 
+import { setDraftData } from '@/configuration/draftData'
+import { DraftDataType } from '@/types/configuration'
+
 import { PostService } from '../services/postService'
 import { SettingService } from '../services/settingService'
 import { TemplateService } from '../services/templateService'

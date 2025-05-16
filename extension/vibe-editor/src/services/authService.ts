@@ -2,6 +2,9 @@ import * as vscode from 'vscode'
 
 import { clearDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
+import { MessageType } from '../types/webview'
+import { getSideViewProvider } from '../views/webview/SideViewProvider'
+import { getStartGuideViewProvider } from '../views/webview/StartGuideViewProvider'
 
 export class AuthService {
   private context: vscode.ExtensionContext
@@ -15,8 +18,6 @@ export class AuthService {
   }
 
   public async githubLogin(): Promise<void> {
-    // await this.context.secrets.store(SecretType.accessToken, 'test')
-    // setDraftData(DraftDataType.loginStatus, true)
     await this.auth('github')
   }
 
@@ -34,11 +35,6 @@ export class AuthService {
             const accessToken = url.searchParams.get('accessToken')
 
             if (accessToken) {
-              await this.context.secrets.store(
-                SecretType.accessToken,
-                accessToken,
-              )
-              setDraftData(DraftDataType.loginStatus, true)
               res.writeHead(200, {
                 'Content-Type': 'text/html; charset=utf-8',
               })
@@ -98,13 +94,30 @@ export class AuthService {
               `)
               res.end()
               server.close()
+              const loginStatus = true
               vscode.window.showInformationMessage(`${domain} 로그인 성공`)
               await this.context.secrets.store(
                 SecretType.accessToken,
                 accessToken,
               )
-              setDraftData(DraftDataType.loginStatus, true)
-              vscode.commands.executeCommand('vibeEditor.getTemplates')
+              setDraftData(DraftDataType.loginStatus, loginStatus)
+              const sideViewProvider = getSideViewProvider()
+              if (sideViewProvider) {
+                sideViewProvider.postMessageToWebview({
+                  type: MessageType.LOGIN_STATUS_LOADED,
+                  payload: loginStatus,
+                })
+              }
+
+              const startGuideViewProvider = getStartGuideViewProvider()
+              if (startGuideViewProvider) {
+                startGuideViewProvider.postMessageToWebview({
+                  type: MessageType.LOGIN_STATUS_LOADED,
+                  payload: loginStatus,
+                })
+              }
+
+              vscode.commands.executeCommand('vibeEditor.initFetchData')
             } else {
               res.statusCode = 400
               res.end('Token이 없습니다.')
@@ -136,9 +149,52 @@ export class AuthService {
     Object.values(SecretType).forEach((element) => {
       this.context.secrets.delete(element)
     })
-    clearDraftData()
-    vscode.commands.executeCommand('vibeEditor.resetTemplate')
-    vscode.commands.executeCommand('vibeEditor.resetPost')
+    await clearDraftData()
+    await vscode.commands.executeCommand('vibeEditor.resetTemplate')
+    await vscode.commands.executeCommand('vibeEditor.resetPost')
     vscode.window.showInformationMessage('로그아웃되었습니다.')
+  }
+
+  public async selectLoginMethod(): Promise<void> {
+    const result = await new Promise<string | null>((resolve) => {
+      const quickPick = vscode.window.createQuickPick()
+      quickPick.items = [
+        {
+          label: 'google',
+          description: '구글 로그인',
+        },
+        {
+          label: 'github',
+          description: '깃허브 로그인',
+        },
+        {
+          label: 'ssafy',
+          description: 'SSAFY 로그인',
+        },
+      ]
+      quickPick.placeholder = '로그인 방식을 선택하세요'
+      quickPick.onDidAccept(() => {
+        const selected = quickPick.selectedItems[0] as {
+          label: string
+        }
+        if (selected) {
+          quickPick.hide()
+          resolve(selected.label)
+        } else {
+          resolve(null)
+        }
+      })
+
+      quickPick.onDidHide(() => {
+        resolve(null)
+      })
+      quickPick.show()
+    })
+    if (result === null) {
+      vscode.window.showErrorMessage('로그인 방식을 선택해주세요.')
+    } else {
+      vscode.window.showInformationMessage(`${result} 로그인 선택`)
+      await this.auth(result)
+    }
   }
 }
