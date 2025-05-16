@@ -14,8 +14,6 @@ import {
 } from '../../types/template'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { PromptForm, PromptSelector } from '../components'
-import { DBSelector } from '../components'
-import { DatabaseModal } from '../components/database/DatabaseModal'
 import { CreatePromptForm } from '../components/template/CreatePromptForm'
 
 export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
@@ -47,7 +45,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     number[]
   >([])
   const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
-
+  const [showOnboarding, setShowOnboarding] = useState(true)
   const initialized = useRef(false)
 
   useEffect(() => {
@@ -60,6 +58,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       const message = event.data
       if (message.type === MessageType.TEMPLATE_SELECTED) {
         setSelectedTemplate(message.payload.template)
+        resetCreatePrompt()
       } else if (message.type === MessageType.OPTIONS_LOADED) {
         setOptionList(message.payload)
       } else if (message.type === MessageType.START_LOADING) {
@@ -97,7 +96,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     setCreatePromptData({
       parentPromptId: null,
       templateId: selectedPromptId,
-      promptName: '새 프롬프트 생성하기',
+      promptName: `${selectedTemplate?.templateName}의 새 템플릿`,
       postType: defaultPostType,
       comment: '',
       promptAttachList: [],
@@ -106,13 +105,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       userAIProviderId: null,
     })
   }
-  const generatePost = (selectedPromptId: number) => {
+  const generatePost = (data: Prompt) => {
     postMessageToExtension({
       type: MessageType.GENERATE_POST,
-      payload: {
-        templateId: selectedPrompt?.templateId,
-        promptId: selectedPromptId,
-      },
+      payload: data,
     })
   }
 
@@ -167,13 +163,17 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   const selectPromptId = (promptId: number) => {
     setSelectedPromptId(promptId)
-    postMessageToExtension({
-      type: MessageType.PROMPT_SELECTED,
-      payload: {
-        promptId: promptId,
-        templateId: selectedTemplate?.templateId,
-      },
-    })
+    if (promptId == 0) {
+      setSelectedPrompt(null)
+    } else {
+      postMessageToExtension({
+        type: MessageType.PROMPT_SELECTED,
+        payload: {
+          promptId: promptId,
+          templateId: selectedTemplate?.templateId,
+        },
+      })
+    }
   }
 
   const deletePrompt = (data: CreatePrompt) => {
@@ -239,76 +239,71 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }, [defaultNotionDatabaseId])
 
   return (
-    <div className="app-container flex flex-col gap-8">
-      <h1>
-        {selectedTemplate?.templateName}의 템플릿 promptId: {selectedPromptId}
-      </h1>
-      <h1>
-        templateId:
-        {selectedTemplate?.templateId}
-      </h1>
+    <div>
+      showOnboarding &&
+      {}
+      !showOnboarding &&
+      {
+        <div className="app-container flex flex-col gap-8">
+          <h1 className="text-2xl font-bold whitespace-pre-wrap">
+            {selectedPrompt?.promptName ??
+              `${selectedTemplate?.templateName}의 새 템플릿`}
+          </h1>
+          <label>
+            promptId:
+            {selectedPromptId}- templateId:
+            {selectedTemplate?.templateId}
+          </label>
 
-      {loading && (
-        <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
-          <DotLoader color="var(--vscode-button-background)" />
+          {loading && (
+            <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
+              <DotLoader color="var(--vscode-button-background)" />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-8">
+            <PromptSelector
+              selectedTemplate={selectedTemplate}
+              selectedPromptId={selectedPromptId}
+              selectPromptId={selectPromptId}
+            />
+            {selectedTemplate && selectedPrompt && (
+              <PromptForm
+                defaultPrompt={selectedPrompt}
+                selectedPromptId={selectedPromptId}
+                generatePost={generatePost}
+                submitPrompt={submitPrompt}
+                deleteSnapshot={deleteSnapshot}
+                localSnapshots={selectedTemplate.snapshotList || []}
+                optionList={optionList}
+                defaultPromptOptionIds={defaultPromptOptionIds}
+                defaultPostType={defaultPostType}
+                saveDatabase={saveDatabase}
+                getDatabases={getDatabases}
+                getAIProviders={getAIProviders}
+                saveAIProvider={saveAIProvider}
+              />
+            )}
+            {createPromptData.promptName}
+            {selectedTemplate && selectedPromptId == 0 && (
+              <CreatePromptForm
+                defaultPrompt={createPromptData}
+                selectedPromptId={selectedPromptId}
+                createPrompt={createPrompt}
+                deleteSnapshot={deleteSnapshot}
+                localSnapshots={selectedTemplate.snapshotList || []}
+                optionList={optionList}
+                defaultPromptOptionIds={defaultPromptOptionIds}
+                defaultPostType={defaultPostType}
+                saveDatabase={saveDatabase}
+                getDatabases={getDatabases}
+                getAIProviders={getAIProviders}
+                saveAIProvider={saveAIProvider}
+              />
+            )}
+          </div>
         </div>
-      )}
-
-      <div className="flex flex-col gap-8">
-        <PromptSelector
-          selectedTemplate={selectedTemplate}
-          selectedPromptId={selectedPromptId}
-          selectPromptId={selectPromptId}
-        />
-        <DBSelector
-          selectedId={notionDatabaseId}
-          onChange={setNotionDatabaseId}
-          getDatabases={getDatabases}
-          onAddClick={() => setShowDbModal(true)}
-        />
-
-        {showDbModal && (
-          <DatabaseModal
-            saveDatabase={saveDatabase}
-            onClose={() => setShowDbModal(false)}
-          />
-        )}
-
-        {selectedTemplate && selectedPrompt && (
-          <PromptForm
-            defaultPrompt={selectedPrompt}
-            selectedPromptId={selectedPromptId}
-            generatePost={generatePost}
-            submitPrompt={submitPrompt}
-            deleteSnapshot={deleteSnapshot}
-            localSnapshots={selectedTemplate.snapshotList || []}
-            optionList={optionList}
-            defaultPromptOptionIds={defaultPromptOptionIds}
-            defaultPostType={defaultPostType}
-            saveDatabase={saveDatabase}
-            getDatabases={getDatabases}
-            getAIProviders={getAIProviders}
-            saveAIProvider={saveAIProvider}
-          />
-        )}
-
-        {selectedTemplate && selectedPromptId == 0 && (
-          <CreatePromptForm
-            defaultPrompt={createPromptData}
-            selectedPromptId={selectedPromptId}
-            createPrompt={createPrompt}
-            deleteSnapshot={deleteSnapshot}
-            localSnapshots={selectedTemplate.snapshotList || []}
-            optionList={optionList}
-            defaultPromptOptionIds={defaultPromptOptionIds}
-            defaultPostType={defaultPostType}
-            saveDatabase={saveDatabase}
-            getDatabases={getDatabases}
-            getAIProviders={getAIProviders}
-            saveAIProvider={saveAIProvider}
-          />
-        )}
-      </div>
+      }
     </div>
   )
 }

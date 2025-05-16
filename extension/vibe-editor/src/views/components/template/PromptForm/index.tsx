@@ -11,7 +11,7 @@ import { PromptFormUI } from '../PromptFormUI'
 
 interface PromptFormProps {
   defaultPrompt: Prompt | null
-  generatePost: (data: number) => void
+  generatePost: (data: Prompt) => void
   submitPrompt: (data: Prompt) => void
   localSnapshots: Snapshot[]
   deleteSnapshot: (snapshotId: number) => void
@@ -109,6 +109,7 @@ export function PromptForm({
       getDatabases={getDatabases}
       getAIProviders={getAIProviders}
       saveAIProvider={saveAIProvider}
+      showGeneratePost={true}
     />
   )
 }

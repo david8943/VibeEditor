@@ -21,7 +21,11 @@ import {
   ShowDefaultPostPageCommand,
   ShowPostPageCommand,
 } from './post'
-import { ShowReadmeCommand, ShowSettingPageCommand } from './setting'
+import {
+  InitFetchDataCommand,
+  ShowReadmeCommand,
+  ShowSettingPageCommand,
+} from './setting'
 import {
   AddToPromptCommand,
   CreateTemplateCommand,
@@ -67,4 +71,5 @@ export const allCommands = [
   ShowReadmeCommand,
   GenaratePostCommand,
   CreatePostCommand,
+  InitFetchDataCommand,
 ]

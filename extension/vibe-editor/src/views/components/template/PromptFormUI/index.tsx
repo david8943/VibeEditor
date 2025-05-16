@@ -15,7 +15,7 @@ import { DBSelector } from '../../../components'
 import { DatabaseModal } from '../../../components/database/DatabaseModal'
 import { AIProviderModal } from '../../aiProvider/AIProviderModal'
 import { AIProviderSelector } from '../../aiProvider/AIProviderSelector'
-import { HighlightedCode } from '../../code/HighLightedCode'
+import { HighlightedCode } from '../../code/HighlightedCode'
 import './styles.css'
 
 interface PromptFormUIProps {
@@ -28,7 +28,7 @@ interface PromptFormUIProps {
   options: EditOptionList
   snapshots: EditSnapshot[]
   onSubmit: (data: EditPrompt) => void
-  handlePost: (() => void) | null
+  handlePost: () => void
   handleOption: (optionName: string, optionId: number) => void
   handleDeleteSnapshot: (attachId: number | null) => void
   handleDescriptionChange: (attachId: number | null, value: string) => void
@@ -37,6 +37,7 @@ interface PromptFormUIProps {
   getDatabases: () => void
   getAIProviders: () => void
   saveAIProvider: (aiProvider: AIAPIKey) => void
+  showGeneratePost: boolean
 }
 
 export function PromptFormUI({
@@ -52,9 +53,11 @@ export function PromptFormUI({
   getDatabases,
   saveAIProvider,
   getAIProviders,
+  showGeneratePost,
 }: PromptFormUIProps) {
   const postTypeValue = watch('postType')
   const notionDatabaseId = watch('notionDatabaseId')
+  const userAIProviderId = watch('userAIProviderId')
 
   //TODO: 스냅 샷 코드 너무 길면 삐져나옴
   useEffect(() => {
@@ -183,6 +186,7 @@ export function PromptFormUI({
               <span className="text-sm font-medium">{optionName}</span>
               {options[optionName].map((option) => (
                 <button
+                  type="button"
                   key={option.optionId}
                   onClick={() => handleOption(optionName, option.optionId)}
                   className={`px-3 py-1 rounded-full text-sm ${
@@ -211,9 +215,9 @@ export function PromptFormUI({
         />
       )}
       <AIProviderSelector
-        selectedId={notionDatabaseId}
+        selectedId={userAIProviderId}
         onChange={(e) => {
-          setValue('notionDatabaseId', e)
+          setValue('userAIProviderId', e)
         }}
         getAIProviders={getAIProviders}
         onAddClick={() => setShowAIProviderModal(true)}
@@ -240,15 +244,17 @@ export function PromptFormUI({
       </div>
       <div className="flex gap-4">
         <button
+          type="button"
           onClick={handleSubmit(onSubmit)}
           className="flex-1 py-2 px-4 rounded text-sm font-medium">
-          프롬프트 저장
+          템플릿 저장
         </button>
-        {handlePost && (
+        {showGeneratePost && (
           <button
+            type="button"
             onClick={handlePost}
             className="flex-1 py-2 px-4 rounded text-sm font-medium">
-            해당 프롬프트로 AI 포스트 생성
+            해당 템플릿으로 AI 포스트 생성
           </button>
         )}
       </div>

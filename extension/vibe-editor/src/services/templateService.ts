@@ -43,6 +43,7 @@ export class TemplateService {
     data: SelectPrompt,
     prev?: Template[],
   ): Promise<Prompt | null> {
+    console.log('getLocalPrompt', data, prev)
     const template = await this.getLocalTemplate(data.templateId, prev)
     return (
       template?.promptList?.find(
@@ -355,18 +356,19 @@ export class TemplateService {
   }
 
   async submitPrompt(data: SubmitUpdatePrompt): Promise<boolean> {
+    console.log('submitPrompt data', data)
     const prev = await this.getLocalTemplates()
     const prompt = await this.getLocalPrompt(
       {
-        promptId: data.selectedTemplateId,
+        promptId: data.selectedPromptId,
         templateId: data.selectedTemplateId,
       },
       prev,
     )
+    console.log(' submitPrompt prompt')
     if (prompt) {
       const { promptId, parentPrompt, templateId, ...submitPromptData } =
         data.prompt
-      // submitPromptData.userAIProviderId = 4
       const success = await submitPrompt({
         submitPrompt: submitPromptData as SubmitPrompt,
         promptId: promptId,
@@ -489,7 +491,11 @@ export class TemplateService {
   async updateTemplateDetail(templateId: number): Promise<Template | null> {
     const result = await getTemplateDetail(templateId)
     if (result.success) {
-      const prev = this.context.globalState.get<Template[]>('templates', [])
+      const prev =
+        (await this.getLocalTemplates()) ?? (await this.getTemplates())
+      if (!prev) {
+        return null
+      }
       const templateIndex = prev.findIndex(
         (template) => template.templateId === templateId,
       )
@@ -506,7 +512,7 @@ export class TemplateService {
       })
       if (templateIndex !== -1) {
         prev[templateIndex] = newTemplate
-        await this.context.globalState.update('templates', prev)
+        await this.updateTemplateToExtension(prev)
       }
       return result.data
     }
@@ -539,11 +545,11 @@ export class TemplateService {
   }
 
   async getTemplate(templateId: number): Promise<Template | null> {
-    let prev: Template[] = await this.getLocalTemplates()
-    let oldTemplate = prev.find((t) => t.templateId == templateId)
+    let prev = await this.getLocalTemplates()
+    let oldTemplate = await this.getLocalTemplate(templateId, prev)
     if (!oldTemplate) {
       prev = await this.getTemplates()
-      oldTemplate = prev.find((t) => t.templateId == templateId)
+      oldTemplate = await this.getLocalTemplate(templateId, prev)
       if (!oldTemplate) {
         return null
       }
@@ -553,38 +559,34 @@ export class TemplateService {
     if (result.success) {
       const { templateName, promptList, snapshotList, updatedAt, ...rest } =
         result.data
-      if (oldTemplate) {
-        oldTemplate.templateName = templateName
-        oldTemplate.updatedAt = updatedAt
-
-        oldTemplate.promptList = promptList?.map((prompt) => {
-          const oldPrompt: Prompt | undefined = oldTemplate.promptList?.find(
-            (p) => prompt.promptId == p.promptId,
-          )
-          if (oldPrompt) {
-            oldPrompt.promptName = prompt.promptName
-            return oldPrompt
-          } else {
-            return prompt
-          }
-        })
-        oldTemplate.snapshotList = snapshotList?.map((snapshot) => {
-          const oldSnapshot = oldTemplate.snapshotList?.find(
-            (s) => snapshot.snapshotId == s.snapshotId,
-          )
-          if (oldSnapshot) {
-            oldSnapshot.snapshotName = snapshot.snapshotName
-            oldSnapshot.updatedAt = snapshot.snapshotName
-            return oldSnapshot
-          } else {
-            return snapshot
-          }
-        })
-        this.context.globalState.update('templates', prev)
-      }
+      oldTemplate.templateName = templateName
+      oldTemplate.updatedAt = updatedAt
+      oldTemplate.promptList = promptList?.map((prompt) => {
+        const oldPrompt: Prompt | undefined = oldTemplate.promptList?.find(
+          (p) => prompt.promptId == p.promptId,
+        )
+        if (oldPrompt) {
+          oldPrompt.promptName = prompt.promptName
+          return oldPrompt
+        } else {
+          return prompt
+        }
+      })
+      oldTemplate.snapshotList = snapshotList?.map((snapshot) => {
+        const oldSnapshot = oldTemplate.snapshotList?.find(
+          (s) => snapshot.snapshotId == s.snapshotId,
+        )
+        if (oldSnapshot) {
+          oldSnapshot.snapshotName = snapshot.snapshotName
+          oldSnapshot.updatedAt = snapshot.snapshotName
+          return oldSnapshot
+        } else {
+          return snapshot
+        }
+      })
+      this.updateTemplateToExtension(prev)
     }
-    const localTemplate = await this.getLocalTemplate(templateId)
-    return localTemplate
+    return await this.getLocalTemplate(templateId, prev)
   }
 
   public async deletePromptSnapshot(

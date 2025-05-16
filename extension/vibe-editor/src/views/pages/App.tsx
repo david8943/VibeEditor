@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { DotLoader } from 'react-spinners'
 
 import '../../styles/global.css'
 import { Message, MessageType, PageType } from '../../types/webview'
 import { PostPage } from './PostPage'
 import { SettingPage } from './SettingPage'
+import { StartingGuidePage } from './StartingGuidePage'
 import { TemplatePage } from './TemplatePage'
 
 declare global {
@@ -55,11 +57,16 @@ export function App() {
         return <PostPage postMessageToExtension={postMessageToExtension} />
       case PageType.SETTING:
         return <SettingPage postMessageToExtension={postMessageToExtension} />
+      case PageType.STARTING_GUIDE:
+        return (
+          <StartingGuidePage postMessageToExtension={postMessageToExtension} />
+        )
       default:
         return (
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex flex-col items-center justify-center h-full gap-10">
             <h1 className="text-2xl font-bold">Vibe Editor</h1>
-            <div className="text-sm text-gray-500">로딩 중이에요</div>
+            <DotLoader color="var(--vscode-button-background)" />
+            <div className="text-sm">로딩 중이에요</div>
           </div>
         )
     }

@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import hljs from 'highlight.js/lib/common'
 import 'highlight.js/styles/github.css'
 
-import '../../../styles/highlight-vscode.css'
+import '../../../../styles/highlight-vscode.css'
 
 interface HighlightedCodeProps {
   code: string

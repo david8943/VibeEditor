@@ -15,10 +15,13 @@ import {
   SideViewProvider,
   setSideViewProvider,
 } from './views/webview/SideViewProvider'
+import {
+  StartGuideViewProvider,
+  setStartGuideViewProvider,
+} from './views/webview/StartGuideViewProvider'
 
 async function setUser(context: vscode.ExtensionContext) {
   const accessToken = await context.secrets.get(SecretType.accessToken)
-  console.log('액세스 토큰', accessToken)
   setDraftData(DraftDataType.loginStatus, !!accessToken)
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
@@ -61,14 +64,17 @@ async function registerProvider(context: vscode.ExtensionContext) {
   const tp = new TemplateProvider(context)
   const pp = new PostProvider(context)
   const svp = new SideViewProvider(context)
+  const sgp = new StartGuideViewProvider(context)
 
   vscode.window.registerTreeDataProvider('vibeEditorTemplatePage', tp)
   vscode.window.registerTreeDataProvider('vibeEditorPostList', pp)
   vscode.window.registerWebviewViewProvider('vibeEditorSideView', svp)
+  vscode.window.registerWebviewViewProvider('vibeEditorViewerPage', sgp)
 
   setTemplateProvider(tp)
   setPostProvider(pp)
   setSideViewProvider(svp)
+  setStartGuideViewProvider(sgp)
 }
 
 async function maybeShowReadme(context: vscode.ExtensionContext) {
@@ -79,12 +85,17 @@ async function maybeShowReadme(context: vscode.ExtensionContext) {
   }
 }
 
+async function initFetchData(context: vscode.ExtensionContext) {
+  await vscode.commands.executeCommand('vibeEditor.initFetchData')
+}
+
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   setExtensionContext(context)
   await registerCommand(context)
   await setUser(context)
+  await initFetchData(context)
   await registerProvider(context)
   await maybeShowReadme(context)
   addStatusBarItem(context)

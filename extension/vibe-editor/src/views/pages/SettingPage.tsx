@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { AIProvider } from '../../types/ai'
 import { CreateDatabase } from '../../types/database'
 import { Database } from '../../types/database'
 import type { Option } from '../../types/template'
 import { User } from '../../types/user'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { formatTime } from '../../utils/formatTime'
+import { AIProviderModal } from '../components/aiProvider/AIProviderModal'
+import { AIProviderSelector } from '../components/aiProvider/AIProviderSelector'
 import { DBSelector } from '../components/database/DBSelector'
 import { DatabaseModal } from '../components/database/DatabaseModal'
 
@@ -19,6 +22,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   })
   const [showDbModal, setShowDbModal] = useState(false)
   const [selectedDbId, setSelectedDbId] = useState(0)
+  const [showAIProviderModal, setShowAIProviderModal] = useState(false)
 
   useEffect(() => {
     postMesasgeTypeToExtension(MessageType.GET_LOGIN_STATUS)
@@ -86,7 +90,8 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   const [defaultPostType, setDefaultPostType] = useState('TECH_CONCEPT')
   const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
   const [notionDbList, setNotionDbList] = useState<Database[]>([])
-
+  const [defaultUserAIProviderId, setDefaultUserAIProviderId] = useState(0)
+  const [userAIProviderList, setUserAIProviderList] = useState<AIProvider[]>([])
   useEffect(() => {
     postMessageToExtension({ type: MessageType.GET_DATABASE })
   }, [])
@@ -248,6 +253,36 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                       })
                     }
                     onClose={() => setShowDbModal(false)}
+                  />
+                )}
+                <AIProviderSelector
+                  selectedId={defaultUserAIProviderId}
+                  onChange={(id) => {
+                    setDefaultUserAIProviderId(id)
+                    postMessageToExtension({
+                      type: MessageType.SET_CONFIG_VALUE,
+                      payload: {
+                        key: 'defaultUserAIProviderId',
+                        value: id,
+                      },
+                    })
+                  }}
+                  getAIProviders={() =>
+                    postMessageToExtension({
+                      type: MessageType.GET_AI_PROVIDERS,
+                    })
+                  }
+                  onAddClick={() => setShowAIProviderModal(true)}
+                />
+                {showAIProviderModal && (
+                  <AIProviderModal
+                    saveAIProvider={(aiProvider) =>
+                      postMessageToExtension({
+                        type: MessageType.SAVE_AI_PROVIDER,
+                        payload: aiProvider,
+                      })
+                    }
+                    onClose={() => setShowAIProviderModal(false)}
                   />
                 )}
 

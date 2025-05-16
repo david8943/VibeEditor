@@ -55,13 +55,13 @@ export function CreatePromptForm({
     onSubmit,
     handlePost,
   } = useCreatePromptForm({
-    defaultPrompt: initializedPrompt,
+    defaultPrompt: defaultPrompt,
     createPrompt,
   })
 
   const { options, handleOption } = usePromptOptions({
     optionList,
-    promptOptionList: initializedPrompt.promptOptionList,
+    promptOptionList: defaultPromptOptionIds,
     setValue,
     watch,
   })
@@ -73,7 +73,7 @@ export function CreatePromptForm({
     addSnapshot,
   } = usePromptSnapshots({
     localSnapshots,
-    promptAttachList: initializedPrompt.promptAttachList,
+    promptAttachList: defaultPrompt?.promptAttachList ?? [],
     deleteSnapshot,
     setValue,
   })
@@ -89,7 +89,7 @@ export function CreatePromptForm({
         options={options}
         snapshots={snapshots}
         onSubmit={onSubmit}
-        handlePost={null}
+        handlePost={() => {}}
         handleOption={handleOption}
         handleDeleteSnapshot={handleDeleteSnapshot}
         handleDescriptionChange={handleDescriptionChange}
@@ -98,6 +98,7 @@ export function CreatePromptForm({
         getDatabases={getDatabases}
         getAIProviders={getAIProviders}
         saveAIProvider={saveAIProvider}
+        showGeneratePost={false}
       />
     </div>
   )

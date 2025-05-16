@@ -13,7 +13,7 @@ import { EditPrompt, Prompt, SubmitPrompt } from '../../types/template'
 
 interface UsePromptFormProps {
   defaultPrompt: Prompt | null
-  generatePost: (selectedPromptId: number) => void
+  generatePost: (data: Prompt) => void
   submitPrompt: (data: Prompt) => void
   selectedPromptId: number
 }
@@ -28,7 +28,7 @@ interface UsePromptFormReturn {
     formState: { errors: FieldErrors<EditPrompt> }
   }
   onSubmit: (data: EditPrompt) => void
-  handlePost: (() => void) | null
+  handlePost: () => void
   defaultValues: EditPrompt
   editPromptToSubmitPrompt: (editPrompt: EditPrompt) => SubmitPrompt
   setDefaultValues: (defaultPrompt: Prompt | null) => EditPrompt
@@ -121,8 +121,7 @@ export const useUpdatePromptForm = ({
 
   const handlePost = () => {
     const formData = editPromptToPrompt(watch())
-    //TODO: onSubmit안 하면 비활성화
-    generatePost(selectedPromptId)
+    generatePost(formData)
   }
 
   return {

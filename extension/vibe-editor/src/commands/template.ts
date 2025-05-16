@@ -1,9 +1,11 @@
 import * as vscode from 'vscode'
 
+import { setDraftData } from '../configuration/draftData'
 import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ViewService } from '../services/viewService'
 import { ICommand } from '../types/command'
+import { DraftDataType } from '../types/configuration'
 import { Prompt } from '../types/template'
 import {
   PromptItem,
@@ -84,6 +86,7 @@ export class ShowPromptCommand implements ICommand {
     prompt: Prompt
     templateId: number
   }): Promise<void> {
+    setDraftData(DraftDataType.selectedTemplateId, templateId)
     await this.templateService.updateTemplateDetail(templateId)
     await this.viewService.showPrompt(prompt)
   }

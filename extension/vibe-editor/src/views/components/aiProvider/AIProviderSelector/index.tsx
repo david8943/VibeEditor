@@ -45,6 +45,7 @@ export const AIProviderSelector: React.FC<Props> = ({
       <div className="flex justify-between items-center">
         <label>AI 종류</label>
         <button
+          type="button"
           className="small-square-button"
           onClick={onAddClick}>
           +
@@ -54,7 +55,7 @@ export const AIProviderSelector: React.FC<Props> = ({
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
-        {selectedAI?.brand || 'AI를 선택하세요'}
+        {selectedAI?.model || 'AI를 선택하세요'}
       </div>
 
       {open && (
