@@ -46,6 +46,7 @@ public class PostSaveDTO {
 			.postType(this.postType)
 			.documentId(this.documentId)
 			.postContent(this.postContent)
+			.userAiProvider(this.prompt.getUserAiProvider())
 			.build();
 	}
 }
