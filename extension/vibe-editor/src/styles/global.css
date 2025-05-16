@@ -119,3 +119,15 @@ button:hover:not(.unselected) {
 .vscode-overlay-background {
   background-color: rgba(0, 0, 0, 0.6);
 }
+
+/* TOAST UI Editor 전체 배경 흰색으로 고정 */
+.toastui-editor-defaultUI {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* 에디터 내부 콘텐츠 영역 배경도 흰색으로 고정 */
+.toastui-editor-contents {
+  background-color: white !important;
+  color: black !important;
+}
