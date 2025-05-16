@@ -4,6 +4,8 @@ export interface PostSummary {
   postTitle: string
   createdAt: string
   updatedAt: string
+  isLoading: boolean
+  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
 }
 
 // 부모 포스트 정보
@@ -24,6 +26,7 @@ export interface PostDetail {
   createdAt: string
   updatedAt: string
   parentPostIdList: ParentPost[]
+  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
 }
 export interface Post {
   postId: number
@@ -35,6 +38,7 @@ export interface PostListItem {
   postTitle: string
   createdAt: string
   updatedAt: string
+  uploadStatus: 'SUCCESS' | 'FAIL' | 'PENDING'
 }
 
 export type UpdatePost = Omit<Post, 'postId'>
@@ -48,18 +52,11 @@ export type CreatePost = Pick<PostDetail, 'postTitle' | 'postContent'>
 export interface UploadToNotionRequest {
   promptId: number
 }
+
 export interface UploadToNotionRequestPost {
   postId: number
 }
 
-// 생성/수정 요청용
-export interface PostSummary {
-  postId: number
-  postTitle: string
-  createdAt: string
-  updatedAt: string
-  isLoading: boolean
-}
 export interface UploadToNotionResponse {
   postUrl: string
 }
