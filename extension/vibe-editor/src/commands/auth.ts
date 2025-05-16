@@ -70,3 +70,20 @@ export class LogoutCommand implements ICommand {
     await this.authService.logout()
   }
 }
+
+export class SelectLoginMethodCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.selectLoginMethod'
+  private authService: AuthService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.authService = new AuthService(context)
+  }
+
+  public get commandName(): string {
+    return SelectLoginMethodCommand.commandName
+  }
+
+  public async execute(): Promise<void> {
+    await this.authService.selectLoginMethod()
+  }
+}

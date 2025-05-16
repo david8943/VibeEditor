@@ -13,6 +13,7 @@ import { AIAPIKey } from '../../types/ai'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
 import { Post, UploadToNotionRequestPost } from '../../types/post'
+import { StartGuideType } from '../../types/startGuide'
 import {
   Prompt,
   SelectPrompt,
@@ -64,8 +65,6 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
       type: MessageType.INITIAL_PAGE,
       payload: { page: this.currentPage },
     })
-
-    // this.getTemplates(webviewView.webview)
   }
 
   private async navigateToInitialPage() {
@@ -394,9 +393,28 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
     }, this.disposables)
   }
 
-  private async startGuide(payload: string) {
-    if (payload === 'isLogin') {
-      // await this.googleLogin()
+  private async startGuide(payload: StartGuideType) {
+    if (payload === StartGuideType.isLogin) {
+      await vscode.commands.executeCommand('vibeEditor.selectLoginMethod')
+      await vscode.commands.executeCommand('vibeEditor.showSettingPage')
+    } else if (payload === StartGuideType.isNotionSecretKey) {
+      await vscode.commands.executeCommand('vibeEditor.showSettingPage')
+    } else if (payload === StartGuideType.isNotionDatabase) {
+      await vscode.commands.executeCommand('vibeEditor.showSettingPage')
+    } else if (payload === StartGuideType.isProject) {
+      await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
+      await vscode.commands.executeCommand('vibeEditor.createTemplate')
+    } else if (payload === StartGuideType.isSnapshot) {
+      await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
+      await vscode.commands.executeCommand('vibeEditor.copyCode')
+    } else if (payload === StartGuideType.isPost) {
+      await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
+      await vscode.commands.executeCommand('vibeEditor.showDefaultTemplatePage')
+    } else if (payload === StartGuideType.isNotionUpload) {
+      await vscode.commands.executeCommand(
+        'vibeEditor.vibeEditorPostList.focus',
+      )
+      await vscode.commands.executeCommand('vibeEditor.showDefaultPostPage')
     }
   }
   private async setConfigValue(message: Message) {

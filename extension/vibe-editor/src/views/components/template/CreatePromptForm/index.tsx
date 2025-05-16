@@ -38,22 +38,9 @@ export function CreatePromptForm({
   getAIProviders,
   saveAIProvider,
 }: CreatePromptFormProps) {
-  const initializedPrompt = defaultPrompt ?? {
-    postType: defaultPostType,
-    promptName: '',
-    comment: '??',
-    promptOptionList: defaultPromptOptionIds,
-    promptAttachList: [],
-    notionDatabaseId: 0,
-    templateId: 0,
-    parentPromptId: null,
-    userAIProviderId: null,
-  }
-
   const {
     formMethods: { register, handleSubmit, setValue, watch },
     onSubmit,
-    handlePost,
   } = useCreatePromptForm({
     defaultPrompt: defaultPrompt,
     createPrompt,

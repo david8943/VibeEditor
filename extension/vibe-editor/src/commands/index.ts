@@ -3,6 +3,7 @@ import {
   GoogleLoginCommand,
   LogoutCommand,
   SSAFYLoginCommand,
+  SelectLoginMethodCommand,
 } from './auth'
 import {
   CaptureSnapshotCommand,
@@ -72,4 +73,5 @@ export const allCommands = [
   GenaratePostCommand,
   CreatePostCommand,
   InitFetchDataCommand,
+  SelectLoginMethodCommand,
 ]
