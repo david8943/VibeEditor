@@ -1,10 +1,10 @@
 {
-  "name": "Chain G",
-  "short_name": "Chain G",
+  "name": "Vibe Editor",
+  "short_name": "Vibe Editor",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
-  "description": "가볍지만 신뢰할 수 있는 동거 서약관리 서비스",
+  "description": "AI로 작성하는 기술 블로그 VSCode Extension",
   "icons": [
     {
       "src": "/icons/homescreen16.png",

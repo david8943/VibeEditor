@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Chain G',
-  description: '가볍지만 신뢰할 수 있는 동거 서약관리 서비스7',
+  title: 'Vibe Editor',
+  description: 'AI로 작성하는 기술 블로그 VSCode Extension',
 }
