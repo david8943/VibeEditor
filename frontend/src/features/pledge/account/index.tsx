@@ -111,7 +111,7 @@ export function Account({
           {paymentCurrent?.rent === PaymentStatus.COLLECTED && (
             <ConfirmButton
               onClick={() => {
-                router.push(`/pledge/transfer/owner?month=${month}`)
+                // router.push(`/pledge/transfer/owner?month=${month}`)
               }}
               label="집주인에게 보내기"
             />
