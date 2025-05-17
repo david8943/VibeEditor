@@ -1,45 +1,48 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+
+// import { useTranslation } from 'react-i18next'
 
 import { marked } from 'marked'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 
+// import Image from 'next/image'
+// import { useRouter } from 'next/navigation'
+
+// import {
+//   AnimatedImage,
+//   BottomSheet,
+//   CardButton,
+//   ConfirmButton,
+//   IconButton,
+// } from '@/components'
+// import { AnimatedImageWrapper } from '@/components/AnimatedImage/styles'
+// import { HeaderButton } from '@/components/TopHeader/styles'
 import {
-  AnimatedImage,
-  BottomSheet,
-  CardButton,
-  ConfirmButton,
-  IconButton,
-} from '@/components'
-import { AnimatedImageWrapper } from '@/components/AnimatedImage/styles'
-import { HeaderButton } from '@/components/TopHeader/styles'
-import {
-  BottomContainer,
+  //   BottomContainer,
   Container,
-  DefaultContainer,
-  TextCenterContainer,
-  Title,
+  //   DefaultContainer,
+  //   TextCenterContainer,
+  //   Title,
 } from '@/styles/styles'
-import { CardItem, ImageVariant } from '@/types/ui'
+
+// import { CardItem, ImageVariant } from '@/types/ui'
 
 import {
-  Dot,
-  HeaderContainer,
-  ImageContainer,
-  LittleTitle,
+  //   Dot,
+  //   HeaderContainer,
+  //   ImageContainer,
+  //   LittleTitle,
   Main,
-  StepControl,
-  TitleContainer,
+  //   StepControl,
+  //   TitleContainer,
 } from './styles'
 
 export function StartPage() {
-  const router = useRouter()
-  const { t } = useTranslation()
-  const [step, setStep] = useState(0)
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+  // const router = useRouter()
+  // const { t } = useTranslation()
+  // const [step, setStep] = useState(0)
+  // const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [readmeContent, setReadmeContent] = useState('')
 
   useEffect(() => {
@@ -47,7 +50,8 @@ export function StartPage() {
       try {
         const response = await fetch('/docs/README.md')
         const content = await response.text()
-        setReadmeContent(marked(content))
+        const markdown = await marked(content)
+        setReadmeContent(markdown)
       } catch (error) {
         console.error('Failed to load README:', error)
       }
@@ -55,64 +59,64 @@ export function StartPage() {
     loadReadme()
   }, [])
 
-  const stepContent = [
-    {
-      id: 'blockchain',
-      title: t('onboarding.blockChain'),
-      image: '/images/onboarding/onboarding-blockchain.png',
-    },
-    {
-      id: 'transfer',
-      title: t('onboarding.transfer'),
-      image: '/images/onboarding/onboarding-transfer.png',
-    },
-    {
-      id: 'budget',
-      title: t('onboarding.budget'),
-      image: '/images/onboarding/onboarding-budget.png',
-    },
-    {
-      id: 'awkward',
-      title: t('onboarding.awkward'),
-      image: '/images/onboarding/onboarding-awkward.png',
-    },
-    {
-      id: 'start',
-      title: t('onboarding.start'),
-      image: '/images/onboarding/onboarding-start.png',
-    },
-  ]
+  // const stepContent = [
+  //   {
+  //     id: 'blockchain',
+  //     title: t('onboarding.blockChain'),
+  //     image: '/images/onboarding/onboarding-blockchain.png',
+  //   },
+  //   {
+  //     id: 'transfer',
+  //     title: t('onboarding.transfer'),
+  //     image: '/images/onboarding/onboarding-transfer.png',
+  //   },
+  //   {
+  //     id: 'budget',
+  //     title: t('onboarding.budget'),
+  //     image: '/images/onboarding/onboarding-budget.png',
+  //   },
+  //   {
+  //     id: 'awkward',
+  //     title: t('onboarding.awkward'),
+  //     image: '/images/onboarding/onboarding-awkward.png',
+  //   },
+  //   {
+  //     id: 'start',
+  //     title: t('onboarding.start'),
+  //     image: '/images/onboarding/onboarding-start.png',
+  //   },
+  // ]
 
-  const cardItems: CardItem[] = [
-    {
-      url: '/group/create',
-      image: '/images/group/group-create.svg',
-      title: t('onboarding.create.title'),
-      description: t('onboarding.create.description'),
-    },
-    {
-      url: '/group/join',
-      image: '/images/group/group-join.svg',
-      title: t('onboarding.join.title'),
-      description: t('onboarding.join.description'),
-    },
-  ]
-  const isConfirmButtonVisible = stepContent[step].id === 'start'
+  // const cardItems: CardItem[] = [
+  //   {
+  //     url: '/group/create',
+  //     image: '/images/group/group-create.svg',
+  //     title: t('onboarding.create.title'),
+  //     description: t('onboarding.create.description'),
+  //   },
+  //   {
+  //     url: '/group/join',
+  //     image: '/images/group/group-join.svg',
+  //     title: t('onboarding.join.title'),
+  //     description: t('onboarding.join.description'),
+  //   },
+  // ]
+  // const isConfirmButtonVisible = stepContent[step].id === 'start'
 
-  const handleNext = () => {
-    if (isConfirmButtonVisible) {
-      setIsBottomSheetOpen(true)
-    } else {
-      setStep(step + 1)
-    }
-  }
-  const handleBack = () => {
-    if (step > 0) {
-      setStep(step - 1)
-    } else {
-      router.back()
-    }
-  }
+  // const handleNext = () => {
+  //   if (isConfirmButtonVisible) {
+  //     setIsBottomSheetOpen(true)
+  //   } else {
+  //     setStep(step + 1)
+  //   }
+  // }
+  // const handleBack = () => {
+  //   if (step > 0) {
+  //     setStep(step - 1)
+  //   } else {
+  //     router.back()
+  //   }
+  // }
 
   return (
     <Container>
