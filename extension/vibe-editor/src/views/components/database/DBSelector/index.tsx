@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { Database } from '../../../../types/database'
 import { MessageType } from '../../../../types/webview'
+import { InfoToolTip } from '../../common/InfoToolTip'
 
 interface Props {
   selectedId: number
@@ -47,7 +48,14 @@ export const DBSelector: React.FC<Props> = ({
       className="form-group relative"
       ref={containerRef}>
       <div className="flex justify-between items-center">
-        <label>노션 데이터베이스</label>
+        <div className="flex justify-start items-center">
+          <label>노션 데이터베이스</label>
+          <InfoToolTip
+            description="해당
+          데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다."
+          />
+        </div>
+
         <button
           className="small-square-button"
           onClick={onAddClick}>

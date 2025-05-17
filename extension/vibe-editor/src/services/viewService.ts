@@ -27,6 +27,11 @@ export class ViewService {
 
   public async showTemplatePage(templateId: number): Promise<void> {
     setDraftData(DraftDataType.selectedPage, PageType.TEMPLATE)
+    const oldTemplateId = getDraftData(DraftDataType.selectedTemplateId)
+    if (templateId != oldTemplateId) {
+      // resetPromptId
+      setDraftData(DraftDataType.selectedPromptId, 0)
+    }
     setDraftData(DraftDataType.selectedTemplateId, templateId)
     await this.focusSideView()
     getSideViewProvider()?.navigateToPageIfExists(PageType.TEMPLATE)
