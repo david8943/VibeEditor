@@ -145,7 +145,7 @@ export function PromptFormUI({
                 </label>
               </div>
               <div className="flex flex-col flex-1 gap-4 items-start w-full">
-                <div className="code-block flex-1">
+                <div className="code-block w-1/2">
                   <HighlightedCode code={snapshot.snapshotContent} />
                 </div>
                 <textarea
@@ -154,7 +154,7 @@ export function PromptFormUI({
                   onChange={(e) =>
                     handleDescriptionChange(snapshot.attachId, e.target.value)
                   }
-                  className="flex-1 min-h-[100px] p-2 rounded"
+                  className="flex-1 min-h-[100px] p-2 rounded w-1/2"
                   placeholder="코드에 대한 설명을 입력해주세요."
                   required
                 />

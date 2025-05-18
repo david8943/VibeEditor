@@ -45,7 +45,7 @@ const postForm = async <T>(url: string, data: object) => {
 }
 
 export const signUp = (params: SignUpRequest) =>
-  postForm<LoginUser>('/auth/signup', params)
+  postForm<unknown>('/user/test/signup', params)
 
 export const login = (params: LoginRequest) =>
   postForm<LoginUser>('/auth/login', params)

@@ -82,6 +82,7 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   border: 1px solid var(--vscode-input-border);
+  max-width: 40vw;
 }
 
 .code-block code {

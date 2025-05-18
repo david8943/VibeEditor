@@ -1,23 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-// import { useTranslation } from 'react-i18next'
+import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { marked } from 'marked'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
-// import Image from 'next/image'
-// import { useRouter } from 'next/navigation'
-
-// import {
-//   AnimatedImage,
-//   BottomSheet,
-//   CardButton,
-//   ConfirmButton,
-//   IconButton,
-// } from '@/components'
+import {
+  //   AnimatedImage,
+  //   BottomSheet,
+  //   CardButton,
+  //   ConfirmButton,
+  Header,
+  IconButton,
+} from '@/components'
 // import { AnimatedImageWrapper } from '@/components/AnimatedImage/styles'
-// import { HeaderButton } from '@/components/TopHeader/styles'
+import { HeaderButton } from '@/components/TopHeader/styles'
+import { useAppSelector } from '@/hooks/useAppSelector'
 import {
   //   BottomContainer,
   Container,
@@ -30,17 +30,18 @@ import {
 
 import {
   //   Dot,
-  //   HeaderContainer,
+  HeaderContainer,
   //   ImageContainer,
   //   LittleTitle,
   Main,
+  MarkdownViewer,
   //   StepControl,
   //   TitleContainer,
 } from './styles'
 
 export function StartPage() {
-  // const router = useRouter()
-  // const { t } = useTranslation()
+  const router = useRouter()
+  const { t } = useTranslation()
   // const [step, setStep] = useState(0)
   // const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [readmeContent, setReadmeContent] = useState('')
@@ -117,14 +118,20 @@ export function StartPage() {
   //     router.back()
   //   }
   // }
+  const accessToken = useAppSelector(
+    (state) => state.auth.loginToken.accessToken,
+  )
 
+  const isLogin = useMemo(() => !!accessToken, [accessToken])
   return (
     <Container>
-      {/* <HeaderContainer>
+      accessToken {accessToken} {!!accessToken ? '로그아웃필요' : '로그인필요'}
+      <Header isLogin={isLogin} />
+      <HeaderContainer>
         <IconButton
           src="/icons/arrow-left.svg"
           alt={t('icon.back')}
-          onClick={handleBack}
+          // onClick={handleBack}
         />
         <Image
           src="/icons/logo-chainG.svg"
@@ -132,10 +139,12 @@ export function StartPage() {
           width={90}
           height={24}
         />
+        <button onClick={() => router.push('/auth/signup')}>회원가입</button>
+        <div>/ 이메일/API키/노션시크릿키/ 로그인/ 로그아웃 포스트생성 설정</div>
         <HeaderButton />
-      </HeaderContainer> */}
+      </HeaderContainer>
       <Main>
-        <div
+        <MarkdownViewer
           className="markdown-viewer"
           dangerouslySetInnerHTML={{ __html: readmeContent }}
         />
@@ -171,7 +180,6 @@ export function StartPage() {
           ))}
         </StepControl> */}
       </Main>
-
       {/* <BottomContainer>
         <ConfirmButton
           onClick={handleNext}

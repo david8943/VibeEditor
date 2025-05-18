@@ -101,7 +101,7 @@ declare module '@emotion/react' {
 
 const theme: CustomTheme = {
   color: {
-    primary: '#54a0ff',
+    primary: '#800000',
     secondary: '#ebeef2',
     modify: '#fec959',
     text: {
