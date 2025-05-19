@@ -44,8 +44,12 @@ export const AIProviderSelector: React.FC<Props> = ({
       className="form-group relative"
       ref={containerRef}>
       <div className="flex justify-between items-center">
-        <div className="flex justify-start items-center">
-          <label>AI 종류</label>
+        <div className="flex">
+          <label
+            htmlFor="aiProvider"
+            className="text-sm font-medium mr-1">
+            AI 종류
+          </label>
           <InfoToolTip description="AI를 선택하지 않을 경우 포스트가 생성되지 않습니다." />
         </div>
         <button

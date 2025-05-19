@@ -105,7 +105,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
           <div className="space-y-8">
             {loginStatus && (
               <div className="space-y-8">
-                <h2 className="text-xl font-semibold border-b pb-4">
+                <h2 className="text-lg font-semibold border-b pb-4">
                   유저 정보
                 </h2>
                 {computedUser && (
@@ -125,15 +125,15 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          <h3 className="text-base font-medium">
+                          <h3 className="text-sm font-medium">
                             Notion 활성화 여부
                           </h3>
                         </div>
                         <div
                           className={
                             computedUser.notionActive
-                              ? 'notion-status-active'
-                              : 'notion-status-inactive'
+                              ? 'notion-status-active text-xs'
+                              : 'notion-status-inactive text-xs'
                           }>
                           {computedUser.notionActive ? '활성화' : '비활성화'}
                         </div>
@@ -153,11 +153,9 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          <h3 className="text-base font-medium">
-                            마지막 로그인
-                          </h3>
+                          <h3 className="text-sm font-medium">마지막 로그인</h3>
                         </div>
-                        <div className="text-sm">
+                        <div className="text-xs">
                           {computedUser.lastLoginAt}
                         </div>
                       </div>
@@ -178,9 +176,9 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                             />
                           </svg>
-                          <h3 className="text-base font-medium">가입일</h3>
+                          <h3 className="text-sm font-medium">가입일</h3>
                         </div>
-                        <div className="text-sm">{computedUser.createdAt}</div>
+                        <div className="text-xs">{computedUser.createdAt}</div>
                       </div>
 
                       <div className="flex justify-between items-center">
@@ -189,17 +187,15 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                             width={24}
                             height={24}
                           />
-                          <h3 className="text-base font-medium">
-                            스타팅 가이드
-                          </h3>
+                          <h3 className="text-sm font-medium">시작 가이드</h3>
                         </div>
                         <button
                           type="button"
                           onClick={handleStartGuide}
                           className={
                             showStartGuide
-                              ? 'notion-status-active'
-                              : 'notion-status-inactive'
+                              ? 'notion-status-active test-xs'
+                              : 'notion-status-inactive text-xs'
                           }>
                           {showStartGuide ? '끄기' : '열기'}
                         </button>
@@ -216,7 +212,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                   }>
                   Notion 프라이빗 API 통합 토큰 등록
                 </button>
-                <h2 className="text-xl font-semibold border-b pb-4">
+                <h2 className="text-lg font-semibold border-b pb-4">
                   기본 설정
                 </h2>
                 <DBSelector
@@ -360,7 +356,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
             )}
             {!loginStatus && (
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold border-b pb-4">로그인</h2>
+                <h2 className="text-lg font-semibold border-b pb-4">로그인</h2>
                 <button
                   className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() =>

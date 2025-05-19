@@ -77,6 +77,37 @@ button:hover:not(.unselected) {
   background: var(--vscode-button-hoverBackground);
 }
 
+.startGuideListItem.selected {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-background);
+}
+.startGuideListItem.unselected {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+}
+.startGuidListItem:hover:not(.unselected) {
+  background: var(--vscode-button-hoverBackground);
+}
+.startGuidListItem:hover:not(.selected) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.info.dark {
+  color: var(--vscode-editor-foreground);
+}
+
+.info.white {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+}
+
+.infoText {
+  background: var(--vscode-button-hoverBackground);
+  color: var(--vscode-button-foreground);
+}
+
 .border {
   border-width: 1px;
   border-style: solid;

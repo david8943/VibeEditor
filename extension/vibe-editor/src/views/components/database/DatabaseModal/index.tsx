@@ -41,7 +41,7 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
   return (
     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 vscode-overlay-background">
       <div className="bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorWidget-border)] p-6 rounded-lg text-[var(--vscode-editor-foreground)] w-96">
-        <h2 className="text-xl mb-4">데이터베이스를 등록해주세요</h2>
+        <h2 className="text-lg mb-4">데이터베이스를 등록해주세요</h2>
         <label>
           해당 Notion 링크를 붙여넣거나, 데이터베이스 아이디를 입력해주세요.
           해당 데이터베이스는 등록된 notion private api와 연동된 상태여야

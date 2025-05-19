@@ -27,14 +27,7 @@ async function setUser(context: vscode.ExtensionContext) {
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
   } else {
-    const result = await getCurrentUser()
-    if (result.success) {
-      await initFetchData(context)
-      setDraftData(DraftDataType.notionStatus, result.data.notionActive)
-      if (!result.data.notionActive) {
-        vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
-      }
-    }
+    await initFetchData(context)
   }
 }
 

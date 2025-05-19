@@ -38,17 +38,21 @@ export class InitFetchDataCommand implements ICommand {
   public static readonly commandName = 'vibeEditor.initFetchData'
   private postService: PostService
   private templateService: TemplateService
+  private settingService: SettingService
 
   constructor(private context: vscode.ExtensionContext) {
     this.postService = new PostService(context)
     this.templateService = new TemplateService(context)
+    this.settingService = new SettingService(context)
   }
 
   public get commandName(): string {
     return InitFetchDataCommand.commandName
   }
   public async execute(): Promise<void> {
+    await this.settingService.fetchUser()
     await this.postService.getPosts()
+    await this.templateService.getTemplates()
     await this.templateService.getTemplates()
   }
 }

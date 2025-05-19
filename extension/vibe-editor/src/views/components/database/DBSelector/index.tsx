@@ -48,14 +48,14 @@ export const DBSelector: React.FC<Props> = ({
       className="form-group relative"
       ref={containerRef}>
       <div className="flex justify-between items-center">
-        <div className="flex justify-start items-center">
-          <label>Notion 데이터베이스</label>
-          <InfoToolTip
-            description="해당
-          데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다."
-          />
+        <div className="flex">
+          <label
+            htmlFor="notionDatabase"
+            className="text-sm font-medium mr-1">
+            Notion 데이터베이스
+          </label>
+          <InfoToolTip description="데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다." />
         </div>
-
         <button
           type="button"
           className="small-square-button"

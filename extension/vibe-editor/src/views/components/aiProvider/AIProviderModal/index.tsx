@@ -23,7 +23,7 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
   return (
     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 vscode-overlay-background">
       <div className="bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorWidget-border)] p-6 rounded-lg text-[var(--vscode-editor-foreground)] w-96 flex flex-col gap-4">
-        <h2 className="text-xl mb-4">AI를 추가해주세요</h2>
+        <h2 className="text-lg mb-4">AI를 추가해주세요</h2>
         <label>브랜드 선택</label>
         <select
           className="w-full"

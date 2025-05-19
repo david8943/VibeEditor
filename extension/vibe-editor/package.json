@@ -219,17 +219,17 @@
       },
       {
         "command": "vibeEditor.closeStartGuide",
-        "title": "스타팅 가이드 닫기",
+        "title": "시작 가이드 닫기",
         "icon": "$(close)"
       },
       {
         "command": "vibeEditor.openStartGuide",
-        "title": "스타팅 가이드 열기",
+        "title": "시작 가이드 열기",
         "icon": "$(rocket)"
       },
       {
         "command": "vibeEditor.resetStartGuide",
-        "title": "스타팅 가이드 새로고침",
+        "title": "시작 가이드 새로고침",
         "icon": "$(refresh)"
       }
     ],
