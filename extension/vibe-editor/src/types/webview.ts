@@ -69,8 +69,10 @@ export const MessageType = {
   REQUEST_DELETE_DATABASE: 'REQUEST_DELETE_DATABASE',
   DATABASE_DELETED: 'DATABASE_DELETED',
 
-  // 스타트 가이드 페이지
+  // 스타팅 가이드 페이지
   START_GUIDE: 'START_GUIDE',
+  GET_START_GUIDE_DATA: 'GET_START_GUIDE_DATA',
+  START_GUIDE_LOADED: 'START_GUIDE_LOADED',
 } as const
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]

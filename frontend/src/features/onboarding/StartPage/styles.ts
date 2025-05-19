@@ -90,3 +90,45 @@ export const Dot = styled.button<{ active: boolean }>`
   cursor: pointer;
   transition: background 0.3s;
 `
+
+export const MarkdownViewer = styled.div`
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+
+  h1,
+  h2,
+  h3 {
+    margin-top: 1em;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  h3 {
+    font-size: 1.17em;
+  }
+
+  pre {
+    background-color: #f6f8fa;
+    padding: 1rem;
+    overflow-x: auto;
+    border-radius: 0.25rem;
+  }
+
+  code {
+    background-color: #f0f0f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+  }
+`

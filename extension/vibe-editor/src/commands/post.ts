@@ -47,16 +47,12 @@ export class OpenNotionLinkCommand implements ICommand {
   }
 
   public async execute(item: PostItem): Promise<void> {
-    // 실제 포스트의 노션 URL이 있다면 여기에서 가져올 수 있어야 함
     const post = item.post
-    let notionUrl = 'https://www.naver.com'
-
-    // 추후에 post.notionUrl이 있다면 그걸로
-    if ((post as any).notionUrl) {
-      notionUrl = (post as any).notionUrl
+    let postUrl = 'https://www.naver.com'
+    if (post.postUrl) {
+      postUrl = post.postUrl
     }
-
-    vscode.env.openExternal(vscode.Uri.parse(notionUrl))
+    vscode.env.openExternal(vscode.Uri.parse(postUrl))
   }
 }
 export class DeletePostCommand implements ICommand {

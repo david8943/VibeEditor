@@ -13,7 +13,7 @@ const urlsToCache = [
   '/icons/logo-chainG.svg',
   '/icons/logo-chainG-no.svg',
   '/icons/logo-chainG-blue.svg',
-  '/icons/loading.svg',
+  '/icons/new/loading.svg',
   '/icons/loading-new.svg',
   '/icons/notification-inactive.svg',
   '/icons/notification-active.svg',

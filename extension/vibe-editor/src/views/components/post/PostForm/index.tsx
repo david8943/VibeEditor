@@ -12,7 +12,7 @@ import './styles.css'
 
 interface PostFormProps {
   onSubmit: (data: Post) => void
-  onUploadToNotion: (data: UploadToNotionRequestPost) => void
+  onUploadToNotion: (data: { post: Post; shouldSave: boolean }) => void
   defaultPost: PostDetail
 }
 
@@ -22,6 +22,7 @@ export function PostForm({
   defaultPost,
 }: PostFormProps) {
   const [isViewer, setIsViewer] = useState(true)
+  const [shouldSave, setShouldSave] = useState(false)
   const [postTitle, setPostTitle] = useState(defaultPost.postTitle)
   const [postContent, setPostContent] = useState(defaultPost.postContent)
   const editorRef = useRef<TuiEditorRef>(null)
@@ -43,6 +44,7 @@ export function PostForm({
   useEffect(() => {
     setPostTitle(defaultPost.postTitle)
     setPostContent(defaultPost.postContent)
+    setShouldSave(false)
   }, [defaultPost])
 
   const handleSubmit = () => {
@@ -62,7 +64,10 @@ export function PostForm({
 
   const uploadToNotion = () => {
     if (defaultPost.postId) {
-      onUploadToNotion({ postId: defaultPost.postId })
+      onUploadToNotion({
+        post: { postId: defaultPost.postId, postContent, postTitle },
+        shouldSave,
+      })
     }
   }
 
@@ -95,7 +100,10 @@ export function PostForm({
           <TuiEditor
             ref={editorRef}
             initialValue={postContent}
-            onChange={(value) => setPostContent(value)}
+            onChange={(value) => {
+              setShouldSave(true)
+              setPostContent(value)
+            }}
           />
         )}
       </div>

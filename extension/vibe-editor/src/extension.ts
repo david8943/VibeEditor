@@ -22,6 +22,7 @@ import {
 
 async function setUser(context: vscode.ExtensionContext) {
   const accessToken = await context.secrets.get(SecretType.accessToken)
+  console.log('accessToken', accessToken)
   setDraftData(DraftDataType.loginStatus, !!accessToken)
   if (!accessToken) {
     vscode.window.showInformationMessage('Vibe Editor에 로그인이 필요합니다.')
@@ -84,6 +85,11 @@ async function maybeShowReadme(context: vscode.ExtensionContext) {
     await vscode.commands.executeCommand('vibeEditor.showReadme')
     Configuration.set(ConfigType.showReadme, true)
   }
+
+  const showStartGuide = Configuration.get(ConfigType.showStartGuide)
+  if (showStartGuide) {
+    await vscode.commands.executeCommand('vibeEditor.openStartGuide')
+  }
 }
 
 async function initFetchData(context: vscode.ExtensionContext) {
@@ -93,6 +99,7 @@ async function initFetchData(context: vscode.ExtensionContext) {
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
+  console.log('Vibe Editor 시작')
   setExtensionContext(context)
   await registerCommand(context)
   await setUser(context)

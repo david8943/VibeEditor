@@ -27,7 +27,8 @@ export class PostProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       isLoading: isLoading(post.postId),
-      uploadStatus: post.uploadStatus,
+      uploadStatus: post?.uploadStatus ?? undefined,
+      postUrl: post?.postUrl ?? '',
     }))
     return Promise.resolve(
       summaries
@@ -51,7 +52,9 @@ export class PostItem extends vscode.TreeItem {
       title: 'View Post',
       arguments: [post.postId],
     }
-    this.contextValue = 'vibeEditorPostList'
+    this.contextValue = post.postUrl
+      ? 'vibeEditorPostURLList'
+      : 'vibeEditorPostList'
 
     this.iconPath = this.getIconForStatus(post)
   }

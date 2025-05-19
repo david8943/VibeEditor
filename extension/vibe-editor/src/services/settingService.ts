@@ -58,7 +58,9 @@ export class SettingService {
     }
     return []
   }
-
+  public getLocalDatabase() {
+    return this.context.globalState.get<Database[]>('notionDatabases', [])
+  }
   public async deleteDatabase(
     database: UpdateDatabase,
   ): Promise<number | null> {

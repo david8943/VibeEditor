@@ -6,7 +6,7 @@ import { ApiErrorResponse, ApiResponse } from '@/types/api'
 import { handleDefaultError } from '@/utils/error/handleDefaultError'
 
 const api = axios.create({
-  baseURL: `/api/v1`,
+  baseURL: `https://vibeeditor.site/api/v1`,
   // baseURL: `${process.env.NEXT_PUBLIC_FRONTEND_SCHEME}://${process.env.NEXT_PUBLIC_FRONTEND_HOST}${process.env.NEXT_PUBLIC_FRONTEND_PATH}`,
   timeout: 5000,
   headers: {
@@ -35,6 +35,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      requestData: error.config?.data,
+      status: error.response?.status,
+      responseData: error.response?.data,
+    })
     return handleDefaultError(error)
   },
 )
@@ -87,6 +95,14 @@ export const putRequest = async <T>(
   }
 }
 
+export const putBooleanRequest = async <T>(
+  url: string,
+  data: object,
+): Promise<boolean> => {
+  const response = await putRequest<unknown>(url, data)
+  return response.success
+}
+
 export const patchRequest = async <T>(
   url: string,
   data: object,
@@ -108,4 +124,11 @@ export const deleteRequest = async <T>(
   } catch (error) {
     return error as ApiErrorResponse
   }
+}
+
+export const deleteBooleanRequest = async <T>(
+  url: string,
+): Promise<boolean> => {
+  const response = await deleteRequest<unknown>(url)
+  return response.success
 }

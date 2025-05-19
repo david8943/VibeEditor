@@ -113,6 +113,46 @@
         "length": "8 ~ 20자 이내"
       }
     },
+    "providerName": {
+      "title": "등록할 AI API의 이름을\n입력해주세요",
+      "label": "AI API 이름",
+      "placeholder": "AI API 이름을 입력해주세요",
+      "error": {
+        "required": "AI API 이름을 입력해주세요"
+      }
+    },
+    "providerUid": {
+      "title": "ChatGPT, Claude의 AI API 키를\n입력해주세요",
+      "label": "AI API 키",
+      "placeholder": "AI API 키를 입력해주세요",
+      "error": {
+        "required": "AI API 키를 입력해주세요"
+      }
+    },
+    "notionSecretKey": {
+      "title": "Notion 시크릿 키를\n입력해주세요",
+      "label": "Notion 시크릿 키",
+      "placeholder": "Notion 시크릿 키를 입력해주세요",
+      "error": {
+        "required": "Notion 시크릿 키를 입력해주세요"
+      }
+    },
+    "notionDatabaseName": {
+      "title": "Notion 데이터베이스 이름을\n입력해주세요",
+      "label": "Notion 데이터베이스 이름",
+      "placeholder": "Notion 데이터베이스 이름을 입력해주세요",
+      "error": {
+        "required": "Notion 데이터베이스 이름을 입력해주세요"
+      }
+    },
+    "notionDatabaseUid": {
+      "title": "Notion 데이터베이스 ID를\n입력해주세요",
+      "label": "Notion 데이터베이스 ID",
+      "placeholder": "Notion 데이터베이스 ID를 입력해주세요",
+      "error": {
+        "required": "Notion 데이터베이스 ID를 입력해주세요"
+      }
+    },
     "confirmPassword": {
       "label": "비밀번호 확인",
       "placeholder": "비밀번호를 다시 입력해주세요",

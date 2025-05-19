@@ -85,7 +85,7 @@ export function MyPage() {
               overflowY: 'auto',
             }}>
             <img
-              src="/icons/loading.svg"
+              src="/icons/new/loading.svg"
               alt="logo"
               width={100}
               height={100}

@@ -10,7 +10,8 @@ export interface LoginRequest {
 }
 
 export interface SignUpRequest {
-  emailAddress: string | null
-  password: string | null
-  name: string | null
+  userName: string
+  email: string
+  providerName: string
+  providerUid: string
 }

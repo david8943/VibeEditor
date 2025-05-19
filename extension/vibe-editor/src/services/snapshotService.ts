@@ -278,6 +278,7 @@ export class SnapshotService {
         const localSnapshot = localTemplate.snapshotList?.find(
           (s) => s.snapshotId == snapshotId,
         )
+        console.log('로컬 스냅샷', localSnapshot)
         if (localSnapshot) {
           localSnapshot.snapshotName = snapshotName
           localSnapshot.snapshotType = snapshotType

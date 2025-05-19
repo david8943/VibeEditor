@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
-  const [brandModal, setBrandModal] = useState('')
+  const [brandModal, setBrandModal] = useState(BrandType.Anthropic)
   const [apiKeyModal, setApiKeyModal] = useState('')
 
   const handleSubmit = () => {
@@ -27,7 +27,7 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
         <label>브랜드 선택</label>
         <select
           className="w-full"
-          value={BrandType.Anthropic}
+          value={brandModal}
           onChange={(e) => {
             setBrandModal(e.target.value)
           }}>

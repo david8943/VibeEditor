@@ -108,13 +108,21 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     this.stopLoading()
   }
 
-  private async uploadPost(data: UploadToNotionRequestPost) {
+  private async uploadPost(data: { post: Post; shouldSave: boolean }) {
     this.startLoading()
-    const postUrl = await this.postService.submitToNotion(data)
-    this.stopLoading()
-    if (postUrl) {
-      this.postService.moveToNotion(postUrl)
+    const result = data.shouldSave
+      ? await this.postService.updatePost(data.post)
+      : true
+    if (result) {
+      const postUrl = await this.postService.submitToNotion({
+        postId: data.post.postId,
+      })
+      if (postUrl) {
+        this.postService.moveToNotion(postUrl)
+      }
     }
+
+    this.stopLoading()
   }
   private async submitPost(data: Post) {
     this.startLoading()
@@ -260,6 +268,10 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     vscode.commands.executeCommand('vibeEditor.githubLogin')
   }
 
+  private async ssafyLogin() {
+    vscode.commands.executeCommand('vibeEditor.ssafyLogin')
+  }
+
   private async setNotionSecretKey() {
     vscode.commands.executeCommand('vibeEditor.setNotionApi')
   }
@@ -354,6 +366,9 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
         case MessageType.GITHUB_LOGIN:
           await this.githubLogin()
           break
+        case MessageType.SSAFY_LOGIN:
+          await this.ssafyLogin()
+          break
         case MessageType.SET_NOTION_SECRET_KEY:
           await this.setNotionSecretKey()
           break
@@ -387,9 +402,21 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
         case MessageType.CREATE_TEMPLATE:
           await this.createTemplate()
           break
+        case MessageType.START_GUIDE:
+          await this.toggleStartGuide(message.payload)
+          break
       }
     }, this.disposables)
   }
+
+  private async toggleStartGuide(showStartGuide: boolean) {
+    if (showStartGuide) {
+      vscode.commands.executeCommand('vibeEditor.closeStartGuide')
+    } else {
+      vscode.commands.executeCommand('vibeEditor.openStartGuide')
+    }
+  }
+
   private async createTemplate() {
     vscode.commands.executeCommand('vibeEditor.createTemplate')
   }
@@ -516,11 +543,11 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     `
   }
 }
-let sideViewProvider: SideViewProvider | undefined
 
-export function getSideViewProvider(): SideViewProvider | undefined {
-  return sideViewProvider
+let sideViewProviderInstance: SideViewProvider | null = null
+export function getSideViewProvider(): SideViewProvider | null {
+  return sideViewProviderInstance
 }
 export function setSideViewProvider(provider: SideViewProvider) {
-  sideViewProvider = provider
+  sideViewProviderInstance = provider
 }

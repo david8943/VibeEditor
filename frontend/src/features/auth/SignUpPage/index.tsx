@@ -27,7 +27,7 @@ export function SignUpPage() {
     formState: { errors },
   } = useForm<SignupForm>({
     defaultValues: {
-      emailAddress: signUp?.emailAddress || '',
+      emailAddress: signUp?.email || '',
     },
   })
   const currentEmail = watch('emailAddress')

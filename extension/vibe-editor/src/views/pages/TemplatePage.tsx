@@ -24,6 +24,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     null,
   )
   const [selectedPromptId, setSelectedPromptId] = useState<number>(0)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>(0)
   const [createPromptData, setCreatePromptData] = useState<CreatePrompt | null>(
     null,
   )
@@ -38,6 +39,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const [showOnboarding, setShowOnboarding] = useState(true)
   const initialized = useRef(false)
   const [configLoaded, setConfigLoaded] = useState(false)
+  const [defaultUserAIProviderId, setDefaultUserAIProviderId] = useState(0)
 
   useEffect(() => {
     if (initialized.current) return
@@ -49,7 +51,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       const message = event.data
       console.log('템플릿 페이지', message.type, message.payload)
       if (message.type === MessageType.TEMPLATE_SELECTED) {
-        console.log('TEMPLATE_SELECTED🐦‍🔥🐦‍🔥', message.payload.template)
+        console.log('TEMPLATE_SELECTED', message.payload.template)
         setShowOnboarding(false)
         setSelectedTemplate(message.payload.template)
       } else if (message.type === MessageType.OPTIONS_LOADED) {
@@ -59,7 +61,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       } else if (message.type === MessageType.STOP_LOADING) {
         setLoading(false)
       } else if (message.type === MessageType.PROMPT_SELECTED) {
-        console.log('PROMPT_SELECTED❣️', message.payload.prompt)
+        console.log('PROMPT_SELECTED', message.payload.prompt)
         if (message.payload.prompt) {
           setSelectedPrompt(message.payload.prompt)
           setSelectedPromptId(message.payload.prompt.promptId)
@@ -69,10 +71,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         addSnapshotCode(message.payload.snapshot)
       } else if (message.type === MessageType.CONFIG_LOADED) {
         const config = message.payload
-        console.log('config✅', config)
         setDefaultPostType(config.defaultPostType)
         setDefaultPromptOptionIds(config.defaultPromptOptionIds)
         setDefaultNotionDatabaseId(config.defaultNotionDatabaseId ?? 0)
+        setDefaultUserAIProviderId(message.payload.defaultUserAIProviderId ?? 0)
         setConfigLoaded(true)
       } else if (message.type === MessageType.NAVIGATE) {
         postMessageToExtension({ type: MessageType.GET_TEMPLATE })
@@ -99,7 +101,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       promptAttachList: [],
       promptOptionList: defaultPromptOptionIds,
       notionDatabaseId: notionDatabaseId,
-      userAIProviderId: null,
+      userAIProviderId: defaultUserAIProviderId,
     })
   }
   const generatePost = (data: Prompt) => {
@@ -223,15 +225,20 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
   }
   useEffect(() => {
+    console.log('selectedProjectId', selectedPromptId)
     if (selectedPromptId == 0) {
       console.log('여기서 또 리셋3')
       setSelectedPrompt(null)
     }
   }, [selectedPromptId])
+
   useEffect(() => {
     if (configLoaded && selectedTemplate) {
-      console.log('여기서 또 리셋1')
-      resetCreatePrompt()
+      if (selectedTemplateId != selectedTemplate.templateId) {
+        console.log('여기서 또 리셋')
+        resetCreatePrompt()
+        setSelectedTemplateId(selectedTemplate.templateId)
+      }
     }
   }, [selectedTemplate, configLoaded])
 
@@ -242,15 +249,12 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   }, [defaultNotionDatabaseId])
 
   return (
-    <div className="flex items-center justify-center w-full">
+    <div className="app-container items-center justify-center">
       {showOnboarding && (
         <div
-          id="container"
-          style={{ height: '90vh' }}
-          className="max-w-lg w-full flex items-center justify-center">
-          <div
-            id="item"
-            className="flex flex-col items-center gap-6">
+          style={{ height: '90vh', width: '90vw' }}
+          className="w-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-6">
             <div className="rounded-full p-8 flex items-center justify-center border-2">
               <CreateProjectImage
                 width={80}
@@ -258,7 +262,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
                 className="text-[var(--vscode-foreground)]"
               />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 text-center">
               <h1 className="text-3xl font-bold">프로젝트를 생성해주세요</h1>
               <p className="text-base opacity-75">
                 프로젝트 생성 후, 템플릿을 작성할 수 있습니다
@@ -278,11 +282,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
             {selectedPrompt?.promptName ??
               `${selectedTemplate?.templateName}의 새 템플릿`}
           </h1>
-          <label>
-            promptId:
-            {selectedPromptId}- templateId:
-            {selectedTemplate?.templateId}
-          </label>
 
           {loading && (
             <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">

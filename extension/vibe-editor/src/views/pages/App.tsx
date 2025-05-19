@@ -6,7 +6,7 @@ import '../../styles/global.css'
 import { Message, MessageType, PageType } from '../../types/webview'
 import { PostPage } from './PostPage'
 import { SettingPage } from './SettingPage'
-import { StartingGuidePage } from './StartingGuidePage'
+import { StartGuidePage } from './StartGuidePage'
 import { TemplatePage } from './TemplatePage'
 
 declare global {
@@ -59,7 +59,7 @@ export function App() {
         return <SettingPage postMessageToExtension={postMessageToExtension} />
       case PageType.STARTING_GUIDE:
         return (
-          <StartingGuidePage postMessageToExtension={postMessageToExtension} />
+          <StartGuidePage postMessageToExtension={postMessageToExtension} />
         )
       default:
         return (

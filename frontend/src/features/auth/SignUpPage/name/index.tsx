@@ -13,7 +13,7 @@ import { setSignUpName } from '@/store/slices/authSlice'
 import { ButtonVariant } from '@/types/ui'
 
 interface SignupForm {
-  name: string
+  userName: string
 }
 
 export function SignUpNamePage() {
@@ -29,15 +29,15 @@ export function SignUpNamePage() {
     formState: { errors },
   } = useForm<SignupForm>({
     defaultValues: {
-      name: signUp.name || '',
+      userName: signUp.userName || '',
     },
   })
 
-  const currentName = watch('name')
+  const currentName = watch('userName')
 
   const onSubmit = async (data: SignupForm) => {
-    dispatch(setSignUpName(data.name))
-    router.push('/auth/signup/password')
+    dispatch(setSignUpName(data.userName))
+    router.push('/auth/signup/provider')
   }
 
   return (
@@ -47,11 +47,11 @@ export function SignUpNamePage() {
       buttonVariant={currentName ? ButtonVariant.next : ButtonVariant.disabled}>
       <InputBox
         label={t('signUp.name.label')}
-        id="name"
+        id="userName"
         type="text"
-        error={errors.name}
+        error={errors.userName}
         placeholder={t('signUp.name.placeholder')}
-        {...register('name', {
+        {...register('userName', {
           required: t('signUp.name.error.required'),
           minLength: {
             value: 2,

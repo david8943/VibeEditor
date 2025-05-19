@@ -109,7 +109,7 @@ button:hover:not(.unselected) {
 
 .notion-status-inactive {
   background: var(--vscode-button-foreground);
-  color: var(--vscode-button-background);
+  color: var(--vscode-button-background) !important;
   border: 1px solid var(--vscode-button-background);
   border-radius: 9999px;
   padding: 4px 12px;
@@ -130,4 +130,17 @@ button:hover:not(.unselected) {
 .toastui-editor-contents {
   background-color: white !important;
   color: black !important;
+}
+.secondary-button {
+  padding: 4px 8px;
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.secondary-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
 }
