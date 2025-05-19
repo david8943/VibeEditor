@@ -125,24 +125,7 @@ export function StartPage() {
   const isLogin = useMemo(() => !!accessToken, [accessToken])
   return (
     <Container>
-      accessToken {accessToken} {!!accessToken ? '로그아웃필요' : '로그인필요'}
       <Header isLogin={isLogin} />
-      <HeaderContainer>
-        <IconButton
-          src="/icons/arrow-left.svg"
-          alt={t('icon.back')}
-          // onClick={handleBack}
-        />
-        <Image
-          src="/icons/logo-chainG.svg"
-          alt="logo"
-          width={90}
-          height={24}
-        />
-        <button onClick={() => router.push('/auth/signup')}>회원가입</button>
-        <div>/ 이메일/API키/노션시크릿키/ 로그인/ 로그아웃 포스트생성 설정</div>
-        <HeaderButton />
-      </HeaderContainer>
       <Main>
         <MarkdownViewer
           className="markdown-viewer"

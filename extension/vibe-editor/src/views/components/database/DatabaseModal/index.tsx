@@ -43,8 +43,9 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
       <div className="bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorWidget-border)] p-6 rounded-lg text-[var(--vscode-editor-foreground)] w-96">
         <h2 className="text-xl mb-4">데이터베이스를 등록해주세요</h2>
         <label>
-          해당 노션 링크를 붙여넣거나, 데이터베이스 아이디를 입력해주세요. 해당
-          데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다.
+          해당 Notion 링크를 붙여넣거나, 데이터베이스 아이디를 입력해주세요.
+          해당 데이터베이스는 등록된 notion private api와 연동된 상태여야
+          합니다.
         </label>
         <input
           className="w-full p-2 mb-2 bg-gray-800 border border-gray-600"
@@ -60,11 +61,13 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
         />
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             className="bg-gray-600 px-4 py-1"
             onClick={onClose}>
             취소
           </button>
           <button
+            type="button"
             className="bg-blue-600 px-4 py-1"
             onClick={handleSubmit}>
             등록하기

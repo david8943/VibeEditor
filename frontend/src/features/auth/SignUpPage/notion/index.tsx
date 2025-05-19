@@ -81,7 +81,7 @@ export function SignUpNotionPage() {
             })
             if (databaseSuccess) {
               
-              await dispatch(setUser(response.data.data))
+              // await dispatch(setUser(response.data.data))
               router.push('/auth/signup/notion')
             }
           }

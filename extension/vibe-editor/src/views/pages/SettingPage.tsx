@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
+import RocketIcon from '@/assets/icons/rocket.svg'
+
 import { Database } from '../../types/database'
 import type { Option } from '../../types/template'
 import { User } from '../../types/user'
@@ -20,6 +22,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
   })
   const [showDbModal, setShowDbModal] = useState(false)
   const [showAIProviderModal, setShowAIProviderModal] = useState(false)
+  const [showStartGuide, setShowStartGuide] = useState(false)
 
   useEffect(() => {
     console.log('로그인 스테이터스', loginStatus)
@@ -41,7 +44,13 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
       }
     }
   }, [user])
-
+  const handleStartGuide = () => {
+    setShowStartGuide(!showStartGuide)
+    postMessageToExtension({
+      type: MessageType.START_GUIDE,
+      payload: showStartGuide,
+    })
+  }
   const postMesasgeTypeToExtension = (type: MessageType) =>
     postMessageToExtension({ type })
 
@@ -56,9 +65,12 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
       } else if (message.type === MessageType.OPTIONS_LOADED) {
         setOptionList(message.payload)
       } else if (message.type === MessageType.CONFIG_LOADED) {
+        console.log('message', message)
         setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
         setDefaultPostType(message.payload.defaultPostType ?? 'TECH_CONCEPT')
         setDefaultNotionDatabaseId(message.payload.defaultNotionDatabaseId ?? 0)
+        setDefaultUserAIProviderId(message.payload.defaultUserAIProviderId ?? 0)
+        setShowStartGuide(message.payload.showStartGuide ?? false)
       } else if (message.type === MessageType.GET_DATABASE) {
         setNotionDbList(message.payload)
       }
@@ -81,7 +93,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
         <div className="flex items-center gap-3 mb-6">
           <div className="text-2xl font-bold">Vibe Editor 설정</div>
           <button
-            className="transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+            className="secondary-button transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
             text-base font-medium px-3 py-1.5 rounded"
             onClick={() =>
               postMessageToExtension({ type: MessageType.SHOW_README })
@@ -114,7 +126,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                             />
                           </svg>
                           <h3 className="text-base font-medium">
-                            노션 활성화 여부
+                            Notion 활성화 여부
                           </h3>
                         </div>
                         <div
@@ -173,23 +185,24 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
 
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                          </svg>
+                          <RocketIcon
+                            width={24}
+                            height={24}
+                          />
                           <h3 className="text-base font-medium">
-                            유저 정보 변경
+                            스타팅 가이드
                           </h3>
                         </div>
-                        <div className="text-sm">{computedUser.updatedAt}</div>
+                        <button
+                          type="button"
+                          onClick={handleStartGuide}
+                          className={
+                            showStartGuide
+                              ? 'notion-status-active'
+                              : 'notion-status-inactive'
+                          }>
+                          {showStartGuide ? '끄기' : '열기'}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -201,7 +214,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                       MessageType.SET_NOTION_SECRET_KEY,
                     )
                   }>
-                  노션 PRIVATE API 키 설정
+                  Notion 프라이빗 API 통합 토큰 등록
                 </button>
                 <h2 className="text-xl font-semibold border-b pb-4">
                   기본 설정

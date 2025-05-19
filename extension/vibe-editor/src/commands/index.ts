@@ -40,7 +40,12 @@ import {
   ShowPromptCommand,
   ShowTemplatePageCommand,
 } from './template'
-import { ShowSideViewCommand } from './view'
+import {
+  CloseStartGuideCommand,
+  OpenStartGuideCommand,
+  ResetStartGuide,
+  ShowSideViewCommand,
+} from './view'
 
 export const allCommands = [
   GoogleLoginCommand,
@@ -76,4 +81,7 @@ export const allCommands = [
   CreatePostCommand,
   InitFetchDataCommand,
   SelectLoginMethodCommand,
+  CloseStartGuideCommand,
+  OpenStartGuideCommand,
+  ResetStartGuide,
 ]

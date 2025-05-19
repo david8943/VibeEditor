@@ -1,11 +1,15 @@
 import * as vscode from 'vscode'
 
+import { ConfigType, Configuration } from '../configuration'
 import { getDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType } from '../types/configuration'
+import { PostDetail } from '../types/post'
 import { Prompt, Template } from '../types/template'
-import { PageType } from '../types/webview'
+import { MessageType, PageType } from '../types/webview'
 import { getSideViewProvider } from '../views/webview/SideViewProvider'
+import { getStartGuideViewProvider } from '../views/webview/StartGuideViewProvider'
 import { PostService } from './postService'
+import { SettingService } from './settingService'
 import { TemplateService } from './templateService'
 
 export class ViewService {
@@ -17,6 +21,9 @@ export class ViewService {
 
   public async focusSideView(): Promise<void> {
     vscode.commands.executeCommand('vibeEditorSideView.focus')
+  }
+  public async focusStartGuide(): Promise<void> {
+    vscode.commands.executeCommand('vibeEditorViewerPage.focus')
   }
 
   public async showSettingPage(): Promise<void> {
@@ -70,5 +77,68 @@ export class ViewService {
     const post = await postService.getCurrentPost()
     await this.focusSideView()
     getSideViewProvider()?.navigateToPageIfExists(PageType.POST)
+  }
+  public async closeStartGuide(): Promise<void> {
+    Configuration.set(ConfigType.showStartGuide, false)
+  }
+  public async openStartGuide(): Promise<void> {
+    Configuration.set(ConfigType.showStartGuide, true)
+    await this.focusStartGuide()
+  }
+  public async resetStartGuide(): Promise<void> {
+    await this.focusStartGuide()
+    const isLogin = getDraftData(DraftDataType.loginStatus)
+    if (!isLogin) {
+      getStartGuideViewProvider()?.postMessageToWebview({
+        type: MessageType.START_GUIDE_LOADED,
+        payload: {
+          isLogin: false,
+          isNotionSecretKey: false,
+          isNotionDatabase: false,
+          isProject: false,
+          isSnapshot: false,
+          isPost: false,
+          isNotionUpload: false,
+        },
+      })
+      return
+    }
+    const postService = new PostService(this.context)
+    const templateService = new TemplateService(this.context)
+    const settingService = new SettingService(this.context)
+
+    const templates = await templateService.getLocalTemplates()
+    let isSnapshot = false
+    if (templates) {
+      const snapshot = templates.find((t: Template) =>
+        t.snapshotList ? t.snapshotList.length > 0 : 0,
+      )
+      isSnapshot = !!snapshot
+    }
+
+    const posts = await postService.getLocalPosts()
+    let isNotionUpload = false
+    if (posts) {
+      const successPost = posts.find(
+        (p: PostDetail) => p.uploadStatus == 'SUCCESS',
+      )
+      isNotionUpload = !!successPost
+    }
+    const isNotionSecretKey = getDraftData(DraftDataType.notionStatus)
+    const isNotionDatabase = settingService.getLocalDatabase().length > 0
+    const isProject = templates.length > 0
+    const isPost = posts.length > 0
+    getStartGuideViewProvider()?.postMessageToWebview({
+      type: MessageType.START_GUIDE_LOADED,
+      payload: {
+        isLogin,
+        isNotionSecretKey,
+        isNotionDatabase,
+        isProject,
+        isSnapshot,
+        isPost,
+        isNotionUpload,
+      },
+    })
   }
 }

@@ -3,14 +3,16 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "engines": {
     "vscode": "^1.99.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -48,6 +50,7 @@
           "type": "webview",
           "id": "vibeEditorViewerPage",
           "name": "Vibe Editor 시작 가이드",
+          "when": "vibeEditor.showStartGuide == true",
           "icon": "media/icon.svg"
         },
         {
@@ -119,7 +122,7 @@
       },
       {
         "command": "vibeEditor.setNotionApi",
-        "title": "노션 PRIVATE API 키 설정",
+        "title": "Notion 프라이빗 API 통합 토큰 키 등록",
         "category": "Vibe Editor"
       },
       {
@@ -175,7 +178,7 @@
       },
       {
         "command": "vibeEditor.openNotionLink",
-        "title": "노션 바로가기",
+        "title": "Notion 바로가기",
         "icon": "$(link-external)"
       },
       {
@@ -212,6 +215,21 @@
         "command": "vibeEditor.createPost",
         "title": "포스트 목록 일괄",
         "icon": "$(wand)"
+      },
+      {
+        "command": "vibeEditor.closeStartGuide",
+        "title": "스타팅 가이드 닫기",
+        "icon": "$(close)"
+      },
+      {
+        "command": "vibeEditor.openStartGuide",
+        "title": "스타팅 가이드 열기",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "vibeEditor.resetStartGuide",
+        "title": "스타팅 가이드 새로고침",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
@@ -235,6 +253,16 @@
           "command": "vibeEditor.createTemplate",
           "when": "view == vibeEditorTemplatePage && vibeEditor.draftData.loginStatus == true",
           "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.resetStartGuide",
+          "when": "view == vibeEditorViewerPage",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vibeEditor.closeStartGuide",
+          "when": "view == vibeEditorViewerPage",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -259,12 +287,12 @@
         },
         {
           "command": "vibeEditor.openNotionLink",
-          "when": "viewItem == vibeEditorPostList",
+          "when": "viewItem == vibeEditorPostURLList",
           "group": "inline@0"
         },
         {
           "command": "vibeEditor.deletePost",
-          "when": "viewItem == vibeEditorPostList",
+          "when": "viewItem == vibeEditorPostList || viewItem == vibeEditorPostURLList",
           "group": "inline@1"
         },
         {
@@ -346,7 +374,7 @@
         "vibeEditor.defaultNotionDatabaseId": {
           "type": "number",
           "default": 0,
-          "description": "기본 노션 데이터베이스 ID"
+          "description": "기본 Notion 데이터베이스 ID"
         },
         "vibeEditor.defaultUserAIProviderId": {
           "type": "number",
@@ -355,10 +383,10 @@
         },
         "vibeEditor.showReadme": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "README 파일 보이기 여부"
         },
-        "vibeEditor.showStartingGuide": {
+        "vibeEditor.showStartGuide": {
           "type": "boolean",
           "default": true,
           "description": "시작 가이드 보이기 여부"

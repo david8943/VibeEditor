@@ -61,7 +61,7 @@ export function SignUpProviderPage() {
         if (response) {
           const token = response.headers['authorization']
           await dispatch(setAccessToken(token))
-          await dispatch(setUser(response.data.data))
+          // await dispatch(setUser(response.data.data))
           router.push('/auth/signup/notion')
         }
       }

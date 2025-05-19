@@ -49,7 +49,7 @@ export const DBSelector: React.FC<Props> = ({
       ref={containerRef}>
       <div className="flex justify-between items-center">
         <div className="flex justify-start items-center">
-          <label>노션 데이터베이스</label>
+          <label>Notion 데이터베이스</label>
           <InfoToolTip
             description="해당
           데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다."
@@ -57,19 +57,18 @@ export const DBSelector: React.FC<Props> = ({
         </div>
 
         <button
+          type="button"
           className="small-square-button"
           onClick={onAddClick}>
           +
         </button>
       </div>
-
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
         {selectedDB?.notionDatabaseName || '데이터베이스를 선택하세요'}
       </div>
-
-      {open && (
+      {open && dbList && dbList?.length > 0 && (
         <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border rounded bg-[var(--vscode-dropdown-background)] shadow-lg">
           {dbList.map((db) => (
             <div

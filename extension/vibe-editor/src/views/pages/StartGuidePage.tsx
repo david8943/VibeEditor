@@ -12,9 +12,7 @@ import { User } from '../../types/user'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import { InfoToolTip } from '../components/common/InfoToolTip'
 
-export function StartingGuidePage({
-  postMessageToExtension,
-}: WebviewPageProps) {
+export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
   const [loginStatus, setLoginStatus] = useState(false)
   const [user, setUser] = useState<User>({
     notionActive: false,
@@ -35,17 +33,17 @@ export function StartingGuidePage({
     {
       id: StartGuideType.isLogin,
       title: '로그인 ',
-      description: '소셜 로그인 후 스타트 가이드를 진행합니다.',
+      description: '소셜 로그인 후 스타팅 가이드를 진행합니다.',
     },
     {
       id: StartGuideType.isNotionSecretKey,
-      title: 'Notion 시크릿 키 등록',
+      title: 'Notion 프라이빗 API 통합 토큰 등록',
       description:
-        'Notion의 API 통합 생성을 통해 발급한 시크릿 키를 등록해주세요.',
+        'Notion의 프라이빗 API 통합 토큰을 복사해 시크릿 키를 등록해주세요.',
     },
     {
       id: StartGuideType.isNotionDatabase,
-      title: '노션 데이터 베이스 등록',
+      title: 'Notion 데이터 베이스 등록',
       description:
         'Notion 시크릿 키와 연결된 상태인 데이터 베이스를 등록해주세요. ',
     },
@@ -67,7 +65,7 @@ export function StartingGuidePage({
     },
     {
       id: StartGuideType.isNotionUpload,
-      title: '포스트 노션 업로드',
+      title: '포스트 Notion 업로드',
       description: 'AI 포스트를 확인 후 Notion에 업로드해주세요.',
     },
   ]
@@ -83,16 +81,25 @@ export function StartingGuidePage({
       const message = event.data
       if (message.type === MessageType.LOGIN_STATUS_LOADED) {
         setIsLogin(message.payload)
+        postMesasgeTypeToExtension(MessageType.GET_START_GUIDE_DATA)
       } else if (message.type === MessageType.USER_LOADED) {
-        setUser(message.payload)
+        // setUser(message.payload)
       } else if (message.type === MessageType.OPTIONS_LOADED) {
-        setOptionList(message.payload)
+        // setOptionList(message.payload)
       } else if (message.type === MessageType.CONFIG_LOADED) {
-        setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
-        setDefaultPostType(message.payload.defaultPostType ?? 'TECH_CONCEPT')
-        setDefaultNotionDatabaseId(message.payload.defaultNotionDatabaseId ?? 0)
+        // setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
+        // setDefaultPostType(message.payload.defaultPostType ?? 'TECH_CONCEPT')
+        // setDefaultNotionDatabaseId(message.payload.defaultNotionDatabaseId ?? 0)
       } else if (message.type === MessageType.GET_DATABASE) {
-        setNotionDbList(message.payload)
+        // setNotionDbList(message.payload)
+      } else if (message.type === MessageType.START_GUIDE_LOADED) {
+        setIsLogin(message.payload.isLogin)
+        setIsNotionSecretKey(message.payload.isNotionSecretKey)
+        setIsNotionDatabase(message.payload.isNotionDatabase)
+        setIsProject(message.payload.isProject)
+        setIsSnapshot(message.payload.isSnapshot)
+        setIsPost(message.payload.isPost)
+        setIsNotionUpload(message.payload.isNotionUpload)
       }
     }
 
@@ -119,16 +126,15 @@ export function StartingGuidePage({
   }
 
   return (
-    <div className="min-h-screen w-full py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen w-full py-4">
+      <div className="max-w-4xl mx-auto px-2">
         <div className="rounded-lg shadow-sm p-6 mb-8">
           <div className="flex items-center gap-4 mb-8 border-b pb-6">
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <CheckListIcon className="w-8 h-8" />
+            <div className="text-xl font-bold flex items-center gap-2">
               <span>Vibe Editor 스타팅 가이드</span>
             </div>
             <button
-              className="text-base font-medium px-4 py-2 rounded-full transition-colors"
+              className="secondary-button text-base font-medium px-4 py-2 rounded-full transition-colors"
               onClick={() =>
                 postMessageToExtension({ type: MessageType.SHOW_README })
               }>
@@ -146,30 +152,31 @@ export function StartingGuidePage({
                       payload: item.id,
                     })
                   }}
-                  className={`relative p-4 rounded-lg border transition-all ${
+                  className={`relative p-2 rounded-lg border transition-all ${
                     statusMap[item.id as keyof typeof statusMap]
                       ? 'bg-blue-50 border-blue-200 cursor-pointer'
                       : 'bg-gray-50 border-gray-200 cursor-pointer hover:bg-blue-100'
                   }`}>
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full  border border-gray-200 text-sm font-medium text-gray-600">
-                      {index + 1}
+                    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full  border border-gray-200 text-sm font-medium text-gray-600">
+                      {statusMap[item.id as keyof typeof statusMap] ? (
+                        <CheckIcon
+                          width={16}
+                          height={16}
+                          className="text-[var(--vscode-foreground)]"
+                        />
+                      ) : (
+                        <InfoToolTip
+                          description={item.description}
+                          size={16}
+                        />
+                      )}
                     </div>
                     <div className="flex-grow gap-2">
                       <div className="flex items-center">
-                        <h3 className="text-lg font-medium">{item.title}</h3>
-                        {statusMap[item.id as keyof typeof statusMap] ? (
-                          <CheckIcon
-                            width={24}
-                            height={24}
-                            className="text-[var(--vscode-foreground)]"
-                          />
-                        ) : (
-                          <InfoToolTip
-                            description={item.description}
-                            size={24}
-                          />
-                        )}
+                        <div className="text-base font-medium">
+                          {item.title}
+                        </div>
                       </div>
                     </div>
                   </div>

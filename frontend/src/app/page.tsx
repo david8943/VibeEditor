@@ -1,5 +1,5 @@
 'use client'
 
-import { HomePage } from '@/features/home/HomePage'
+import { StartPage } from '@/features/onboarding/StartPage'
 
-export default HomePage
+export default StartPage

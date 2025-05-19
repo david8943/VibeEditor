@@ -59,7 +59,6 @@ export function PromptFormUI({
   const notionDatabaseId = watch('notionDatabaseId')
   const userAIProviderId = watch('userAIProviderId')
 
-  //TODO: 스냅 샷 코드 너무 길면 삐져나옴
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -140,12 +139,12 @@ export function PromptFormUI({
               <div>
                 <label
                   htmlFor="snapshotName"
-                  className="text-sm font-medium">
+                  className="text-sm font-medium pre-wrap">
                   {snapshot.snapshotName}
                 </label>
               </div>
               <div className="flex flex-col flex-1 gap-4 items-start w-full">
-                <div className="code-block w-1/2">
+                <div className="code-block w-full">
                   <HighlightedCode code={snapshot.snapshotContent} />
                 </div>
                 <textarea
@@ -161,7 +160,7 @@ export function PromptFormUI({
                 <button
                   type="button"
                   onClick={() => handleDeleteSnapshot(snapshot.attachId)}
-                  className="p-2 hover:bg-[var(--vscode-button-hoverBackground)] rounded">
+                  className="hover:bg-[var(--vscode-button-hoverBackground)] rounded">
                   <MinusIcon
                     width={20}
                     height={20}

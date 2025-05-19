@@ -6,6 +6,7 @@ export interface PostSummary {
   updatedAt: string
   isLoading: boolean
   uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
+  postUrl?: string
 }
 
 // 부모 포스트 정보

@@ -130,27 +130,27 @@
       }
     },
     "notionSecretKey": {
-      "title": "노션 시크릿 키를\n입력해주세요",
-      "label": "노션 시크릿 키",
-      "placeholder": "노션 시크릿 키를 입력해주세요",
+      "title": "Notion 시크릿 키를\n입력해주세요",
+      "label": "Notion 시크릿 키",
+      "placeholder": "Notion 시크릿 키를 입력해주세요",
       "error": {
-        "required": "노션 시크릿 키를 입력해주세요"
+        "required": "Notion 시크릿 키를 입력해주세요"
       }
     },
     "notionDatabaseName": {
-      "title": "노션 데이터베이스 이름을\n입력해주세요",
-      "label": "노션 데이터베이스 이름",
-      "placeholder": "노션 데이터베이스 이름을 입력해주세요",
+      "title": "Notion 데이터베이스 이름을\n입력해주세요",
+      "label": "Notion 데이터베이스 이름",
+      "placeholder": "Notion 데이터베이스 이름을 입력해주세요",
       "error": {
-        "required": "노션 데이터베이스 이름을 입력해주세요"
+        "required": "Notion 데이터베이스 이름을 입력해주세요"
       }
     },
     "notionDatabaseUid": {
-      "title": "노션 데이터베이스 ID를\n입력해주세요",
-      "label": "노션 데이터베이스 ID",
-      "placeholder": "노션 데이터베이스 ID를 입력해주세요",
+      "title": "Notion 데이터베이스 ID를\n입력해주세요",
+      "label": "Notion 데이터베이스 ID",
+      "placeholder": "Notion 데이터베이스 ID를 입력해주세요",
       "error": {
-        "required": "노션 데이터베이스 ID를 입력해주세요"
+        "required": "Notion 데이터베이스 ID를 입력해주세요"
       }
     },
     "confirmPassword": {

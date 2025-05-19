@@ -5,7 +5,8 @@ interface ConfigSchema {
   defaultPromptOptionIds: number[]
   defaultNotionDatabaseId: number
   showReadme: boolean
-  showStartingGuide: boolean
+  showStartGuide: boolean
+  defaultUserAIProviderId: number
 }
 
 // 기본값 정의
@@ -13,8 +14,9 @@ const defaultConfig: ConfigSchema = {
   defaultPostType: 'TECH_CONCEPT',
   defaultPromptOptionIds: [],
   defaultNotionDatabaseId: 0,
-  showReadme: false,
-  showStartingGuide: true,
+  showReadme: true,
+  showStartGuide: true,
+  defaultUserAIProviderId: 0,
 }
 
 export const ConfigType = {
@@ -22,7 +24,8 @@ export const ConfigType = {
   defaultPromptOptionIds: 'defaultPromptOptionIds',
   defaultNotionDatabaseId: 'defaultNotionDatabaseId',
   showReadme: 'showReadme',
-  showStartingGuide: 'showStartingGuide',
+  showStartGuide: 'showStartGuide',
+  defaultUserAIProviderId: 'defaultUserAIProviderId',
 } as const
 
 export class Configuration {
@@ -47,9 +50,11 @@ export class Configuration {
         config.get(ConfigType.defaultNotionDatabaseId) ??
         defaultConfig.defaultNotionDatabaseId,
       showReadme: config.get(ConfigType.showReadme) ?? defaultConfig.showReadme,
-      showStartingGuide:
-        config.get(ConfigType.showStartingGuide) ??
-        defaultConfig.showStartingGuide,
+      showStartGuide:
+        config.get(ConfigType.showStartGuide) ?? defaultConfig.showStartGuide,
+      defaultUserAIProviderId:
+        config.get(ConfigType.defaultUserAIProviderId) ??
+        defaultConfig.defaultUserAIProviderId,
     }
   }
 

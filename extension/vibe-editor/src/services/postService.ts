@@ -78,35 +78,41 @@ export class PostService {
   }
   async getCurrentPost(): Promise<PostDetail | null> {
     const postId = await this.getSelectedPostId()
-    return await this.getPost(postId)
+    if (postId) {
+      return await this.getPost(postId)
+    }
+    return null
   }
 
   async getPost(postId: number): Promise<PostDetail | null> {
-    const result = await getPostDetail(postId)
-    if (!result.success) {
-      vscode.window.showErrorMessage(
-        `포스트 ${postId}를 불러오는 데 실패했습니다.`,
-      )
-      return null
-    }
+    const isLoad = isLoading(postId)
 
-    const post = result.data
     const prev = await this.getLocalPosts()
-    const index = prev.findIndex((p) => p.postId === postId)
-    const updatedPost: PostDetail = {
-      ...post,
-      parentPostIdList: prev[index]?.parentPostIdList ?? [],
-      uploadStatus: prev[index]?.uploadStatus, // 필요 시 보존
-    }
 
-    if (index !== -1) {
-      prev[index] = updatedPost
-    } else {
-      prev.push(updatedPost)
+    if (!isLoad) {
+      const result = await getPostDetail(postId)
+      if (!result.success) {
+        vscode.window.showErrorMessage(
+          `포스트 ${postId}를 불러오는 데 실패했습니다.`,
+        )
+        return null
+      }
+      const post = result.data
+      const index = prev.findIndex((p) => p.postId === postId)
+      const updatedPost: PostDetail = {
+        ...post,
+        parentPostIdList: prev[index]?.parentPostIdList ?? [],
+        uploadStatus: prev[index]?.uploadStatus, // 필요 시 보존
+      }
+      if (index !== -1) {
+        prev[index] = updatedPost
+      } else {
+        prev.push(updatedPost)
+      }
+      await this.updatePostToExtension(prev)
     }
-
-    await this.context.globalState.update('posts', prev)
-    return updatedPost
+    const localPost = this.getLocalPost(postId, prev)
+    return localPost
   }
 
   async getLocalPosts(): Promise<PostDetail[]> {
@@ -154,7 +160,7 @@ export class PostService {
     return postId ? posts.find((post) => post.postId === postId) || null : null
   }
 
-  async updatePost(data: Post): Promise<void> {
+  async updatePost(data: Post): Promise<boolean> {
     const prev = await this.getLocalPosts()
     const updated = prev.map((post) =>
       post.postId === data.postId ? { ...post, ...data } : post,
@@ -169,8 +175,10 @@ export class PostService {
     })
     if (success) {
       vscode.window.showInformationMessage('포스트가 업데이트되었습니다.')
+      return true
     }
     refreshPostProvider()
+    return false
   }
   async submitToNotion(data: UploadToNotionRequestPost): Promise<string> {
     // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
@@ -188,7 +196,7 @@ export class PostService {
   moveToNotion = (postUrl: string) => {
     vscode.window
       .showInformationMessage(
-        '노션이 생성되었습니다. 해당 페이지로 이동하시겠습니까?',
+        'Notion이 생성되었습니다. 해당 페이지로 이동하시겠습니까?',
         { modal: true },
         'Ok',
       )

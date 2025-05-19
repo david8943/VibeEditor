@@ -220,19 +220,13 @@ export class TemplateService {
   async addToPrompt(snapshot: Snapshot): Promise<void> {
     const sideViewProvider = getSideViewProvider()
     if (sideViewProvider) {
-      const selectedPromptId = Number(
-        getDraftData(DraftDataType.selectedPromptId),
-      )
       const promptAttach = {
         attachId: new Date().getTime(),
         snapshotId: snapshot.snapshotId,
         description: '설명',
       }
-
-      if (selectedPromptId !== 0) {
-        const selectedTemplateId = Number(
-          getDraftData(DraftDataType.selectedTemplateId),
-        )
+      const selectedTemplateId = await this.getSelectedTemplateId()
+      if (selectedTemplateId) {
         const template = await this.getLocalTemplate(selectedTemplateId)
         sideViewProvider.postMessageToWebview({
           type: MessageType.TEMPLATE_SELECTED,

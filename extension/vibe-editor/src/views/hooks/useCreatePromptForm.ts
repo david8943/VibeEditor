@@ -66,7 +66,6 @@ export const useCreatePromptForm = ({
 
   useEffect(() => {
     if (defaultPrompt) {
-      console.log('이게 리셋의 원인인가요?')
       const newDefaultValues = setDefaultValues(defaultPrompt)
       reset(newDefaultValues)
     }

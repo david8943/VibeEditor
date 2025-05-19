@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
+import AIBookImage from '../../assets/images/ai-book.svg'
+import AINotesImage from '../../assets/images/ai-notes.svg'
+import AIPostImage from '../../assets/images/ai-post.svg'
 import { Post, PostDetail, UploadToNotionRequestPost } from '../../types/post'
-import { MessageType, WebviewPageProps,PageType } from '../../types/webview'
+import { MessageType, PageType, WebviewPageProps } from '../../types/webview'
 import { PostForm } from '../components'
 
 export function PostPage({ postMessageToExtension }: WebviewPageProps) {
@@ -40,8 +43,6 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
         setLoading(true)
       } else if (message.type === MessageType.STOP_LOADING) {
         setLoading(false)
-      } else if (message.type === MessageType.GET_CURRENT_POST) {
-        postMessageToExtension({ type: MessageType.GET_CURRENT_POST })
       } else if (message.type === MessageType.NAVIGATE) {
         postMessageToExtension({ type: MessageType.GET_CURRENT_POST })
       }
@@ -50,7 +51,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const onUploadToNotion = (data: UploadToNotionRequestPost) => {
+  const onUploadToNotion = (data: { post: Post; shouldSave: boolean }) => {
     postMessageToExtension({
       type: MessageType.UPLOAD_POST,
       payload: data,
@@ -70,18 +71,17 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
     const page = PageType.TEMPLATE
     postMessageToExtension({
       type: MessageType.NAVIGATE,
-      payload: {page},
+      payload: { page },
     })
   }
   return (
-    <div className="app-container">
-      <h1>포스트 미리보기</h1>
+    <div className="app-container items-center justify-center">
       {loading && (
         <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
           <DotLoader color="var(--vscode-button-background)" />
         </div>
       )}
-      {showOnboarding &&{
+      {showOnboarding && (
         <div
           id="container"
           style={{ height: '90vh' }}
@@ -90,32 +90,38 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
             id="item"
             className="flex flex-col items-center gap-6">
             <div className="rounded-full p-8 flex items-center justify-center border-2">
-              <CreateProjectImage
-                width={80}
-                height={80}
+              <AIBookImage
+                width={100}
+                height={100}
                 className="text-[var(--vscode-foreground)]"
               />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 text-center">
               <h1 className="text-3xl font-bold">포스트를 생성해주세요</h1>
               <p className="text-base opacity-75">
-                AI로 초안 포스트 생성 후, 포스트를 Notion에 작성할 수 있습니다
+                AI로 초안 포스트 생성 후, <br />
+                포스트를 Notion에 작성할 수 있습니다
               </p>
             </div>
             <button
+              type="button"
               className="px-6 py-3 rounded-full text-base font-medium transition-all hover:scale-105 active:scale-100"
               onClick={navigateToTemplate}>
               템플릿 페이지로 이동하기
             </button>
           </div>
         </div>
-      }}
-
-      {!showOnboarding && <PostForm
-        defaultPost={defaultPost}
-        onSubmit={onSubmit}
-        onUploadToNotion={onUploadToNotion}
-      />}
+      )}
+      {!showOnboarding && (
+        <>
+          <h1>포스트 미리보기</h1>
+          <PostForm
+            defaultPost={defaultPost}
+            onSubmit={onSubmit}
+            onUploadToNotion={onUploadToNotion}
+          />
+        </>
+      )}
     </div>
   )
 }

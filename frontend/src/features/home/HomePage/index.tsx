@@ -61,11 +61,11 @@ export function HomePage() {
   useEffect(() => {
     if (!isMounted) return
 
-    if (!accessToken) {
+    // if (!accessToken) {
       router.push('/onboarding')
       // router.push('/auth/login')
       return
-    }
+    // }
   }, [accessToken, router, isMounted])
 
   const user = useAppSelector((state) => state.user.user)
@@ -332,7 +332,7 @@ export function HomePage() {
         <SlimContainer>
           <CenterContainer>
             <AnimatedImage
-              src="/icons/logo-no-padding.svg"
+              src="/icons/new/logo-icon.svg"
               alt="logo"
               width={90}
               height={90}
@@ -351,18 +351,12 @@ export function HomePage() {
               color: 'var(--color-text-regular)',
               gap: '10px',
             }}>
-            <Image
-              src="/icons/logo-chainG-no.svg"
-              alt="logo"
-              width={120}
-              height={20}
-            />
             <div>
               <p
                 style={{
                   color: '#586575',
                 }}>
-                가볍지만 신뢰할 수 있는 동거 서약관리 서비스2
+                Vibe Editor
               </p>
             </div>
           </div>

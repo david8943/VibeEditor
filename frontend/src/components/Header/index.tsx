@@ -35,7 +35,7 @@ export const Header = ({ isLogin }: HeaderProps) => {
           />
           Vibe Editor
         </HeaderButton>
-        {!isLogin && (
+        {!isLogin && false && (
           <>
             <HeaderButton onClick={() => router.push('/auth/signup')}>
               회원가입
@@ -45,7 +45,7 @@ export const Header = ({ isLogin }: HeaderProps) => {
             </HeaderButton>
           </>
         )}
-        {isLogin && (
+        {isLogin && false && (
           <>
             <HeaderButton onClick={handleLogout}>로그아웃</HeaderButton>
             <HeaderButton onClick={() => router.push('/auth/post/create')}>

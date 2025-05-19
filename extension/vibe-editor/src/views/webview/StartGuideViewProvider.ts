@@ -196,9 +196,7 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async getCurrentPost() {
-    const postId: undefined | number = getDraftData(
-      DraftDataType.selectedPostId,
-    )
+    const postId = getDraftData<number>(DraftDataType.selectedPostId)
     if (!postId) return
 
     const post = await this.postService.getPost(postId)
@@ -389,10 +387,32 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
         case MessageType.START_GUIDE:
           await this.startGuide(message.payload)
           break
+        case MessageType.GET_START_GUIDE_DATA:
+          await this.getStartGuidedata()
+          break
+        case MessageType.START_GUIDE_LOADED:
+          await this.startGuidedata(message.payload)
+          break
       }
     }, this.disposables)
   }
-
+  private async getStartGuidedata() {
+    await vscode.commands.executeCommand('vibeEditor.resetStartGuide')
+  }
+  private async startGuidedata(data: {
+    isLogin: boolean
+    isNotionSecretKey: boolean
+    isNotionDatabase: boolean
+    isProject: boolean
+    isSnapshot: boolean
+    isPost: boolean
+    isNotionUpload: boolean
+  }) {
+    this.postMessageToWebview({
+      type: MessageType.START_GUIDE_LOADED,
+      payload: data,
+    })
+  }
   private async startGuide(payload: StartGuideType) {
     if (payload === StartGuideType.isLogin) {
       await vscode.commands.executeCommand('vibeEditor.selectLoginMethod')
@@ -539,13 +559,11 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
     `
   }
 }
-let startGuideViewProvider: StartGuideViewProvider | undefined
 
-export function getStartGuideViewProvider():
-  | StartGuideViewProvider
-  | undefined {
-  return startGuideViewProvider
+let startGuideViewProviderInstance: StartGuideViewProvider | null = null
+export function getStartGuideViewProvider(): StartGuideViewProvider | null {
+  return startGuideViewProviderInstance
 }
 export function setStartGuideViewProvider(provider: StartGuideViewProvider) {
-  startGuideViewProvider = provider
+  startGuideViewProviderInstance = provider
 }
