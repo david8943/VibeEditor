@@ -1,5 +1,6 @@
 {
   "name": "vibe-editor",
+  "icon": "media/icon.png",
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
