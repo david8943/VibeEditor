@@ -106,7 +106,12 @@ public enum ExceptionCode {
 	OPENAI_INVALID_DATA_ERROR("OPENAI_INVALID_DATA_ERROR", "OpenAI API 응답 데이터가 유효하지 않습니다."),
 	OPENAI_EMPTY_CONTENT("OPENAI_EMPTY_CONTENT", "OpenAI API 응답에 콘텐츠가 없습니다."),
 	OPENAI_REQUEST_DATA_NOT_FOUND("OPENAI_REQUEST_DATA_NOT_FOUND", "OpenAI API 응답에서 요청한 데이터 형식을 찾을 수 없습니다."),
-	OPENAI_JSON_PARSING_ERROR("OPENAI_JSON_PARSING_ERROR", "응답 데이터 파싱 중 오류가 발생했습니다.");
+	OPENAI_JSON_PARSING_ERROR("OPENAI_JSON_PARSING_ERROR", "응답 데이터 파싱 중 오류가 발생했습니다."),
+
+	// Ollama 관련
+	OLLAMA_BAD_REQUEST_ERROR("OLLAMA_BAD_REQUEST_ERROR", "Ollama 요청의 형식이나 내용에 문제가 있습니다."),
+	OLLAMA_REQUEST_DATA_NOT_FOUND("OLLAMA_REQUEST_DATA_NOT_FOUND", "Ollama 응답에서 요청한 데이터 형식을 찾을 수 없습니다."),
+	OLLAMA_MODEL_NOT_FOUND("OLLAMA_MODEL_NOT_FOUND", "Ollama 모델을 찾을 수 없습니다.");
 
 	private final String code;
 	private final String message;
