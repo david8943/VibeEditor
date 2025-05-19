@@ -415,8 +415,13 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
   }
   private async startGuide(payload: StartGuideType) {
     if (payload === StartGuideType.isLogin) {
-      await vscode.commands.executeCommand('vibeEditor.selectLoginMethod')
-      await vscode.commands.executeCommand('vibeEditor.showSettingPage')
+      let loginStatus = await getDraftData(DraftDataType.loginStatus)
+      if (!loginStatus) {
+        await vscode.commands.executeCommand('vibeEditor.selectLoginMethod')
+        await vscode.commands.executeCommand('vibeEditor.showSettingPage')
+      } else {
+        await vscode.commands.executeCommand('vibeEditor.resetStartGuide')
+      }
     } else if (payload === StartGuideType.isNotionSecretKey) {
       await vscode.commands.executeCommand('vibeEditor.showSettingPage')
     } else if (payload === StartGuideType.isNotionDatabase) {

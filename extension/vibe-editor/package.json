@@ -1,9 +1,10 @@
 {
   "name": "vibe-editor",
+  "icon": "media/icon.png",
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -218,17 +219,17 @@
       },
       {
         "command": "vibeEditor.closeStartGuide",
-        "title": "스타팅 가이드 닫기",
+        "title": "시작 가이드 닫기",
         "icon": "$(close)"
       },
       {
         "command": "vibeEditor.openStartGuide",
-        "title": "스타팅 가이드 열기",
+        "title": "시작 가이드 열기",
         "icon": "$(rocket)"
       },
       {
         "command": "vibeEditor.resetStartGuide",
-        "title": "스타팅 가이드 새로고침",
+        "title": "시작 가이드 새로고침",
         "icon": "$(refresh)"
       }
     ],

@@ -1,5 +1,8 @@
 import * as vscode from 'vscode'
 
+import { getCurrentUser } from '@/apis/user'
+
+import { ConfigType, Configuration } from '../configuration'
 import { clearDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
 import { MessageType } from '../types/webview'
@@ -101,6 +104,7 @@ export class AuthService {
                 accessToken,
               )
               setDraftData(DraftDataType.loginStatus, loginStatus)
+              await vscode.commands.executeCommand('vibeEditor.initFetchData')
               const sideViewProvider = getSideViewProvider()
               if (sideViewProvider) {
                 sideViewProvider.postMessageToWebview({
@@ -152,6 +156,9 @@ export class AuthService {
     await clearDraftData()
     await vscode.commands.executeCommand('vibeEditor.resetTemplate')
     await vscode.commands.executeCommand('vibeEditor.resetPost')
+    if (Configuration.get(ConfigType.showStartGuide)) {
+      await vscode.commands.executeCommand('vibeEditor.resetStartGuide')
+    }
     vscode.window.showInformationMessage('로그아웃되었습니다.')
   }
 

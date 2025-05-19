@@ -33,7 +33,7 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
     {
       id: StartGuideType.isLogin,
       title: '로그인 ',
-      description: '소셜 로그인 후 스타팅 가이드를 진행합니다.',
+      description: '소셜 로그인 후 시작 가이드를 진행합니다.',
     },
     {
       id: StartGuideType.isNotionSecretKey,
@@ -126,12 +126,12 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
   }
 
   return (
-    <div className="min-h-screen w-full py-4">
-      <div className="max-w-4xl mx-auto px-2">
-        <div className="rounded-lg shadow-sm p-6 mb-8">
+    <div className="min-h-screen w-full">
+      <div className="max-w-4xl mx-auto">
+        <div className="rounded-lg shadow-sm p-2 mb-8">
           <div className="flex items-center gap-4 mb-8 border-b pb-6">
-            <div className="text-xl font-bold flex items-center gap-2">
-              <span>Vibe Editor 스타팅 가이드</span>
+            <div className="text-lg font-bold flex items-center gap-2">
+              <span>Vibe Editor 시작 가이드</span>
             </div>
             <button
               className="secondary-button text-base font-medium px-4 py-2 rounded-full transition-colors"
@@ -152,31 +152,30 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
                       payload: item.id,
                     })
                   }}
-                  className={`relative p-2 rounded-lg border transition-all ${
+                  className={`relative p-2 rounded-lg border ${
                     statusMap[item.id as keyof typeof statusMap]
-                      ? 'bg-blue-50 border-blue-200 cursor-pointer'
-                      : 'bg-gray-50 border-gray-200 cursor-pointer hover:bg-blue-100'
+                      ? 'startGuideListItem selected cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]'
+                      : 'startGuideListItem unselected border-gray-200 cursor-pointer  transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]'
                   }`}>
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full  border border-gray-200 text-sm font-medium text-gray-600">
+                    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full  border border-gray-200 text-sm font-medium">
                       {statusMap[item.id as keyof typeof statusMap] ? (
                         <CheckIcon
-                          width={16}
-                          height={16}
-                          className="text-[var(--vscode-foreground)]"
+                          width={14}
+                          height={14}
+                          className="text-[var(--vscode-button-foreground)]"
                         />
                       ) : (
                         <InfoToolTip
                           description={item.description}
-                          size={16}
+                          size={14}
+                          isWhite={true}
                         />
                       )}
                     </div>
                     <div className="flex-grow gap-2">
                       <div className="flex items-center">
-                        <div className="text-base font-medium">
-                          {item.title}
-                        </div>
+                        <div className="text-sm font-medium">{item.title}</div>
                       </div>
                     </div>
                   </div>

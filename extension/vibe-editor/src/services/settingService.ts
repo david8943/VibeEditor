@@ -61,6 +61,7 @@ export class SettingService {
   public getLocalDatabase() {
     return this.context.globalState.get<Database[]>('notionDatabases', [])
   }
+
   public async deleteDatabase(
     database: UpdateDatabase,
   ): Promise<number | null> {
@@ -109,6 +110,15 @@ export class SettingService {
       vscode.window.showInformationMessage('AI 공급자 저장 완료')
     } else {
       vscode.window.showInformationMessage('AI 공급자 저장 실패')
+    }
+  }
+  public async fetchUser(): Promise<void> {
+    const result = await getCurrentUser()
+    if (result.success) {
+      setDraftData(DraftDataType.notionStatus, result.data.notionActive)
+      if (!result.data.notionActive) {
+        vscode.window.showInformationMessage('Notion 정보 등록이 필요합니다.')
+      }
     }
   }
 }

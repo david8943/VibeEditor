@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import MinusIcon from '@/assets/icons/minus_circle.svg'
+import MinusIcon from '@/assets/icons/circle-slash.svg'
 
 import { AIAPIKey } from '../../../../types/ai'
 import { CreateDatabase } from '../../../../types/database'
@@ -16,6 +16,7 @@ import { DatabaseModal } from '../../../components/database/DatabaseModal'
 import { AIProviderModal } from '../../aiProvider/AIProviderModal'
 import { AIProviderSelector } from '../../aiProvider/AIProviderSelector'
 import { HighlightedCode } from '../../code/HighlightedCode'
+import { InfoToolTip } from '../../common/InfoToolTip'
 import './styles.css'
 
 interface PromptFormUIProps {
@@ -126,22 +127,34 @@ export function PromptFormUI({
       </div>
 
       <div className="form-group">
-        <label
-          htmlFor="snapshots"
-          className="text-sm font-medium">
-          스냅 샷
-        </label>
+        <div className="flex">
+          <label
+            htmlFor="snapshots"
+            className="text-sm font-medium mr-1">
+            스냅 샷
+          </label>
+          <InfoToolTip description="템플릿 목록 안의 스냅샷을 추가할 수 있습니다. 코드 / 파일 / 디렉토리 구조 / 로그 등을 추가해보세요." />
+        </div>
+
         {snapshots &&
           snapshots.map((snapshot) => (
             <div
               className="flex flex-col gap-4 p-4 rounded border border-[var(--vscode-input-border)]"
               key={snapshot.attachId}>
-              <div>
+              <div className="flex justify-between">
                 <label
                   htmlFor="snapshotName"
                   className="text-sm font-medium pre-wrap">
                   {snapshot.snapshotName}
                 </label>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => handleDeleteSnapshot(snapshot.attachId)}>
+                  <MinusIcon
+                    width={20}
+                    height={20}
+                  />
+                </div>
               </div>
               <div className="flex flex-col flex-1 gap-4 items-start w-full">
                 <div className="code-block w-full">
@@ -157,16 +170,6 @@ export function PromptFormUI({
                   placeholder="코드에 대한 설명을 입력해주세요."
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => handleDeleteSnapshot(snapshot.attachId)}
-                  className="hover:bg-[var(--vscode-button-hoverBackground)] rounded">
-                  <MinusIcon
-                    width={20}
-                    height={20}
-                    className="text-[var(--vscode-foreground)]"
-                  />
-                </button>
               </div>
             </div>
           ))}
