@@ -66,6 +66,9 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-anthropic'
     implementation 'com.anthropic:anthropic-java:1.4.0'
     implementation 'com.openai:openai-java:1.6.1'
+    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-model'
+    implementation("org.springframework.ai:spring-ai-core:1.0.0-M6")
 
     // infrastructure
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
