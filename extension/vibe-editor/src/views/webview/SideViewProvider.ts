@@ -158,7 +158,6 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
 
   private async selectPrompt(data: SelectPrompt) {
     setDraftData(DraftDataType.selectedPromptId, data.promptId)
-
     const prompt = await this.templateService.selectPrompt(data)
     this.postMessageToWebview({
       type: MessageType.PROMPT_SELECTED,

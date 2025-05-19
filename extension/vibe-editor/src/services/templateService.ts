@@ -53,10 +53,12 @@ export class TemplateService {
   }
 
   async getSelectedTemplateId(): Promise<number> {
+    console.log('getSelectedTemplateId')
     let selectedTemplateId = getDraftData<number>(
       DraftDataType.selectedTemplateId,
     )
     if (selectedTemplateId) {
+      console.log('있대', selectedTemplateId)
       return selectedTemplateId
     } else {
       const templates = await this.getTemplates()
@@ -66,6 +68,7 @@ export class TemplateService {
         return templates[0].templateId
       }
     }
+    console.log('없대')
     return 0
   }
 

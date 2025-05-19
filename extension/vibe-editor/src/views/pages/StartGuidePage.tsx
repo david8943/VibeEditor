@@ -43,9 +43,9 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
     },
     {
       id: StartGuideType.isNotionDatabase,
-      title: 'Notion 데이터 베이스 등록',
+      title: 'Notion 데이터베이스 등록',
       description:
-        'Notion 시크릿 키와 연결된 상태인 데이터 베이스를 등록해주세요. ',
+        'Notion 시크릿 키와 연결된 상태인 데이터베이스를 등록해주세요. ',
     },
     {
       id: StartGuideType.isProject,
@@ -54,9 +54,9 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
     },
     {
       id: StartGuideType.isSnapshot,
-      title: '스냅 샷 추가',
+      title: '스냅샷 추가',
       description:
-        '프로젝트에 코드, 파일, 디렉토리 구조, 로그 스냅 샷을 추가해주세요.',
+        '프로젝트에 코드, 파일, 디렉토리 구조, 로그 스냅샷을 추가해주세요.',
     },
     {
       id: StartGuideType.isPost,
@@ -152,7 +152,7 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
                       payload: item.id,
                     })
                   }}
-                  className={`relative p-2 rounded-lg border ${
+                  className={`p-2 rounded-lg border ${
                     statusMap[item.id as keyof typeof statusMap]
                       ? 'startGuideListItem selected cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]'
                       : 'startGuideListItem unselected border-gray-200 cursor-pointer  transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]'

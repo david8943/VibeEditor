@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DotLoader } from 'react-spinners'
 
 import CreateProjectImage from '../../assets/images/create-project.svg'
@@ -47,6 +47,33 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     postMessageToExtension({ type: MessageType.GET_TEMPLATE })
     postMessageToExtension({ type: MessageType.GET_OPTIONS })
     postMessageToExtension({ type: MessageType.GET_CONFIG })
+  }, [])
+
+  const addSnapshotCode = useCallback(
+    (data: PromptAttach) => {
+      if (selectedPromptId === 0) {
+        setCreatePromptData((currentPrompt) => {
+          if (!currentPrompt) return currentPrompt
+          return {
+            ...currentPrompt,
+            promptAttachList: [...currentPrompt.promptAttachList, data],
+          }
+        })
+      } else {
+        setSelectedPrompt((currentPrompt) => {
+          if (!currentPrompt) return currentPrompt
+          const updatedPrompt = {
+            ...currentPrompt,
+            promptAttachList: [...currentPrompt.promptAttachList, data],
+          }
+          return updatedPrompt
+        })
+      }
+    },
+    [selectedPromptId, createPromptData, selectedPrompt],
+  )
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
       console.log('템플릿 페이지', message.type, message.payload)
@@ -88,13 +115,13 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     }
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [])
+  }, [addSnapshotCode])
 
-  const resetCreatePrompt = () => {
+  const resetCreatePrompt = useCallback(() => {
     console.log('resetCreatePrompt')
     setCreatePromptData({
       parentPromptId: null,
-      templateId: selectedPromptId,
+      templateId: selectedTemplate?.templateId ?? 0,
       promptName: `${selectedTemplate?.templateName}의 새 템플릿`,
       postType: defaultPostType,
       comment: '',
@@ -103,33 +130,19 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       notionDatabaseId: notionDatabaseId,
       userAIProviderId: defaultUserAIProviderId,
     })
-  }
+  }, [
+    selectedPromptId,
+    selectedTemplate,
+    defaultPostType,
+    defaultPromptOptionIds,
+    notionDatabaseId,
+    defaultUserAIProviderId,
+  ])
+
   const generatePost = (data: Prompt) => {
     postMessageToExtension({
       type: MessageType.GENERATE_POST,
       payload: data,
-    })
-  }
-
-  const addSnapshotCode = (data: PromptAttach) => {
-    console.log('addSnapshotCode', data)
-    console.log('selectedPromptId', selectedPromptId)
-    if (selectedPromptId == 0) {
-      setCreatePromptData((currentPrompt) => {
-        if (!currentPrompt) return currentPrompt
-        return {
-          ...currentPrompt,
-          promptAttachList: [...currentPrompt.promptAttachList, data],
-        }
-      })
-    }
-    setSelectedPrompt((currentPrompt) => {
-      if (!currentPrompt) return currentPrompt
-      const updatedPrompt = {
-        ...currentPrompt,
-        promptAttachList: [...currentPrompt.promptAttachList, data],
-      }
-      return updatedPrompt
     })
   }
 
@@ -145,22 +158,29 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     })
   }
 
-  const createPrompt = (data: CreatePrompt) => {
-    postMessageToExtension({
-      type: MessageType.CREATE_PROMPT,
-      payload: {
-        prompt: {
-          ...data,
-          templateId: selectedTemplate?.templateId,
-          notionDatabaseId,
+  const createPrompt = useCallback(
+    (data: CreatePrompt) => {
+      console.log('아... createPrompt', data, createPromptData)
+      console.log('어진짜...selectedTemplate', selectedTemplate)
+      console.log('어진짜...selectedTemplateId', selectedTemplateId)
+      postMessageToExtension({
+        type: MessageType.CREATE_PROMPT,
+        payload: {
+          prompt: {
+            ...data,
+            templateId: selectedTemplate?.templateId,
+            notionDatabaseId,
+          },
+          selectedTemplateId: selectedTemplate?.templateId,
+          selectedPromptId: selectedPromptId,
         },
-        selectedTemplateId: selectedTemplate?.templateId,
-        selectedPromptId: selectedPromptId,
-      },
-    })
-  }
+      })
+    },
+    [selectedPromptId, selectedTemplate, notionDatabaseId],
+  )
 
   const selectPromptId = (promptId: number) => {
+    console.log('아니?', promptId)
     setSelectedPromptId(promptId)
     if (promptId == 0) {
       setSelectedPrompt(null)
@@ -214,18 +234,35 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
       type: MessageType.CREATE_TEMPLATE,
     })
 
-  const deleteSnapshot = (attachId: number) => {
-    postMessageToExtension({
-      type: MessageType.DELETE_SNAPSHOT,
-      payload: {
-        attachId,
-        selectedPromptId,
-        selectedTemplateId: selectedTemplate?.templateId,
-      },
-    })
-  }
+  const deleteSnapshot = useCallback(
+    (attachId: number) => {
+      if (selectedPromptId == 0) {
+        postMessageToExtension({
+          type: MessageType.DELETE_SNAPSHOT,
+          payload: {
+            attachId,
+            selectedPromptId,
+            selectedTemplateId: selectedTemplate?.templateId,
+          },
+        })
+      } else {
+        setSelectedPrompt((currentPrompt) => {
+          if (!currentPrompt) return currentPrompt
+          return {
+            ...currentPrompt,
+            promptAttachList: [
+              ...currentPrompt.promptAttachList.filter(
+                (snapshot) => snapshot.attachId !== attachId,
+              ),
+            ],
+          }
+        })
+      }
+    },
+    [selectedPromptId],
+  )
+
   useEffect(() => {
-    console.log('selectedProjectId', selectedPromptId)
     if (selectedPromptId == 0) {
       console.log('여기서 또 리셋3')
       setSelectedPrompt(null)
@@ -250,6 +287,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   return (
     <div className="app-container items-center justify-center">
+      'selectedPromptId' {selectedPromptId}
       {showOnboarding && (
         <div
           style={{ height: '90vh', width: '90vw' }}

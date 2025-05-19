@@ -54,7 +54,7 @@ export const DBSelector: React.FC<Props> = ({
             className="text-sm font-medium mr-1">
             Notion 데이터베이스
           </label>
-          <InfoToolTip description="데이터베이스는 등록된 notion private api와 연동된 상태여야 합니다." />
+          <InfoToolTip description="데이터베이스는 등록된 notion private api와\n연동된 상태여야 합니다." />
         </div>
         <button
           type="button"
