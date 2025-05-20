@@ -92,6 +92,7 @@ public class OpenAIUtil {
 	}
 
 	private String[] parseContent(String content) {
+		log.info("Generated AI Content: {}", content);
 		Pattern pattern = Pattern.compile("```json\\s*(\\{.*?})\\s*```", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 
