@@ -119,16 +119,32 @@ public class AnthropicUtil {
 	}
 
 	private String[] parseContent(String content) {
-		Pattern pattern = Pattern.compile("```json\\s*(\\{.*?})\\s*```", Pattern.DOTALL);
-		Matcher matcher = pattern.matcher(content);
+		log.info("Generated AI Content: {}", content);
 
-		if (!matcher.find()) {
+		// ```json { ... } ``` 또는 ``` { ... } ``` 또는 { ... } 모두 인식하는 패턴
+		Pattern[] patterns = new Pattern[] {
+			Pattern.compile("```json\\s*(\\{.*?})\\s*```", Pattern.DOTALL),
+			Pattern.compile("```\\s*(\\{.*?})\\s*```", Pattern.DOTALL),
+			Pattern.compile("(\\{.*})", Pattern.DOTALL)
+		};
+
+		Matcher matcher = null;
+		String jsonString = null;
+		for (Pattern pattern : patterns) {
+			matcher = pattern.matcher(content);
+			if (matcher.find()) {
+				jsonString = matcher.group(1);
+				break;
+			}
+		}
+
+		if (jsonString == null) {
 			throw new ExternalAPIException(CLAUDE_REQUEST_DATA_NOT_FOUND);
 		}
 
 		JsonNode responseJson = null;
 		try {
-			responseJson = mapper.readTree(matcher.group(1));
+			responseJson = mapper.readTree(jsonString);
 		} catch (JsonProcessingException e) {
 			log.error("JSON 파싱 오류: {}", e.getMessage());
 			throw new ServerException(CLAUDE_JSON_PARSING_ERROR);
@@ -139,4 +155,5 @@ public class AnthropicUtil {
 
 		return new String[] {postTitle, postContent};
 	}
+
 }
