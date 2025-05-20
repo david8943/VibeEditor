@@ -184,8 +184,8 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
                           <RocketIcon
-                            width={24}
-                            height={24}
+                            width={16}
+                            height={16}
                           />
                           <h3 className="text-sm font-medium">시작 가이드</h3>
                         </div>
@@ -210,7 +210,9 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                       MessageType.SET_NOTION_SECRET_KEY,
                     )
                   }>
-                  Notion 프라이빗 API 통합 토큰 등록
+                  {computedUser?.notionActive
+                    ? 'Notion 프라이빗 API 통합 토큰 변경'
+                    : ' Notion 프라이빗 API 통합 토큰 등록'}
                 </button>
                 <h2 className="text-lg font-semibold border-b pb-4">
                   기본 설정

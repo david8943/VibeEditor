@@ -14,15 +14,15 @@ export const InfoToolTip = ({
   isWhite = false,
 }: InfoToolTipProps) => {
   return (
-    <div className="relative group">
+    <div className={`relative group  ${isWhite ? '' : 'mt-1'}`}>
       <div className="flex items-center">
         <InfoIcon
           width={size}
           height={size}
-          className={`info ${isWhite ? 'white' : 'dark relative top-[1px]'} align-middle`}
+          className={`z-1 info ${isWhite ? 'white' : 'dark relative top-[2px]'} align-middle`}
         />
       </div>
-      <div className="absolute left-0 top-full p-2 infoText text-sm rounded shadow-lg opacity-50 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-100 w-64">
+      <div className="absolute left-0 top-full p-2 infoText text-xs rounded shadow-lg opacity-50 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 w-64">
         {description}
       </div>
     </div>

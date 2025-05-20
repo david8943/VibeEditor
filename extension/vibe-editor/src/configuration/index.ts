@@ -58,6 +58,21 @@ export class Configuration {
     }
   }
 
+  public static async reset(): Promise<void> {
+    await this.set(ConfigType.defaultPostType, defaultConfig.defaultPostType)
+    await this.set(
+      ConfigType.defaultPromptOptionIds,
+      defaultConfig.defaultPromptOptionIds,
+    )
+    await this.set(
+      ConfigType.defaultNotionDatabaseId,
+      defaultConfig.defaultNotionDatabaseId,
+    )
+    await this.set(
+      ConfigType.defaultUserAIProviderId,
+      defaultConfig.defaultUserAIProviderId,
+    )
+  }
   public static async set<K extends keyof ConfigSchema>(
     key: K,
     value: ConfigSchema[K],

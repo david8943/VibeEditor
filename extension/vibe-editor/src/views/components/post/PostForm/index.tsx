@@ -107,22 +107,24 @@ export function PostForm({
           />
         )}
       </div>
-      <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="flex-1 py-2 px-4 rounded text-sm font-medium">
-          포스트 저장
-        </button>
-        {uploadToNotion && (
+      {defaultPost.uploadStatus != 'LOADING' && (
+        <div className="flex gap-4">
           <button
             type="button"
-            onClick={uploadToNotion}
+            onClick={handleSubmit}
             className="flex-1 py-2 px-4 rounded text-sm font-medium">
-            Notion에 게시
+            포스트 저장
           </button>
-        )}
-      </div>
+          {uploadToNotion && (
+            <button
+              type="button"
+              onClick={uploadToNotion}
+              className="flex-1 py-2 px-4 rounded text-sm font-medium">
+              Notion에 게시
+            </button>
+          )}
+        </div>
+      )}
     </form>
   )
 }

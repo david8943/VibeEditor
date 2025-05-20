@@ -8,6 +8,25 @@
   padding: 12px;
   border-radius: 8px;
   overflow-x: auto;
+  text-shadow: none !important;
+}
+
+/* highlight.js 기본 스타일 오버라이드 */
+code[class*='language-'],
+pre[class*='language-'] {
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-editor-background);
+  text-shadow: none !important;
+  font-family: var(--vscode-editor-font-family);
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
 }
 
 /* 주석 */

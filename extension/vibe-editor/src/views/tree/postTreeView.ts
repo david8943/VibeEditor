@@ -1,3 +1,4 @@
+import * as path from 'path'
 import * as vscode from 'vscode'
 
 import { PostDetail, PostSummary } from '../../types/post'
@@ -58,19 +59,41 @@ export class PostItem extends vscode.TreeItem {
 
     this.iconPath = this.getIconForStatus(post)
   }
-
-  private getIconForStatus(post: PostSummary): vscode.ThemeIcon {
-    if (post.isLoading) return new vscode.ThemeIcon('sync~spin')
-
-    switch (post.uploadStatus) {
-      case 'SUCCESS':
-        return new vscode.ThemeIcon('check')
-      case 'FAIL':
-        return new vscode.ThemeIcon('error')
-      case 'PENDING':
-        return new vscode.ThemeIcon('debug-breakpoint-function')
-      default:
-        return new vscode.ThemeIcon('book')
+  private extensionPath(subPath: string): string {
+    return path.join(
+      vscode.extensions.getExtension('VibeEditor.vibe-editor')!.extensionPath,
+      subPath,
+    )
+  }
+  private getIconBasePath(): string {
+    return this.extensionPath('media/icons')
+  }
+  private getIconForStatus(post: PostSummary): {
+    light: vscode.Uri
+    dark: vscode.Uri
+  } {
+    const iconBasePath = this.getIconBasePath()
+    let icon = 'book.svg'
+    if (post.isLoading) {
+      icon = 'sync.svg'
+    } else {
+      switch (post.uploadStatus) {
+        case 'SUCCESS':
+          icon = 'check.svg'
+          break
+        case 'FAIL':
+          icon = 'error.svg'
+          break
+        case 'PENDING':
+          icon = 'history.svg'
+          break
+        default:
+          icon = 'book.svg'
+      }
+    }
+    return {
+      light: vscode.Uri.file(path.join(iconBasePath, 'light', icon)),
+      dark: vscode.Uri.file(path.join(iconBasePath, 'dark', icon)),
     }
   }
 }

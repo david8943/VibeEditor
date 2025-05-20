@@ -42,7 +42,11 @@ export const DBSelector: React.FC<Props> = ({
   }, [])
 
   const selectedDB = dbList.find((db) => db.notionDatabaseId === selectedId)
-
+  useEffect(() => {
+    if (selectedId == 0 && dbList.length > 0) {
+      onChange(dbList[0].notionDatabaseId)
+    }
+  }, [selectedId, dbList])
   return (
     <div
       className="form-group relative"
@@ -63,52 +67,29 @@ export const DBSelector: React.FC<Props> = ({
           +
         </button>
       </div>
-      <div
-        onClick={() => setOpen((prev) => !prev)}
-        className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
-        {selectedDB?.notionDatabaseName || '데이터베이스를 선택하세요'}
-      </div>
-      {open && dbList && dbList?.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border rounded bg-[var(--vscode-dropdown-background)] shadow-lg">
-          {dbList.map((db) => (
-            <div
-              key={db.notionDatabaseId}
-              onMouseEnter={() => setHovered(db.notionDatabaseId)}
-              onMouseLeave={() => setHovered(0)}
-              onClick={() => {
-                onChange(db.notionDatabaseId)
-                setOpen(false)
-              }}
+      {dbList && (
+        <select
+          value={selectedId}
+          onChange={(e) => {
+            const value = parseInt(e.target.value)
+            onChange(value)
+          }}>
+          {dbList.map((ai) => (
+            <option
+              value={ai.notionDatabaseId}
+              key={ai.notionDatabaseId}
               className={`flex justify-between items-center px-3 py-2 cursor-pointer
                 ${
-                  selectedId === db.notionDatabaseId
+                  selectedId === ai.notionDatabaseId
                     ? 'bg-[var(--vscode-list-activeSelectionBackground)] text-[var(--vscode-list-activeSelectionForeground)]'
-                    : hovered === db.notionDatabaseId
+                    : hovered === ai.notionDatabaseId
                       ? 'bg-[var(--vscode-list-hoverBackground)]'
                       : ''
                 }`}>
-              <span>{db.notionDatabaseName}</span>
-              {/* <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  window.vscode.postMessage({
-                    type: MessageType.REQUEST_DELETE_DATABASE,
-                    payload: {
-                      notionDatabaseId: db.notionDatabaseId,
-                      notionDatabaseName: db.notionDatabaseName,
-                    },
-                  })
-                }}
-                className="ml-2 text-sm"
-                style={{
-                  visibility:
-                    hovered === db.notionDatabaseId ? 'visible' : 'hidden',
-                }}>
-                삭제
-              </button> */}
-            </div>
+              <span>{ai.notionDatabaseName}</span>
+            </option>
           ))}
-        </div>
+        </select>
       )}
     </div>
   )

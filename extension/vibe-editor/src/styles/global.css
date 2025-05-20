@@ -99,7 +99,6 @@ button:hover:not(.unselected) {
 }
 
 .info.white {
-  background: var(--vscode-button-foreground);
   color: var(--vscode-button-background);
 }
 

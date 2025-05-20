@@ -64,7 +64,7 @@ export class ViewService {
   }
 
   public async showPostPage(postId: number): Promise<void> {
-    setDraftData(DraftDataType.selectedPage, PageType.POST)
+    // setDraftData(DraftDataType.selectedPage, PageType.POST)
     if (postId) {
       setDraftData(DraftDataType.selectedPostId, postId)
     }

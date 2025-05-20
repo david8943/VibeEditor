@@ -427,11 +427,12 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
     } else if (payload === StartGuideType.isNotionDatabase) {
       await vscode.commands.executeCommand('vibeEditor.showSettingPage')
     } else if (payload === StartGuideType.isProject) {
+      await vscode.commands.executeCommand('vibeEditor.showDefaultTemplatePage')
       await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
       await vscode.commands.executeCommand('vibeEditor.createTemplate')
     } else if (payload === StartGuideType.isSnapshot) {
+      await vscode.commands.executeCommand('vibeEditor.showDefaultTemplatePage')
       await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
-      await vscode.commands.executeCommand('vibeEditor.copyCode')
     } else if (payload === StartGuideType.isPost) {
       await vscode.commands.executeCommand('vibeEditorTemplatePage.focus')
       await vscode.commands.executeCommand('vibeEditor.showDefaultTemplatePage')

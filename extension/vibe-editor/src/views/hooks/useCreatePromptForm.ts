@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   FieldErrors,
   UseFormHandleSubmit,
@@ -36,6 +36,9 @@ export const useCreatePromptForm = ({
   defaultPrompt,
   createPrompt,
 }: UseCreatePromptFormProps): UseCreatePromptFormReturn => {
+  // 이전 defaultPrompt 값을 저장하기 위한 ref
+  const prevDefaultPromptRef = useRef<CreatePrompt | null>(null)
+
   const setDefaultValues = (defaultPrompt: CreatePrompt | null): EditPrompt => {
     console.log('useCreatePromptForm setDefaultValues', defaultPrompt)
     if (!defaultPrompt) return {} as EditPrompt
@@ -51,7 +54,11 @@ export const useCreatePromptForm = ({
     }
   }
 
-  const defaultValues = setDefaultValues(defaultPrompt)
+  // defaultValues를 useMemo로 감싸서 불필요한 재계산 방지
+  const defaultValues = useMemo(
+    () => setDefaultValues(defaultPrompt),
+    [defaultPrompt],
+  )
 
   const {
     register,
@@ -64,14 +71,22 @@ export const useCreatePromptForm = ({
     defaultValues,
   })
 
+  // defaultPrompt가 변경될 때만 실행되도록 수정
   useEffect(() => {
-    if (defaultPrompt) {
+    if (
+      defaultPrompt &&
+      JSON.stringify(prevDefaultPromptRef.current) !==
+        JSON.stringify(defaultPrompt)
+    ) {
+      console.log('defaultPrompt changed, rolling back to:', defaultPrompt)
       const newDefaultValues = setDefaultValues(defaultPrompt)
       reset(newDefaultValues)
+      prevDefaultPromptRef.current = defaultPrompt
     }
-  }, [defaultPrompt, reset])
+  }, [defaultPrompt])
 
   const editPromptToCreatePrompt = (editPrompt: EditPrompt): CreatePrompt => {
+    console.log('editPromptToCreatePrompt - editPrompt:', editPrompt)
     return {
       templateId: defaultPrompt?.templateId ?? 0,
       promptName: editPrompt.promptName,

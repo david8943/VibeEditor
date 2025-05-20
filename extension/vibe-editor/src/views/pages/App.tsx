@@ -34,6 +34,7 @@ export function App() {
 
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
+      console.log('app 메시지', message)
       if (
         message.type === MessageType.INITIAL_PAGE ||
         message.type === MessageType.NAVIGATE

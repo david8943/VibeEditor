@@ -1,7 +1,5 @@
 import * as vscode from 'vscode'
 
-import { getCurrentUser } from '@/apis/user'
-
 import { ConfigType, Configuration } from '../configuration'
 import { clearDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
@@ -154,6 +152,7 @@ export class AuthService {
       this.context.secrets.delete(element)
     })
     await clearDraftData()
+    await Configuration.reset()
     await vscode.commands.executeCommand('vibeEditor.resetTemplate')
     await vscode.commands.executeCommand('vibeEditor.resetPost')
     if (Configuration.get(ConfigType.showStartGuide)) {

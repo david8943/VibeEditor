@@ -1,7 +1,11 @@
 import path from 'path'
 import * as vscode from 'vscode'
 
-import { getAiProviderList, registerUserAPIKey } from '../apis/ai'
+import {
+  getAiProviderList,
+  registerUserAPIKey,
+  updateUserAPIKey,
+} from '../apis/ai'
 import {
   addNotionDatabase,
   removeNotionDatabase,
@@ -105,11 +109,17 @@ export class SettingService {
   }
 
   public async saveAIProvider(aiProvider: AIAPIKey): Promise<void> {
-    const success = await registerUserAPIKey(aiProvider)
+    const aiProviders = await this.getAIProviders()
+    console.log('ai privaiProviders', aiProviders, 'aiProvider', aiProvider)
+    let success = false
+    if (aiProviders.find((ai) => ai.brand == aiProvider.brand)) {
+      success = await updateUserAPIKey(aiProvider)
+    } else {
+      success = await registerUserAPIKey(aiProvider)
+    }
+
     if (success) {
       vscode.window.showInformationMessage('AI 공급자 저장 완료')
-    } else {
-      vscode.window.showInformationMessage('AI 공급자 저장 실패')
     }
   }
   public async fetchUser(): Promise<void> {

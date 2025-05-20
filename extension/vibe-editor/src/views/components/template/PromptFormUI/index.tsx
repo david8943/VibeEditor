@@ -80,7 +80,7 @@ export function PromptFormUI({
         <label
           htmlFor="promptName"
           className="text-sm font-medium">
-          포스트 제목
+          템플릿 제목
         </label>
         <input
           type="text"
@@ -100,7 +100,11 @@ export function PromptFormUI({
         <div className="flex flex-wrap gap-2 items-center p-2">
           <button
             type="button"
-            onClick={() => setValue('postType', PostType.TECH_CONCEPT)}
+            onClick={() => {
+              console.log('Before setValue - postType:', postTypeValue)
+              setValue('postType', PostType.TECH_CONCEPT)
+              console.log('After setValue - postType:', watch('postType'))
+            }}
             className={`px-3 py-1 rounded-full text-sm ${
               postTypeValue === PostType.TECH_CONCEPT
                 ? 'selected'
@@ -110,7 +114,11 @@ export function PromptFormUI({
           </button>
           <button
             type="button"
-            onClick={() => setValue('postType', PostType.TROUBLE_SHOOTING)}
+            onClick={() => {
+              console.log('Before setValue - postType:', postTypeValue)
+              setValue('postType', PostType.TROUBLE_SHOOTING)
+              console.log('After setValue - postType:', watch('postType'))
+            }}
             className={`px-3 py-1 rounded-full text-sm ${
               postTypeValue === PostType.TROUBLE_SHOOTING
                 ? 'selected'
@@ -131,7 +139,7 @@ export function PromptFormUI({
           <label
             htmlFor="snapshots"
             className="text-sm font-medium mr-1">
-            스냅 샷
+            스냅샷
           </label>
           <InfoToolTip description="템플릿 목록 안의 스냅샷을 추가할 수 있습니다. 코드 / 파일 / 디렉토리 구조 / 로그 등을 추가해보세요." />
         </div>
@@ -144,7 +152,7 @@ export function PromptFormUI({
               <div className="flex justify-between">
                 <label
                   htmlFor="snapshotName"
-                  className="text-sm font-medium pre-wrap">
+                  className="text-sm font-medium pre-wrap break-all w-3/4">
                   {snapshot.snapshotName}
                 </label>
                 <div
@@ -157,8 +165,11 @@ export function PromptFormUI({
                 </div>
               </div>
               <div className="flex flex-col flex-1 gap-4 items-start w-full">
-                <div className="code-block w-full">
-                  <HighlightedCode code={snapshot.snapshotContent} />
+                <div className="flex flex-col flex-1 gap-2">
+                  <div className="code-block w-full">
+                    <HighlightedCode code={snapshot.snapshotContent} />
+                  </div>
+                  <div>{[...snapshot.snapshotContent].length}자</div>
                 </div>
                 <textarea
                   id={`description-${snapshot.attachId}`}
