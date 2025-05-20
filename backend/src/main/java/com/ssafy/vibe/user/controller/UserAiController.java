@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,7 @@ public class UserAiController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<?> registerUserAPIKey(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
-		@Valid UserAiCreateRequest request
+		@Valid @RequestBody UserAiCreateRequest request
 	) {
 		userAiProviderService.registerUserAPIKey(userPrincipal.getUserId(), request);
 		return ResponseEntity.ok(BaseResponse.success(null));
@@ -51,7 +52,7 @@ public class UserAiController {
 	@PutMapping
 	public ResponseEntity<?> updateUserAPIKey(
 		@AuthenticationPrincipal UserPrincipal userPrincipal,
-		@Valid UserAiUpdateRequest request
+		@Valid @RequestBody UserAiUpdateRequest request
 	) {
 		userAiProviderService.updateUserAPIKey(userPrincipal.getUserId(), request);
 		return ResponseEntity.ok(BaseResponse.success(null));
