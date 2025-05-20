@@ -85,12 +85,15 @@ export class PostService {
   }
 
   async getPost(postId: number): Promise<PostDetail | null> {
+    console.log('getPost', postId)
     const isLoad = isLoading(postId)
+    console.log('isLoad', isLoad)
 
     const prev = await this.getLocalPosts()
 
     if (!isLoad) {
       const result = await getPostDetail(postId)
+      console.log(' getPostDetail result', result)
       if (!result.success) {
         vscode.window.showErrorMessage(
           `포스트 ${postId}를 불러오는 데 실패했습니다.`,
@@ -120,6 +123,7 @@ export class PostService {
   }
   async getPosts(): Promise<PostDetail[]> {
     const prev = await this.getLocalPosts()
+    const loadingPrev = prev.filter((p) => isLoading(p.postId))
 
     const result = await getPostList()
     let posts: PostDetail[] = []
@@ -148,6 +152,7 @@ export class PostService {
             }
           }
         })
+      loadingPrev?.forEach((item) => prev.push(item))
       await this.updatePostToExtension(posts)
     }
     return posts

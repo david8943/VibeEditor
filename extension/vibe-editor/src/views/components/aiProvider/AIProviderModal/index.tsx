@@ -24,7 +24,7 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 vscode-overlay-background">
       <div className="bg-[var(--vscode-editor-background)] border border-[var(--vscode-editorWidget-border)] p-6 rounded-lg text-[var(--vscode-editor-foreground)] w-96 flex flex-col gap-4">
         <h2 className="text-lg mb-4">AI를 추가해주세요</h2>
-        <label>브랜드 선택</label>
+        <label className="p-2">브랜드 선택</label>
         <select
           className="w-full"
           value={brandModal}
@@ -49,13 +49,13 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            className="bg-gray-600 px-4 py-1"
+            className="secondary-button px-4 py-1"
             onClick={onClose}>
             취소
           </button>
           <button
             type="button"
-            className="bg-blue-600 px-4 py-1"
+            className="px-4 py-1"
             onClick={handleSubmit}>
             등록하기
           </button>

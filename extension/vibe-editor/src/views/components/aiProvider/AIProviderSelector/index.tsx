@@ -37,7 +37,35 @@ export const AIProviderSelector: React.FC<Props> = ({
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const selectedAI = aiList.find((ai) => ai.userAIProviderId === selectedId)
+  useEffect(() => {
+    getAIProviders()
+    const handleMessage = (event: MessageEvent) => {
+      const message = event.data
+      if (message.type === MessageType.GET_AI_PROVIDERS) {
+        setAiList(message.payload)
+      } else if (message.type === MessageType.AI_PROVIDERS_LOADED) {
+        setAiList(message.payload)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  useEffect(() => {
+    if (aiList.length == 0) {
+      return
+    }
+    let ai = aiList[0]
+    if (selectedId) {
+      ai = aiList.find((ai) => ai.userAIProviderId === selectedId) ?? ai
+    } else {
+      onChange(ai.userAIProviderId)
+    }
+    setSelectedAI(ai)
+  }, [selectedId, aiList])
+
+  const [selectedAI, setSelectedAI] = useState<AIProvider | null>(null)
 
   return (
     <div
@@ -59,23 +87,17 @@ export const AIProviderSelector: React.FC<Props> = ({
           +
         </button>
       </div>
-      <div
-        onClick={() => setOpen((prev) => !prev)}
-        className="p-2 border rounded bg-[var(--vscode-dropdown-background)] text-[var(--vscode-dropdown-foreground)] cursor-pointer">
-        {selectedAI?.model || 'AI를 선택하세요'}
-      </div>
-
-      {open && (
-        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border rounded bg-[var(--vscode-dropdown-background)] shadow-lg">
+      {aiList && (
+        <select
+          value={selectedId}
+          onChange={(e) => {
+            const value = parseInt(e.target.value)
+            onChange(value)
+          }}>
           {aiList.map((ai) => (
-            <div
+            <option
+              value={ai.userAIProviderId}
               key={ai.userAIProviderId}
-              onMouseEnter={() => setHovered(ai.userAIProviderId)}
-              onMouseLeave={() => setHovered(0)}
-              onClick={() => {
-                onChange(ai.userAIProviderId)
-                setOpen(false)
-              }}
               className={`flex justify-between items-center px-3 py-2 cursor-pointer
                 ${
                   selectedId === ai.userAIProviderId
@@ -85,9 +107,9 @@ export const AIProviderSelector: React.FC<Props> = ({
                       : ''
                 }`}>
               <span>{ai.model}</span>
-            </div>
+            </option>
           ))}
-        </div>
+        </select>
       )}
     </div>
   )

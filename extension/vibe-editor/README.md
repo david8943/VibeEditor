@@ -7,7 +7,7 @@ VS Code에서 코드/디렉토리/로그 스냅샷을 찍고, AI의 도움으로
 ## 🛠️ 설치 방법
 
 - VS Code 확장 탭에서 `vibeeditor` 검색 후 설치
-- 또는 `vscode://extension/VibeEditor.vibeditor` 링크를 통해 직접 설치
+- 또는 [vscode://extension/VibeEditor.vibeditor](https://marketplace.visualstudio.com/items?itemName=VibeEditor.vibe-editor) 링크를 통해 직접 설치
 
 ---
 
@@ -23,14 +23,13 @@ VS Code에서 코드/디렉토리/로그 스냅샷을 찍고, AI의 도움으로
    - Notion에서 [API 통합 생성](https://www.notion.so/my-integrations) → 새 페이지 생성 → 빈 데이터베이스 추가 → API 통합 연결
    - 설정 페이지의 `Notion 데이터베이스` 섹션에서 `+` 버튼 클릭 후 이름과 ID 입력
 
-3. **템플릿 만들기**
+3. **프로젝트 만들기**
 
-   - `Ctrl + Shift + P`를 눌러 명령어 팔레트를 열고 `Vibe Editor: 새 템플릿 생성`을 실행합니다.
-   - 템플릿 이름을 입력합니다.
+   - 프로젝트 목록에서 `+` 버튼을 눌러 새 프로젝트를 생성합니다.
 
 4. **포스트 종류 선택**
 
-   - 템플릿 생성 후, CS 개념 또는 트러블 슈팅 중 하나를 선택합니다.
+   - 프로젝트 내부에서 템플릿을 작성할 수 있습니다. 이후, CS 개념 또는 트러블 슈팅 중 하나를 선택합니다.
 
 5. **스냅샷 추가 (코드 / 디렉토리 / 로그)**
 

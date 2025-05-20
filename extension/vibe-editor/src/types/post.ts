@@ -5,7 +5,7 @@ export interface PostSummary {
   createdAt: string
   updatedAt: string
   isLoading: boolean
-  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
+  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING' | 'LOADING'
   postUrl?: string
 }
 
@@ -27,7 +27,7 @@ export interface PostDetail {
   createdAt: string
   updatedAt: string
   parentPostIdList: ParentPost[]
-  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING'
+  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING' | 'LOADING'
   postUrl?: string | null
   usedAIBrand?: string
   usedAIModel?: string
@@ -42,7 +42,7 @@ export interface PostListItem {
   postTitle: string
   createdAt: string
   updatedAt: string
-  uploadStatus: 'SUCCESS' | 'FAIL' | 'PENDING'
+  uploadStatus?: 'SUCCESS' | 'FAIL' | 'PENDING' | 'LOADING'
 }
 
 export type UpdatePost = Omit<Post, 'postId'>

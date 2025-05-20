@@ -20,6 +20,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
     promptId: 0,
     templateId: 0,
     parentPostIdList: [],
+    uploadStatus: 'LOADING',
   })
 
   useEffect(() => {
@@ -34,7 +35,9 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
       const message = event.data
       console.log('handleMessage', message)
       if (message.type === MessageType.CURRENT_POST_LOADED) {
-        setDefaultPost(message.payload.post)
+        if (message.payload.post) {
+          setDefaultPost(message.payload.post)
+        }
         setShowOnboarding(false)
       } else if (message.type === MessageType.SHOW_POST_VIEWER) {
         setDefaultPost(message.payload)
@@ -74,6 +77,10 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
       payload: { page },
     })
   }
+  useEffect(() => {
+    console.log('defaultPost', defaultPost)
+    setLoading(defaultPost?.uploadStatus == 'LOADING' || !defaultPost)
+  }, [defaultPost])
   return (
     <div className="app-container items-center justify-center">
       {loading && (
@@ -114,7 +121,9 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
       )}
       {!showOnboarding && (
         <>
-          <h1>포스트 미리보기</h1>
+          <h1 className="text-2xl font-bold whitespace-pre-wrap">
+            {`${defaultPost?.postTitle ?? '포스트'} 미리보기`}
+          </h1>
           <PostForm
             defaultPost={defaultPost}
             onSubmit={onSubmit}

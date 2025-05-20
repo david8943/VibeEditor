@@ -15,6 +15,7 @@ import {
   SnapshotItem,
   refreshTemplateProvider,
 } from '../views/tree/templateTreeView'
+import { TemplateService } from './templateService'
 
 export class SnapshotService {
   private context: vscode.ExtensionContext
@@ -33,27 +34,30 @@ export class SnapshotService {
           label: template.templateName,
           templateId: template.templateId,
         }))
-        quickPick.placeholder = '템플릿을 선택하세요'
+        quickPick.placeholder = '프로젝트를 선택하세요'
         quickPick.buttons = [
           {
             iconPath: new vscode.ThemeIcon('add'),
-            tooltip: '템플릿 추가',
+            tooltip: '프로젝트 추가',
           },
         ]
 
         quickPick.onDidTriggerButton(async () => {
           quickPick.hide()
-          const templateName = await vscode.window.showInputBox({
-            placeHolder: '새 템플릿 이름을 입력하세요',
-            prompt: '새로운 템플릿의 이름을 입력해주세요',
-          })
+          const templateService = new TemplateService(this.context)
+          await templateService.createTemplate()
+          // const templateName = await vscode.window.showInputBox({
+          //   placeHolder: '새 프로젝트 이름을 입력하세요',
+          //   prompt: '새로운 프로젝트의 이름을 입력해주세요',
+          // })
 
-          if (templateName) {
-            // TODO: 템플릿 추가 로직 구현 필요
-            vscode.window.showInformationMessage(
-              `새 템플릿 "${templateName}"이(가) 추가되었습니다.`,
-            )
-          }
+          // if (templateName) {
+          //   // TODO: 템플릿 추가 로직 구현 필요
+          //   vscode.window.showInformationMessage(
+          //     `새 템플릿 "${templateName}"이(가) 추가되었습니다.`,
+          //   )
+          // }
+
           resolve(null)
         })
 
@@ -133,7 +137,7 @@ export class SnapshotService {
   public async deleteSnapshot(snapshotId: number): Promise<void> {
     let selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
     if (!selectedTemplateId) {
-      vscode.window.showInformationMessage(`선택한 템플릿이 없습니다.`)
+      vscode.window.showInformationMessage(`선택한 프로젝트가 없습니다.`)
       return
     }
     const prevTemplates = this.context.globalState.get<Template[]>(
@@ -228,7 +232,7 @@ export class SnapshotService {
   }): Promise<boolean> {
     const selectedTemplate = await this.selectTemplate(localTemplates)
     if (!selectedTemplate) {
-      vscode.window.showInformationMessage('선택한 템플릿이 없습니다.')
+      vscode.window.showInformationMessage('선택한 프로젝트가 없습니다.')
       return false
     }
 

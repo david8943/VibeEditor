@@ -7,6 +7,7 @@ import {
   savePrompt,
   submitPrompt,
 } from '../apis/prompt'
+import { getSnapshotList } from '../apis/snapshot'
 import {
   addTemplate,
   getTemplateDetail,
@@ -32,6 +33,7 @@ import { MessageType } from '../types/webview'
 import { refreshPostProvider } from '../views/tree/postTreeView'
 import { refreshTemplateProvider } from '../views/tree/templateTreeView'
 import { getSideViewProvider } from '../views/webview/SideViewProvider'
+import { ViewService } from './viewService'
 
 export class TemplateService {
   private context: vscode.ExtensionContext
@@ -58,7 +60,6 @@ export class TemplateService {
       DraftDataType.selectedTemplateId,
     )
     if (selectedTemplateId) {
-      console.log('있대', selectedTemplateId)
       return selectedTemplateId
     } else {
       const templates = await this.getTemplates()
@@ -68,7 +69,6 @@ export class TemplateService {
         return templates[0].templateId
       }
     }
-    console.log('없대')
     return 0
   }
 
@@ -104,6 +104,7 @@ export class TemplateService {
         prompt.promptOptionList = result.data.promptOptionList
         prompt.notionDatabaseId = result.data.notionDatabaseId
         prompt.userAIProviderId = result.data.userAIProviderId
+        prompt.templateId = result.data.templateId
       } else {
         return null
       }
@@ -119,12 +120,12 @@ export class TemplateService {
       (template) => template.templateId === templateId,
     )
     if (templateIndex === -1) {
-      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
+      vscode.window.showInformationMessage('프로젝트를 찾을 수 없습니다.')
       return
     }
     prev.splice(templateIndex, 1)
     vscode.window
-      .showWarningMessage('템플릿을 삭제하시겠습니까?', { modal: true }, 'Ok')
+      .showWarningMessage('프로젝트를 삭제하시겠습니까?', { modal: true }, 'Ok')
       .then(async (selection) => {
         if (selection === 'Ok') {
           await this.context.globalState.update('templates', prev)
@@ -150,7 +151,7 @@ export class TemplateService {
               setDraftData(DraftDataType.selectedTemplateId, 0)
             }
             refreshTemplateProvider()
-            vscode.window.showInformationMessage('템플릿이 삭제되었습니다.')
+            vscode.window.showInformationMessage('프로젝트가 삭제되었습니다.')
           }
         }
       })
@@ -160,13 +161,13 @@ export class TemplateService {
     const prev = await this.getLocalTemplates()
     const template = await this.getLocalTemplate(templateId, prev)
     if (!template) {
-      vscode.window.showInformationMessage('템플릿을 찾을 수 없습니다.')
+      vscode.window.showInformationMessage('프로젝트를 찾을 수 없습니다.')
       return
     }
 
     const templateName = await vscode.window.showInputBox({
       value: template.templateName,
-      prompt: '템플릿 이름을 입력하세요',
+      prompt: '프로젝트 이름을 입력하세요',
       placeHolder: template.templateName,
     })
 
@@ -176,7 +177,7 @@ export class TemplateService {
       const success = await updateTemplate({ templateId, templateName })
       if (success) {
         await vscode.window.showInformationMessage(
-          `템플릿 이름을 <${templateName}>로 변경했습니다.`,
+          `프로젝트 이름을 <${templateName}>로 변경했습니다.`,
         )
       }
     }
@@ -254,7 +255,7 @@ export class TemplateService {
     let templateName = new Date().toISOString()
     const value = await vscode.window.showInputBox({
       value: templateName,
-      prompt: '템플릿 이름을 입력하세요',
+      prompt: '프로젝트 이름을 입력하세요',
       placeHolder: templateName,
     })
 
@@ -276,74 +277,69 @@ export class TemplateService {
 
   async generatePost(prompt: Prompt): Promise<Post | null> {
     const ok = 'Ok'
-    vscode.window
-      .showInformationMessage(
-        '프롬프트 기반으로 포스트를 생성하시겠습니까?',
-        {
-          detail: '생성 시 포스트 페이지로 이동합니다.',
-          modal: true,
-        },
-        ok,
-      )
-      .then(async (selection) => {
-        if (selection === ok) {
-          vscode.window.showInformationMessage(
-            `프롬프트로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
-          )
-          const loadingPost: PostDetail = {
-            postId: new Date().getTime(),
-            postTitle: `포스트 생성 중 : ${prompt.promptName}`,
-            postContent: `포스트 생성 중입니다...`,
-            templateId: prompt.templateId,
-            promptId: prompt.promptId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            parentPostIdList: [],
-          }
-          const prev = this.context.globalState.get<PostDetail[]>('posts', [])
-          prev.push(loadingPost)
-          await this.context.globalState.update('posts', prev)
-          refreshPostProvider()
-          const result = await generateAIPost({ promptId: prompt.promptId })
-          if (result.success) {
-            const createdPost: Post = result.data
-            const newPost: PostDetail = {
-              postId: createdPost.postId,
-              postTitle: createdPost.postTitle,
-              postContent: createdPost.postContent,
-              templateId: prompt.templateId,
-              promptId: prompt.promptId,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              parentPostIdList: [],
-            }
-            prev.push(newPost)
-            vscode.window.showInformationMessage(
-              `포스트 미리보기에서 확인해주세요: ${newPost.postTitle}`,
-            )
+    const selection = await vscode.window.showInformationMessage(
+      '프롬프트 기반으로 포스트를 생성하시겠습니까?',
+      {
+        detail: '생성 시 포스트 페이지로 이동합니다.',
+        modal: true,
+      },
+      ok,
+    )
 
-            setDraftData(DraftDataType.selectedPostId, createdPost.postId)
-            const sideViewProvider = getSideViewProvider()
-            if (sideViewProvider) {
-              sideViewProvider.postMessageToWebview({
-                type: MessageType.GET_CURRENT_POST,
-              })
-            }
-            refreshPostProvider()
-            await this.context.globalState.update(
-              'posts',
-              prev.filter((post) => post.postId !== loadingPost.postId),
-            )
-            return createdPost
-          } else {
-            await this.context.globalState.update(
-              'posts',
-              prev.filter((post) => post.postId !== loadingPost.postId),
-            )
-            refreshPostProvider()
-          }
+    if (selection === ok) {
+      vscode.window.showInformationMessage(
+        `프롬프트로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
+      )
+
+      const loadingPost: PostDetail = {
+        postId: new Date().getTime(),
+        postTitle: `포스트 생성 중 : ${prompt.promptName}`,
+        postContent: `포스트 생성 중입니다...`,
+        templateId: prompt.templateId,
+        promptId: prompt.promptId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        uploadStatus: 'LOADING',
+        parentPostIdList: [],
+      }
+      const prev = this.context.globalState.get<PostDetail[]>('posts', [])
+      prev.push(loadingPost)
+      await this.context.globalState.update('posts', prev)
+      refreshPostProvider()
+
+      const moveSelection = await vscode.window.showInformationMessage(
+        '해당 템플릿으로 포스트를 생성하고 있습니다. 포스트 페이지로 이동하시겠습니까?',
+        { modal: true },
+        'Ok',
+      )
+
+      if (moveSelection === 'Ok') {
+        const viewService = new ViewService(this.context)
+        viewService.showPostPage(loadingPost.postId)
+      }
+
+      const result = await generateAIPost({ promptId: prompt.promptId })
+      if (result.success) {
+        console.log('createdPost', result.data)
+        const newPost: PostDetail = {
+          postId: result.data.postId,
+          postTitle: result.data.postTitle,
+          postContent: result.data.postContent,
+          templateId: prompt.templateId,
+          promptId: prompt.promptId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          parentPostIdList: [],
         }
-      })
+        prev.push(newPost)
+        await this.context.globalState.update(
+          'posts',
+          prev.filter((post) => post.postId !== loadingPost.postId),
+        )
+        refreshPostProvider()
+        return newPost
+      }
+    }
     return null
   }
 
@@ -619,5 +615,46 @@ export class TemplateService {
       }
     }
   }
+
+  public async updatePromptSnapshot(prompt: Prompt): Promise<Template | null> {
+    console.log('updatePromptSnapshot', prompt)
+    const prev = await this.getLocalTemplates()
+    const template = await this.getLocalTemplate(prompt.templateId, prev)
+    console.log('template', template)
+    if (!template || !template.snapshotList) {
+      return null
+    }
+    const shouldUpdateSnapshotIds: number[] = []
+    prompt.promptAttachList.forEach((attach) => {
+      const snapshot = template.snapshotList?.find(
+        (s) => s.snapshotId === attach.snapshotId,
+      )
+      if (!snapshot?.snapshotContent) {
+        shouldUpdateSnapshotIds.push(attach.snapshotId)
+      }
+    })
+    if (shouldUpdateSnapshotIds.length === 0) {
+      return null
+    }
+    console.log('shouldUpdateSnapshotIds', shouldUpdateSnapshotIds)
+    const result = await getSnapshotList(shouldUpdateSnapshotIds)
+    console.log('result', result)
+    if (result.success) {
+      template.snapshotList?.forEach((snapshot) => {
+        const updatedSnapshot = result.data?.find(
+          (s) => s.snapshotId === snapshot.snapshotId,
+        )
+        if (updatedSnapshot) {
+          snapshot.snapshotContent = updatedSnapshot.snapshotContent
+          snapshot.snapshotType = updatedSnapshot.snapshotType
+          snapshot.snapshotName = updatedSnapshot.snapshotName
+          snapshot.createdAt = updatedSnapshot.createdAt
+          snapshot.updatedAt = updatedSnapshot.updatedAt
+        }
+      })
+      this.updateTemplateToExtension(prev)
+      return template
+    }
+    return null
+  }
 }
-// TODO : 절반 이하로 줄인다 671

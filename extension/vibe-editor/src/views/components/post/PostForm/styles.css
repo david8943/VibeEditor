@@ -17,8 +17,7 @@
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea .form-group select {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--vscode-input-border);
@@ -79,7 +78,15 @@
 .viewer-toggle-button:hover {
   background-color: var(--vscode-button-secondaryHoverBackground);
 }
+.secondary-button {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+}
 
+.secondary-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
 .markdown-viewer {
   padding: 12px;
   border: 1px solid var(--vscode-input-border);
@@ -163,4 +170,26 @@
 
 .markdown-viewer table tr:nth-child(2n) {
   background-color: var(--vscode-editor-inactiveSelectionBackground);
+}
+
+/* Prism.js 스타일 오버라이드 */
+.markdown-viewer pre[class*='language-'] {
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-textCodeBlock-background);
+  text-shadow: none;
+  font-family: var(--vscode-editor-font-family);
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+}
+
+.markdown-viewer code[class*='language-'] {
+  color: var(--vscode-editor-foreground);
+  text-shadow: none;
 }

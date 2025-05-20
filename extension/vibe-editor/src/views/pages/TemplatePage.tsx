@@ -51,6 +51,10 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   const addSnapshotCode = useCallback(
     (data: PromptAttach) => {
+      console.log(
+        '이론 : 지금 createdPromptData가 최신본이 아니다',
+        createPromptData,
+      )
       if (selectedPromptId === 0) {
         setCreatePromptData((currentPrompt) => {
           if (!currentPrompt) return currentPrompt
@@ -180,7 +184,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   )
 
   const selectPromptId = (promptId: number) => {
-    console.log('아니?', promptId)
     setSelectedPromptId(promptId)
     if (promptId == 0) {
       setSelectedPrompt(null)
@@ -237,13 +240,16 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   const deleteSnapshot = useCallback(
     (attachId: number) => {
       if (selectedPromptId == 0) {
-        postMessageToExtension({
-          type: MessageType.DELETE_SNAPSHOT,
-          payload: {
-            attachId,
-            selectedPromptId,
-            selectedTemplateId: selectedTemplate?.templateId,
-          },
+        setCreatePromptData((currentPrompt) => {
+          if (!currentPrompt) return currentPrompt
+          return {
+            ...currentPrompt,
+            promptAttachList: [
+              ...currentPrompt.promptAttachList.filter(
+                (snapshot) => snapshot.attachId !== attachId,
+              ),
+            ],
+          }
         })
       } else {
         setSelectedPrompt((currentPrompt) => {
@@ -287,7 +293,6 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
 
   return (
     <div className="app-container items-center justify-center">
-      'selectedPromptId' {selectedPromptId}
       {showOnboarding && (
         <div
           style={{ height: '90vh', width: '90vw' }}

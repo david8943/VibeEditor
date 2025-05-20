@@ -1,10 +1,8 @@
 import * as vscode from 'vscode'
 
-import {
-  addNotionDatabase,
-  removeNotionDatabase,
-  retrieveNotionDatabases,
-} from '../../apis/notion'
+import { getSnapshotList } from '@/apis/snapshot'
+
+import { retrieveNotionDatabases } from '../../apis/notion'
 import { getCurrentUser } from '../../apis/user'
 import { Configuration } from '../../configuration'
 import { getDraftData, setDraftData } from '../../configuration/draftData'
@@ -16,12 +14,13 @@ import { ViewService } from '../../services/viewService'
 import { AIAPIKey } from '../../types/ai'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
-import { Post, UploadToNotionRequestPost } from '../../types/post'
+import { Post } from '../../types/post'
 import {
   Prompt,
   SelectPrompt,
   SubmitCreatePrompt,
   SubmitUpdatePrompt,
+  Template,
 } from '../../types/template'
 import { Message, MessageType, PageType } from '../../types/webview'
 
@@ -29,7 +28,6 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   private templateService: TemplateService
   private snapshotService: SnapshotService
   private postService: PostService
-  private viewService: ViewService
   private disposables: vscode.Disposable[] = []
   private currentTemplateId?: number
   private _view?: vscode.WebviewView
@@ -40,11 +38,11 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     this.templateService = new TemplateService(context)
     this.snapshotService = new SnapshotService(context)
     this.postService = new PostService(context)
-    this.viewService = new ViewService(context)
     this.settingService = new SettingService(context)
   }
 
   public navigateToPageIfExists(page: PageType): boolean {
+    console.log('navigateToPageIfExists', page)
     if (this._view) {
       this.navigate(page)
       return true
@@ -100,9 +98,17 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   private async generatePost(prompt: Prompt) {
     this.startLoading()
     if (prompt) {
-      const post = await this.templateService.generatePost(prompt)
-      if (post) {
-        this.viewService.showPostPage(post.postId)
+      const newPost = await this.templateService.generatePost(prompt)
+      if (newPost) {
+        vscode.window.showInformationMessage(
+          `포스트 미리보기에서 확인해주세요: ${newPost.postTitle}`,
+        )
+        setDraftData(DraftDataType.selectedPostId, newPost.postId)
+        const post = await this.postService.getPost(newPost.postId)
+        this.postMessageToWebview({
+          type: MessageType.CURRENT_POST_LOADED,
+          payload: { post },
+        })
       }
     }
     this.stopLoading()
@@ -157,8 +163,22 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async selectPrompt(data: SelectPrompt) {
+    console.log('SideView select Prompt', data)
     setDraftData(DraftDataType.selectedPromptId, data.promptId)
     const prompt = await this.templateService.selectPrompt(data)
+    if (!prompt) {
+      return
+    }
+    const shouldUpdateTemplate =
+      await this.templateService.updatePromptSnapshot(prompt)
+
+    if (shouldUpdateTemplate) {
+      this.postMessageToWebview({
+        type: MessageType.TEMPLATE_SELECTED,
+        payload: { template: shouldUpdateTemplate },
+      })
+    }
+
     this.postMessageToWebview({
       type: MessageType.PROMPT_SELECTED,
       payload: { prompt },
@@ -201,16 +221,13 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async getCurrentPost() {
-    const postId: undefined | number = getDraftData(
-      DraftDataType.selectedPostId,
-    )
-    if (!postId) return
-
-    const post = await this.postService.getPost(postId)
-    this.postMessageToWebview({
-      type: MessageType.CURRENT_POST_LOADED,
-      payload: { post },
-    })
+    const post = await this.postService.getCurrentPost()
+    if (post) {
+      this.postMessageToWebview({
+        type: MessageType.CURRENT_POST_LOADED,
+        payload: { post },
+      })
+    }
   }
 
   private async getCurrentPrompt() {
@@ -222,13 +239,9 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
         type: MessageType.RESET_CREATE_PROMPT,
       })
     } else {
-      const prompt = await this.templateService.selectPrompt({
+      await this.selectPrompt({
         templateId,
         promptId,
-      })
-      this.postMessageToWebview({
-        type: MessageType.PROMPT_SELECTED,
-        payload: { prompt },
       })
     }
   }

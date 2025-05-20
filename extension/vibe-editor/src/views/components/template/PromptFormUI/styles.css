@@ -76,12 +76,21 @@
 
 .code-block {
   background-color: var(--vscode-editor-background);
-  padding: 10px;
   border-radius: 4px;
   font-family: var(--vscode-editor-font-family);
   white-space: pre-wrap;
   word-wrap: break-word;
+  overflow: hidden;
   border: 1px solid var(--vscode-input-border);
+  overflow-y: auto;
+  overflow: hidden;
+  width: 100%;
+  pre code.hljs {
+    max-height: 30vh;
+    overflow-y: auto;
+    width: calc(100vw - 84px);
+    max-width: calc(100vw - 84px);
+  }
 }
 
 .code-block code {

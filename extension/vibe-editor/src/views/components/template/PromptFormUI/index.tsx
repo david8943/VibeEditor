@@ -80,7 +80,7 @@ export function PromptFormUI({
         <label
           htmlFor="promptName"
           className="text-sm font-medium">
-          포스트 제목
+          템플릿 제목
         </label>
         <input
           type="text"
@@ -155,18 +155,21 @@ export function PromptFormUI({
                   className="text-sm font-medium pre-wrap break-all w-3/4">
                   {snapshot.snapshotName}
                 </label>
-                {/* <div
+                <div
                   className="cursor-pointer"
                   onClick={() => handleDeleteSnapshot(snapshot.attachId)}>
                   <MinusIcon
                     width={20}
                     height={20}
                   />
-                </div> */}
+                </div>
               </div>
               <div className="flex flex-col flex-1 gap-4 items-start w-full">
-                <div className="code-block w-full">
-                  <HighlightedCode code={snapshot.snapshotContent} />
+                <div className="flex flex-col flex-1 gap-2">
+                  <div className="code-block w-full">
+                    <HighlightedCode code={snapshot.snapshotContent} />
+                  </div>
+                  <div>{[...snapshot.snapshotContent].length}자</div>
                 </div>
                 <textarea
                   id={`description-${snapshot.attachId}`}
