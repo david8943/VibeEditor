@@ -91,6 +91,10 @@ public class UserAiProviderServiceImpl implements UserAiProviderService {
 			throw new BadRequestException(ExceptionCode.AI_BRAND_NOT_FOUND);
 		}
 
+		// 브랜드 API Key 유효성 검사
+		AiChatService aiChatService = aiChatServiceFactory.get(request.brand());
+		aiChatService.validateApiKey(request.apiKey());
+
 		userAiProviders.forEach(userAiProvider ->
 			userAiProvider.updateApiKey(encryptedApiKey)
 		);
