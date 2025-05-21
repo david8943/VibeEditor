@@ -103,16 +103,18 @@ export class SettingService {
   public async getAIProviders(): Promise<AIProvider[]> {
     const result = await getAiProviderList()
     if (result.success) {
-      return result.data
+      return result.data.sort((a) => (a.isDefault ? -1 : 1))
     }
     return []
   }
 
-  public async saveAIProvider(aiProvider: AIAPIKey): Promise<void> {
+  public async saveAIProvider(aiProvider: AIAPIKey): Promise<boolean> {
     const aiProviders = await this.getAIProviders()
     console.log('ai privaiProviders', aiProviders, 'aiProvider', aiProvider)
     let success = false
-    if (aiProviders.find((ai) => ai.brand == aiProvider.brand)) {
+    if (
+      aiProviders.find((ai) => ai.brand == aiProvider.brand && !ai.isDefault)
+    ) {
       success = await updateUserAPIKey(aiProvider)
     } else {
       success = await registerUserAPIKey(aiProvider)
@@ -121,6 +123,7 @@ export class SettingService {
     if (success) {
       vscode.window.showInformationMessage('AI 공급자 저장 완료')
     }
+    return success
   }
   public async fetchUser(): Promise<void> {
     const result = await getCurrentUser()

@@ -49,19 +49,19 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
     },
     {
       id: StartGuideType.isProject,
-      title: '프로젝트 생성',
-      description: '템플릿과 스냅샷을 저장할 프로젝트를 생성해주세요.',
+      title: '에픽 생성',
+      description: '스토리와 스냅샷을 저장할 에픽을 생성해주세요.',
     },
     {
       id: StartGuideType.isSnapshot,
       title: '스냅샷 추가',
       description:
-        '프로젝트에 코드, 파일, 디렉토리 구조, 로그 스냅샷을 추가해주세요.',
+        '에픽에 코드, 파일, 디렉토리 구조, 로그 스냅샷을 추가해주세요.',
     },
     {
       id: StartGuideType.isPost,
-      title: '템플릿으로 AI 포스트 생성',
-      description: '템플릿을 작성해 AI 포스트를 생성해주세요.',
+      title: '스토리로 AI 포스트 생성',
+      description: '스토리를 작성해 AI 포스트를 생성해주세요.',
     },
     {
       id: StartGuideType.isNotionUpload,

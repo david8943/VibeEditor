@@ -16,14 +16,14 @@ export function PromptSelector({
 }: PromptSelectorProps) {
   return (
     <div className="form-group flex flex-col gap-4">
-      <label>템플릿 선택</label>
+      <label>스토리 선택</label>
       {selectedTemplate && (
         <select
           value={selectedPromptId || ''}
           onChange={(e) => {
             selectPromptId(parseInt(e.target.value))
           }}>
-          <option value="0">새 템플릿 생성하기</option>
+          <option value="0">새 스토리 생성하기</option>
           {selectedTemplate.promptList?.map((prompt) => (
             <option
               key={prompt.promptId}

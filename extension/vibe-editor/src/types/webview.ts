@@ -18,10 +18,10 @@ export const MessageType = {
   INITIAL_PAGE: 'INITIAL_PAGE',
   CONFIG_CHANGE: 'CONFIG_CHANGE',
   WEBVIEW_READY: 'WEBVIEW_READY',
-  // 프로젝트 목록 페이지
+  // 에픽 목록 페이지
   CREATE_TEMPLATE: 'CREATE_TEMPLATE',
 
-  // 템플릿 페이지
+  // 스토리 페이지
   SUBMIT_PROMPT: 'SUBMIT_PROMPT',
   GENERATE_POST: 'GENERATE_POST',
   CREATE_PROMPT: 'CREATE_PROMPT',

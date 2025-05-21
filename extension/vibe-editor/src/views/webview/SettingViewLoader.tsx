@@ -246,7 +246,7 @@ export class SettingViewLoader {
   static async showWebview(
     context: vscode.ExtensionContext,
     page: PageType,
-    payload?: any, // 템플릿 or 포스트 등
+    payload?: any, // 스토리 or 포스트 등
   ) {
     const cls = this
     const column = vscode.window.activeTextEditor
@@ -270,7 +270,7 @@ export class SettingViewLoader {
       const loader = new cls(context, page)
       cls.currentPanel = loader.panel
 
-      // 템플릿이 전달된 경우 (기존 로직 유지)
+      // 스토리가 전달된 경우 (기존 로직 유지)
       if (page === PageType.TEMPLATE && payload) {
         setDraftData(DraftDataType.selectedTemplateId, payload.templateId)
         vscode.commands.executeCommand(
@@ -325,7 +325,7 @@ export class SettingViewLoader {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>템플릿 생성</title>
+          <title>스토리 생성</title>
           <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
           <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         </head>

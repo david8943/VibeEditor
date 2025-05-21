@@ -4,7 +4,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -62,7 +62,7 @@
         },
         {
           "id": "vibeEditorTemplatePage",
-          "name": "프로젝트 목록",
+          "name": "에픽 목록",
           "icon": "media/icon.svg",
           "when": "vibeEditor.draftData.loginStatus == true  && vibeEditor.draftData.selectedPage != 'POST'"
         },
@@ -128,28 +128,28 @@
       },
       {
         "command": "vibeEditor.renameTemplate",
-        "title": "프로젝트 이름 바꾸기",
+        "title": "에픽 이름 바꾸기",
         "category": "Vibe Editor"
       },
       {
         "command": "vibeEditor.deleteTemplate",
-        "title": "프로젝트 삭제",
+        "title": "에픽 삭제",
         "icon": "$(trash)",
         "category": "Vibe Editor"
       },
       {
         "command": "vibeEditor.createTemplate",
-        "title": "새 프로젝트 생성",
+        "title": "새 에픽 생성",
         "category": "Vibe Editor",
         "icon": "$(add)"
       },
       {
         "command": "vibeEditor.showTemplatePage",
-        "title": "템플릿 페이지 보기"
+        "title": "스토리 페이지 보기"
       },
       {
         "command": "vibeEditor.resetTemplate",
-        "title": "프로젝트 초기화",
+        "title": "에픽 초기화",
         "category": "Vibe Editor"
       },
       {
@@ -204,7 +204,7 @@
       },
       {
         "command": "vibeEditor.showDefaultTemplatePage",
-        "title": "템플릿 보기",
+        "title": "스토리 보기",
         "icon": "$(notebook)"
       },
       {
@@ -348,12 +348,12 @@
         "vibeEditor.selectedTemplateId": {
           "type": "number",
           "default": 0,
-          "description": "선택된 프로젝트 ID"
+          "description": "선택된 에픽 ID"
         },
         "vibeEditor.selectedPromptId": {
           "type": "number",
           "default": 0,
-          "description": "선택된 템플릿 ID"
+          "description": "선택된 스토리 ID"
         },
         "vibeEditor.defaultPostType": {
           "type": "string",

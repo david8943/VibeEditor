@@ -106,7 +106,10 @@ export const AIProviderSelector: React.FC<Props> = ({
                       ? 'bg-[var(--vscode-list-hoverBackground)]'
                       : ''
                 }`}>
-              <span>{ai.model}</span>
+              <span>
+                {ai.model}
+                {ai.isDefault && ' (기본 제공)'}
+              </span>
             </option>
           ))}
         </select>

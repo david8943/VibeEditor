@@ -120,12 +120,12 @@ export class TemplateService {
       (template) => template.templateId === templateId,
     )
     if (templateIndex === -1) {
-      vscode.window.showInformationMessage('프로젝트를 찾을 수 없습니다.')
+      vscode.window.showInformationMessage('에픽을 찾을 수 없습니다.')
       return
     }
     prev.splice(templateIndex, 1)
     vscode.window
-      .showWarningMessage('프로젝트를 삭제하시겠습니까?', { modal: true }, 'Ok')
+      .showWarningMessage('에픽을 삭제하시겠습니까?', { modal: true }, 'Ok')
       .then(async (selection) => {
         if (selection === 'Ok') {
           await this.context.globalState.update('templates', prev)
@@ -151,7 +151,7 @@ export class TemplateService {
               setDraftData(DraftDataType.selectedTemplateId, 0)
             }
             refreshTemplateProvider()
-            vscode.window.showInformationMessage('프로젝트가 삭제되었습니다.')
+            vscode.window.showInformationMessage('에픽이 삭제되었습니다.')
           }
         }
       })
@@ -161,13 +161,13 @@ export class TemplateService {
     const prev = await this.getLocalTemplates()
     const template = await this.getLocalTemplate(templateId, prev)
     if (!template) {
-      vscode.window.showInformationMessage('프로젝트를 찾을 수 없습니다.')
+      vscode.window.showInformationMessage('에픽을 찾을 수 없습니다.')
       return
     }
 
     const templateName = await vscode.window.showInputBox({
       value: template.templateName,
-      prompt: '프로젝트 이름을 입력하세요',
+      prompt: '에픽 이름을 입력하세요',
       placeHolder: template.templateName,
     })
 
@@ -177,7 +177,7 @@ export class TemplateService {
       const success = await updateTemplate({ templateId, templateName })
       if (success) {
         await vscode.window.showInformationMessage(
-          `프로젝트 이름을 <${templateName}>로 변경했습니다.`,
+          `에픽 이름을 <${templateName}>로 변경했습니다.`,
         )
       }
     }
@@ -255,7 +255,7 @@ export class TemplateService {
     let templateName = new Date().toISOString()
     const value = await vscode.window.showInputBox({
       value: templateName,
-      prompt: '프로젝트 이름을 입력하세요',
+      prompt: '에픽 이름을 입력하세요',
       placeHolder: templateName,
     })
 
@@ -308,7 +308,7 @@ export class TemplateService {
       refreshPostProvider()
 
       const moveSelection = await vscode.window.showInformationMessage(
-        '해당 템플릿으로 포스트를 생성하고 있습니다. 포스트 페이지로 이동하시겠습니까?',
+        '해당 스토리로 포스트를 생성하고 있습니다. 포스트 페이지로 이동하시겠습니까?',
         { modal: true },
         'Ok',
       )
