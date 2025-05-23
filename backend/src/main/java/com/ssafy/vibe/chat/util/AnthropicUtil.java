@@ -1,4 +1,4 @@
-package com.ssafy.vibe.prompt.util;
+package com.ssafy.vibe.chat.util;
 
 import static com.ssafy.vibe.common.exception.ExceptionCode.*;
 
@@ -70,7 +70,7 @@ public class AnthropicUtil {
 		return client.messages().withRawResponse().create(params);
 	}
 
-	public String[] handleClaudeResponse(HttpResponseFor<Message> response) {
+	public String handleClaudeResponse(HttpResponseFor<Message> response) {
 		int statusCode = response.statusCode();
 
 		if (statusCode == 200) {
@@ -85,8 +85,7 @@ public class AnthropicUtil {
 				throw new ExternalAPIException(CLAUDE_EMPTY_CONTENT);
 			}
 
-			String content = contentBlocks.getFirst().toString();
-			return parseContent(content);
+			return contentBlocks.getFirst().text().get().text();
 		}
 
 		try {
@@ -111,6 +110,10 @@ public class AnthropicUtil {
 			case 529 -> throw new ExternalAPIException(CLAUDE_OVERLOADED_ERROR);
 			default -> throw new ExternalAPIException(CLAUDE_API_ERROR);
 		}
+	}
+
+	public String[] handleBlogResponse(String content) {
+		return parseContent(content);
 	}
 
 	private String parseAnthropicErrorMessage(String responseBody) throws JsonProcessingException {

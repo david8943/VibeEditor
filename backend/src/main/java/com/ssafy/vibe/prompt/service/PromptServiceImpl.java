@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.vibe.chat.service.AiChatService;
+import com.ssafy.vibe.chat.service.AiChatServiceFactory;
 import com.ssafy.vibe.common.domain.BaseEntity;
 import com.ssafy.vibe.common.exception.BadRequestException;
 import com.ssafy.vibe.common.exception.NotFoundException;
@@ -110,7 +112,7 @@ public class PromptServiceImpl implements PromptService {
 			aiProvider.getModel(), userAiProvider.getIsDefault(), userAiProvider.getTemperature(), apiKey,
 			SYSTEM_PROMPT, generatedUserPrompt);
 
-		String[] parsedContentArray = aiChatService.generateChat(aiChatInputDTO);
+		String[] parsedContentArray = aiChatService.generateBlogPost(aiChatInputDTO);
 		PostSaveDTO postDTO = PostSaveDTO.from(
 			null,
 			prompt,

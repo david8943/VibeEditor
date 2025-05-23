@@ -1,4 +1,4 @@
-package com.ssafy.vibe.prompt.util;
+package com.ssafy.vibe.chat.util;
 
 import static com.ssafy.vibe.common.exception.ExceptionCode.*;
 
@@ -54,7 +54,7 @@ public class OpenAIUtil {
 		return client.chat().completions().withRawResponse().create(params);
 	}
 
-	public String[] handleOpenAIResponse(HttpResponseFor<ChatCompletion> response) {
+	public String handleOpenAIResponse(HttpResponseFor<ChatCompletion> response) {
 		int statusCode = response.statusCode();
 
 		if (statusCode == 200) {
@@ -66,7 +66,6 @@ public class OpenAIUtil {
 					.filter(Optional::isPresent)
 					.map(Optional::get)                  // String
 					.findFirst()
-					.map(this::parseContent)
 					.orElseThrow(() -> new ExternalAPIException(OPENAI_EMPTY_CONTENT));
 			} catch (OpenAIInvalidDataException e) {
 				throw new ExternalAPIException(OPENAI_INVALID_DATA_ERROR);
@@ -88,6 +87,14 @@ public class OpenAIUtil {
 			case 422 -> throw new BadRequestException(OPENAI_UNPROCESSABLE_ENTITY_ERROR);
 			case 429 -> throw new BadRequestException(OPENAI_RATE_LIMIT_ERROR);
 			default -> throw mapUnexpectedStatusCode(statusCode);
+		}
+	}
+
+	public String[] handleBlogResponse(String content) {
+		try {
+			return parseContent(content);
+		} catch (OpenAIInvalidDataException e) {
+			throw new ExternalAPIException(OPENAI_INVALID_DATA_ERROR);
 		}
 	}
 
