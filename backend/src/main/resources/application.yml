@@ -28,6 +28,9 @@ spring:
       host: 127.0.0.1
       port: 6379
       password:
+    qdrant:
+      base-url: ${QDRANT_BASEURL}
+      collection-name: ${QDRANT_COLLECTION_NAME}
 
   datasource:
     url: ${DATASOURCE_URL}
@@ -113,6 +116,11 @@ spring:
           model: ${CLAUDE_MODEL}
           max-tokens: ${CLAUDE_MAX_TOKEN}
       base-url: ${CLAUDE_BASEURL}
+
+  embedding:
+    voyage:
+      base-url: ${VOYAGEAI_BASEURL}
+      api-key: ${VOYAGEAI_APIKEY}
 
   lifecycle:
     timeout-per-shutdown-phase: 60s
