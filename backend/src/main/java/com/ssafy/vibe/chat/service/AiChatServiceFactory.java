@@ -1,4 +1,4 @@
-package com.ssafy.vibe.prompt.service;
+package com.ssafy.vibe.chat.service;
 
 import static com.ssafy.vibe.common.exception.ExceptionCode.*;
 
