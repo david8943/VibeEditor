@@ -30,6 +30,7 @@ spring:
       password:
     qdrant:
       base-url: ${QDRANT_BASEURL}
+      api-key: ${QDRANT_APIKEY}
       collection-name: ${QDRANT_COLLECTION_NAME}
 
   datasource:

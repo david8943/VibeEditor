@@ -24,6 +24,9 @@ public class QdrantVectorService {
 	@Value("${spring.data.qdrant.base-url}")
 	private String baseUrl;
 
+	@Value("${spring.data.qdrant.api-key}")
+	private String apiKey;
+
 	@Value("${spring.data.qdrant.collection-name}")
 	private String collectionName;
 
@@ -53,6 +56,7 @@ public class QdrantVectorService {
 		WebClient webClient = WebClient.builder()
 			.baseUrl(baseUrl)
 			.defaultHeader("Content-Type", "application/json")
+			.defaultHeader("api-key", apiKey)
 			.build();
 
 		webClient.put()
@@ -86,6 +90,7 @@ public class QdrantVectorService {
 
 		WebClient webClient = WebClient.builder()
 			.baseUrl(baseUrl)
+			.defaultHeader("api-key", apiKey)
 			.build();
 
 		String response = webClient.post()
