@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssafy.vibe.chat.service.AiChatService;
+import com.ssafy.vibe.chat.service.AiChatServiceFactory;
 import com.ssafy.vibe.common.exception.BadRequestException;
 import com.ssafy.vibe.common.exception.ExceptionCode;
 import com.ssafy.vibe.common.util.Aes256Util;
-import com.ssafy.vibe.prompt.service.AiChatService;
-import com.ssafy.vibe.prompt.service.AiChatServiceFactory;
 import com.ssafy.vibe.user.controller.request.UserAiCreateRequest;
 import com.ssafy.vibe.user.controller.request.UserAiUpdateRequest;
 import com.ssafy.vibe.user.controller.response.UserAiResponse;
