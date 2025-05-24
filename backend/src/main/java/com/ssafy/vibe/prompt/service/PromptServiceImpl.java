@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.vibe.chat.service.AiChatService;
 import com.ssafy.vibe.chat.service.AiChatServiceFactory;
+import com.ssafy.vibe.chat.service.QdrantVectorService;
+import com.ssafy.vibe.chat.service.VoyageEmbeddingService;
 import com.ssafy.vibe.common.domain.BaseEntity;
 import com.ssafy.vibe.common.exception.BadRequestException;
 import com.ssafy.vibe.common.exception.NotFoundException;
@@ -80,6 +82,8 @@ public class PromptServiceImpl implements PromptService {
 	private final PromptUtil promptUtil;
 	private final AiChatServiceFactory aiChatServiceFactory;
 	private final Aes256Util aes256Util;
+	private final VoyageEmbeddingService voyageEmbeddingService;
+	private final QdrantVectorService qdrantVectorService;
 
 	@Override
 	public CreatedPostResponse createDraft(Long userId, GeneratePostCommand generatePostCommand) {
@@ -122,6 +126,15 @@ public class PromptServiceImpl implements PromptService {
 
 		PostEntity post = postDTO.toEntity();
 		post = postRepository.save(post);
+
+		// 유저 입력과 생성한 게시글 제목 벡터에 저장(검색에는 유저 입력만 사용)
+		float[] vector = voyageEmbeddingService.getEmbedding(generatedUserPrompt);
+		qdrantVectorService.save(
+			userId,
+			generatedUserPrompt,
+			post.getPostTitle(),
+			vector
+		);
 
 		return CreatedPostResponse.from(
 			post.getId(),
