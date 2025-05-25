@@ -179,6 +179,16 @@ export class PostService {
       },
     })
     if (success) {
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+            title: '포스트가 업데이트되었습니다.',
+                  cancellable: true,
+                },
+                async () => {
+                  await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 후 자동 종료
+                }
+              );
       vscode.window.showInformationMessage('포스트가 업데이트되었습니다.')
       return true
     }
