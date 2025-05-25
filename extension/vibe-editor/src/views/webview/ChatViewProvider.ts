@@ -92,8 +92,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     if (prompt) {
       const newPost = await this.templateService.generatePost(prompt)
       if (newPost) {
-        vscode.window.showInformationMessage(
-          `포스트 미리보기에서 확인해주세요: ${newPost.postTitle}`,
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: `포스트 미리보기에서 확인해주세요: ${newPost.postTitle}`,
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
         )
         setDraftData(DraftDataType.selectedPostId, newPost.postId)
         const post = await this.postService.getPost(newPost.postId)
@@ -150,7 +157,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         type: MessageType.DATABASE_DELETED,
         payload: { notionDatabaseId },
       })
-      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '삭제가 완료되었습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
   }
 

@@ -146,7 +146,16 @@ export class StartGuideViewProvider implements vscode.WebviewViewProvider {
         type: MessageType.DATABASE_DELETED,
         payload: { notionDatabaseId },
       })
-      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '삭제가 완료되었습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
   }
 

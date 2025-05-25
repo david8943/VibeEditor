@@ -63,12 +63,7 @@ async function registerCommand(context: vscode.ExtensionContext) {
   const openChatDisposable = vscode.commands.registerCommand(
     'vibeEditor.openChat',
     async () => {
-      vscode.window.showInformationMessage(
-        '채팅 뷰를 사용하려면 사이드바에서 Chat 아이콘을 클릭하거나, 명령 팔레트(Ctrl+Shift+P)에서 "Chat: Focus Chat View"를 입력하세요.',
-      )
-      setTimeout(() => {
-        vscode.commands.executeCommand('vibeEditorAIChatView.focus')
-      }, 100)
+      vscode.commands.executeCommand('vibeEditorAIChatView.focus')
     },
   )
   context.subscriptions.push(openChatDisposable)

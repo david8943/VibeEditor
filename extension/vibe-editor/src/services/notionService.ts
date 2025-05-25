@@ -31,7 +31,16 @@ export class NotionService {
         notionSecretKey,
       )
       setDraftData(DraftDataType.notionStatus, !!notionSecretKey)
-      vscode.window.showInformationMessage('Notion 등록 성공')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: 'Notion 등록 성공',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     } catch (error) {
       vscode.window.showErrorMessage('Notion 등록 실패')
     }

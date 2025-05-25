@@ -120,7 +120,16 @@ export class TemplateService {
       (template) => template.templateId === templateId,
     )
     if (templateIndex === -1) {
-      vscode.window.showInformationMessage('에픽을 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '에픽을 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
     prev.splice(templateIndex, 1)
@@ -151,7 +160,16 @@ export class TemplateService {
               setDraftData(DraftDataType.selectedTemplateId, 0)
             }
             refreshTemplateProvider()
-            vscode.window.showInformationMessage('에픽이 삭제되었습니다.')
+            vscode.window.withProgress(
+              {
+                location: vscode.ProgressLocation.Notification,
+                title: '에픽이 삭제되었습니다.',
+                cancellable: false,
+              },
+              async () => {
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+              },
+            )
           }
         }
       })
@@ -161,7 +179,16 @@ export class TemplateService {
     const prev = await this.getLocalTemplates()
     const template = await this.getLocalTemplate(templateId, prev)
     if (!template) {
-      vscode.window.showInformationMessage('에픽을 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '에픽을 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
 
@@ -176,8 +203,15 @@ export class TemplateService {
       await this.updateTemplateToExtension(prev)
       const success = await updateTemplate({ templateId, templateName })
       if (success) {
-        await vscode.window.showInformationMessage(
-          `에픽 이름을 <${templateName}>로 변경했습니다.`,
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: `에픽 이름을 <${templateName}>로 변경했습니다.`,
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
         )
       }
     }
@@ -195,7 +229,16 @@ export class TemplateService {
       prev,
     )
     if (!prompt) {
-      vscode.window.showInformationMessage('스토리를 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '스토리를 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
     const promptAttachList = prompt.promptAttachList
@@ -217,7 +260,16 @@ export class TemplateService {
       promptId: selectedPromptId,
     })
     if (success) {
-      vscode.window.showInformationMessage(`스토리에 추가되었습니다`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `스토리에 추가되었습니다`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
   }
 
@@ -245,7 +297,16 @@ export class TemplateService {
           snapshot: promptAttach,
         },
       })
-      vscode.window.showInformationMessage(`스토리에 추가되었습니다`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `스토리에 추가되었습니다`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     } else {
       this.addAndSaveToPrompt(snapshot)
     }
@@ -287,8 +348,15 @@ export class TemplateService {
     )
 
     if (selection === ok) {
-      vscode.window.showInformationMessage(
-        `스토리로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `스토리로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
       )
 
       const loadingPost: PostDetail = {
@@ -378,8 +446,15 @@ export class TemplateService {
           prompt.userAIProviderId = result.data.userAIProviderId
         }
         await this.updateTemplateToExtension(prev)
-        vscode.window.showInformationMessage(
-          `스토리가 저장되었습니다: ${data.prompt.promptName}`,
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: `스토리가 저장되었습니다: ${data.prompt.promptName}`,
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
         )
         return true
       }
@@ -404,8 +479,15 @@ export class TemplateService {
       const template = await this.getTemplate(data.selectedTemplateId)
       if (template?.promptList) {
         const newPrompt = template.promptList[0]
-        vscode.window.showInformationMessage(
-          `스토리가 생성되었습니다: ${newPrompt.promptName}`,
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: `스토리가 생성되었습니다: ${newPrompt.promptName}`,
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
         )
         return {
           promptId: newPrompt.promptId,
@@ -435,7 +517,16 @@ export class TemplateService {
       await this.context.globalState.update('templates', prev)
       refreshTemplateProvider()
     }
-    vscode.window.showInformationMessage(`스토리가 삭제되었습니다:`)
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: '스토리가 삭제되었습니다.',
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
+    )
   }
 
   async getLocalTemplates(): Promise<Template[]> {
@@ -608,8 +699,15 @@ export class TemplateService {
             ),
           ]
           await this.context.globalState.update('templates', prev)
-          vscode.window.showInformationMessage(
-            `스냅샷이 스토리에서 삭제되었습니다.`,
+          vscode.window.withProgress(
+            {
+              location: vscode.ProgressLocation.Notification,
+              title: `스냅샷이 스토리에서 삭제되었습니다.`,
+              cancellable: false,
+            },
+            async () => {
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+            },
           )
         }
       }

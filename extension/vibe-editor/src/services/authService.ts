@@ -96,7 +96,17 @@ export class AuthService {
               res.end()
               server.close()
               const loginStatus = true
-              vscode.window.showInformationMessage(`${domain} 로그인 성공`)
+              vscode.window.withProgress(
+                {
+                  location: vscode.ProgressLocation.Notification,
+                  title: `${domain} 로그인 성공`,
+                  cancellable: false,
+                },
+                async () => {
+                  await new Promise((resolve) => setTimeout(resolve, 2000))
+                },
+              )
+
               await this.context.secrets.store(
                 SecretType.accessToken,
                 accessToken,
@@ -158,7 +168,16 @@ export class AuthService {
     if (Configuration.get(ConfigType.showStartGuide)) {
       await vscode.commands.executeCommand('vibeEditor.resetStartGuide')
     }
-    vscode.window.showInformationMessage('로그아웃되었습니다.')
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: '로그아웃되었습니다.',
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
+    )
   }
 
   public async selectLoginMethod(): Promise<void> {

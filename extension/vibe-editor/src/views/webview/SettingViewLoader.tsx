@@ -92,7 +92,16 @@ export class SettingViewLoader {
       if (result.success) {
         const databases = result.data
         await this.context.globalState.update('notionDatabases', databases)
-        vscode.window.showInformationMessage('DB 저장 완료')
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: 'DB 저장 완료',
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
+        )
         this.panel.webview.postMessage({
           type: MessageType.GET_DATABASE,
           payload: databases,
@@ -159,7 +168,16 @@ export class SettingViewLoader {
           })
         }
       }
-      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '삭제가 완료되었습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
   }
   private setupMessageListeners() {
@@ -172,11 +190,6 @@ export class SettingViewLoader {
             type: MessageType.INITIAL_PAGE,
             payload: { page: this.currentPage },
           })
-        } else if (message.type === MessageType.COMMON) {
-          const text = (message as CommonMessage).payload
-          vscode.window.showInformationMessage(
-            `Received message from Webview: ${text}`,
-          )
         } else if (message.type === MessageType.GET_LOGIN_STATUS) {
           await this.getLoginStatus()
         } else if (message.type === MessageType.GET_USER) {

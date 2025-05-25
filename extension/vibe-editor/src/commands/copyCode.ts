@@ -28,7 +28,16 @@ export class CopyCodeCommand implements ICommand {
     const localTemplates: Template[] =
       await this.templateService.getLocalTemplates()
     if (localTemplates.length == 0) {
-      vscode.window.showInformationMessage(`에픽이 없습니다.`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '에픽이 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       await this.templateService.createTemplate()
     }
     const copyText = await this.snapshotService.copyCode()
@@ -40,11 +49,28 @@ export class CopyCodeCommand implements ICommand {
       localTemplates,
     })
     if (!success) {
-      vscode.window.showInformationMessage('스냅샷 생성에 실패했습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '스냅샷 생성에 실패했습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
-
-    vscode.window.showInformationMessage('📸 로그 스냅샷이 저장되었습니다!')
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: '📸 로그 스냅샷이 저장되었습니다!',
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
+    )
     const selectedTemplateId: number | undefined = getDraftData(
       DraftDataType.selectedTemplateId,
     )

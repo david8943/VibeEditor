@@ -44,8 +44,15 @@ export class PostService {
     prev.push(newPost)
     await this.context.globalState.update('posts', prev)
     refreshPostProvider()
-    vscode.window.showInformationMessage(
-      `포스트가 생성되었습니다: ${newPost.postTitle}`,
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `포스트가 생성되었습니다: ${newPost.postTitle}`,
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
     )
   }
 
@@ -53,7 +60,17 @@ export class PostService {
     const result = await deletePost(postId)
 
     if (result.success) {
-      vscode.window.showInformationMessage(`포스트가 삭제되었습니다.`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `포스트가 삭제되었습니다.`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
+
       setDraftData(DraftDataType.selectedPostId, 0) // 선택된 포스트 ID 초기화 (필요시)
       await this.getPosts()
       refreshPostProvider()
@@ -182,14 +199,13 @@ export class PostService {
       vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-            title: '포스트가 업데이트되었습니다.',
-                  cancellable: true,
-                },
-                async () => {
-                  await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 후 자동 종료
-                }
-              );
-      vscode.window.showInformationMessage('포스트가 업데이트되었습니다.')
+          title: '포스트가 업데이트되었습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return true
     }
     refreshPostProvider()

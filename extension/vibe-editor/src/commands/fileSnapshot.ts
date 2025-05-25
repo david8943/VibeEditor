@@ -38,7 +38,16 @@ export class FileSnapshotCommand implements ICommand {
     const localTemplates: Template[] =
       await this.templateService.getLocalTemplates()
     if (localTemplates.length == 0) {
-      vscode.window.showInformationMessage(`에픽이 없습니다.`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '에픽이 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       await this.templateService.createTemplate()
     }
     for (const fileUri of selectedUris) {
@@ -53,7 +62,16 @@ export class FileSnapshotCommand implements ICommand {
         localTemplates,
       })
       if (success) {
-        vscode.window.showInformationMessage('📸 파일 스냅샷이 저장되었습니다!')
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: '📸 파일 스냅샷이 저장되었습니다!',
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
+        )
       }
       if (!success) {
         vscode.window.showErrorMessage('스냅샷 생성에 실패했습니다.')

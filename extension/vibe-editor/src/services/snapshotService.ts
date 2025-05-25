@@ -46,18 +46,6 @@ export class SnapshotService {
           quickPick.hide()
           const templateService = new TemplateService(this.context)
           await templateService.createTemplate()
-          // const templateName = await vscode.window.showInputBox({
-          //   placeHolder: '새 에픽 이름을 입력하세요',
-          //   prompt: '새로운 에픽의 이름을 입력해주세요',
-          // })
-
-          // if (templateName) {
-          //   // TODO: 스토리 추가 로직 구현 필요
-          //   vscode.window.showInformationMessage(
-          //     `새 스토리 "${templateName}"이(가) 추가되었습니다.`,
-          //   )
-          // }
-
           resolve(null)
         })
 
@@ -137,7 +125,16 @@ export class SnapshotService {
   public async deleteSnapshot(snapshotId: number): Promise<void> {
     let selectedTemplateId = getDraftData(DraftDataType.selectedTemplateId)
     if (!selectedTemplateId) {
-      vscode.window.showInformationMessage(`선택한 에픽이 없습니다.`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `선택한 에픽이 없습니다.`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
     const prevTemplates = this.context.globalState.get<Template[]>(
@@ -161,7 +158,16 @@ export class SnapshotService {
     })
 
     await this.context.globalState.update('templates', updatedTemplates)
-    vscode.window.showInformationMessage(`스냅샷이 삭제되었습니다.`)
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `스냅샷이 삭제되었습니다.`,
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
+    )
     refreshTemplateProvider()
   }
 
@@ -180,7 +186,16 @@ export class SnapshotService {
     )
 
     if (!snapshot) {
-      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '스냅샷을 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
 
@@ -232,7 +247,16 @@ export class SnapshotService {
   }): Promise<boolean> {
     const selectedTemplate = await this.selectTemplate(localTemplates)
     if (!selectedTemplate) {
-      vscode.window.showInformationMessage('선택한 에픽이 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '선택한 에픽이 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return false
     }
 
@@ -258,7 +282,16 @@ export class SnapshotService {
   ): Promise<Snapshot | null> {
     const result = await getSnapshotDetail(snapshotId)
     if (!result.success) {
-      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '스냅샷을 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return null
     }
     const {
@@ -315,7 +348,16 @@ export class SnapshotService {
     setDraftData(DraftDataType.selectedTemplateId, templateId)
     const snapshot = await this.updateCodeSnapshot(snapshotId, templateId)
     if (!snapshot) {
-      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '스냅샷을 찾을 수 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
       return
     }
     await this.viewUpdatedSnapshot(snapshot)

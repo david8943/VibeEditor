@@ -34,7 +34,17 @@ export class DirectoryTreeCommand implements ICommand {
 
     const localTemplates = await this.templateService.getLocalTemplates()
     if (localTemplates.length == 0) {
-      vscode.window.showInformationMessage(`에픽이 없습니다.`)
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '에픽이 없습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
+
       await this.templateService.createTemplate()
     }
     const treeText = await this.directoryTreeService.generateTree(uri.fsPath)
@@ -45,8 +55,15 @@ export class DirectoryTreeCommand implements ICommand {
       localTemplates,
     })
     if (success) {
-      vscode.window.showInformationMessage(
-        '📸 디렉토리 트리 스냅샷이 저장되었습니다!',
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '📸 디렉토리 트리 스냅샷이 저장되었습니다!',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
       )
     }
     if (!success) {

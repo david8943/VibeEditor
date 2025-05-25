@@ -56,7 +56,16 @@ export class SettingService {
       if (result.success) {
         const databases = result.data
         await this.context.globalState.update('notionDatabases', databases)
-        vscode.window.showInformationMessage('DB 저장 완료')
+        vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: 'Notion 데이터베이스 저장이 완료되었습니다.',
+            cancellable: false,
+          },
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+          },
+        )
         return databases
       }
     }
@@ -95,7 +104,16 @@ export class SettingService {
           return notionDatabaseId
         }
       }
-      vscode.window.showInformationMessage('삭제가 완료되었습니다.')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: 'Notion 데이터베이스를 삭제했습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
     return null
   }
@@ -119,7 +137,16 @@ export class SettingService {
     }
 
     if (success) {
-      vscode.window.showInformationMessage('AI 공급자 저장 완료')
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: 'AI 공급자 저장이 완료되었습니다..',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
     }
   }
   public async fetchUser(): Promise<void> {
