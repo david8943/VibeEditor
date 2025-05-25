@@ -80,7 +80,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data
-      console.log('템플릿 페이지', message.type, message.payload)
+      console.log('스토리 페이지', message.type, message.payload)
       if (message.type === MessageType.TEMPLATE_SELECTED) {
         console.log('TEMPLATE_SELECTED', message.payload.template)
         setShowOnboarding(false)
@@ -126,7 +126,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
     setCreatePromptData({
       parentPromptId: null,
       templateId: selectedTemplate?.templateId ?? 0,
-      promptName: `${selectedTemplate?.templateName}의 새 템플릿`,
+      promptName: `${selectedTemplate?.templateName}의 새 스토리`,
       postType: defaultPostType,
       comment: '',
       promptAttachList: [],
@@ -306,15 +306,15 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
               />
             </div>
             <div className="space-y-3 text-center">
-              <h1 className="text-3xl font-bold">프로젝트를 생성해주세요</h1>
+              <h1 className="text-3xl font-bold">에픽을 생성해주세요</h1>
               <p className="text-base opacity-75">
-                프로젝트 생성 후, 템플릿을 작성할 수 있습니다
+                에픽 생성 후, 스토리를 작성할 수 있습니다
               </p>
             </div>
             <button
               className="px-6 py-3 rounded-full text-base font-medium transition-all hover:scale-105 active:scale-100"
               onClick={createProject}>
-              프로젝트 생성하기
+              에픽 생성하기
             </button>
           </div>
         </div>
@@ -323,7 +323,7 @@ export function TemplatePage({ postMessageToExtension }: WebviewPageProps) {
         <div className="flex flex-col gap-8">
           <h1 className="text-2xl font-bold whitespace-pre-wrap">
             {selectedPrompt?.promptName ??
-              `${selectedTemplate?.templateName}의 새 템플릿`}
+              `${selectedTemplate?.templateName}의 새 스토리`}
           </h1>
 
           {loading && (

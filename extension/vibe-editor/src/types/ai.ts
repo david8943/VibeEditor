@@ -14,3 +14,11 @@ export interface AIProvider {
   model: string
   isDefault: boolean
 }
+
+export interface ChatRequest {
+  userAIProviderId: number
+  message: string
+}
+export interface ChatResponse {
+  aiResponse: string
+}

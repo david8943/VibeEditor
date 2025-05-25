@@ -80,7 +80,7 @@ export function PromptFormUI({
         <label
           htmlFor="promptName"
           className="text-sm font-medium">
-          템플릿 제목
+          스토리 제목
         </label>
         <input
           type="text"
@@ -141,7 +141,7 @@ export function PromptFormUI({
             className="text-sm font-medium mr-1">
             스냅샷
           </label>
-          <InfoToolTip description="템플릿 목록 안의 스냅샷을 추가할 수 있습니다. 코드 / 파일 / 디렉토리 구조 / 로그 등을 추가해보세요." />
+          <InfoToolTip description="스토리 목록 안의 스냅샷을 추가할 수 있습니다. 코드 / 파일 / 디렉토리 구조 / 로그 등을 추가해보세요." />
         </div>
 
         {snapshots &&
@@ -260,14 +260,14 @@ export function PromptFormUI({
           type="button"
           onClick={handleSubmit(onSubmit)}
           className="flex-1 py-2 px-4 rounded text-sm font-medium">
-          템플릿 저장
+          스토리 저장
         </button>
         {showGeneratePost && (
           <button
             type="button"
             onClick={handlePost}
             className="flex-1 py-2 px-4 rounded text-sm font-medium">
-            해당 템플릿으로 AI 포스트 생성
+            해당 스토리로 AI 포스트 생성
           </button>
         )}
       </div>

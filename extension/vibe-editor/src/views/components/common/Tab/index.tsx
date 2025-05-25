@@ -14,7 +14,7 @@ export const Tab: React.FC<TabProps> = ({
   const tabs = useMemo(
     () => [
       { label: '포스트', value: PageType.POST },
-      { label: '템플릿', value: PageType.TEMPLATE },
+      { label: '스토리', value: PageType.TEMPLATE },
     ],
     [],
   )

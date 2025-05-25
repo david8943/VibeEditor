@@ -34,7 +34,7 @@ export class DirectoryTreeCommand implements ICommand {
 
     const localTemplates = await this.templateService.getLocalTemplates()
     if (localTemplates.length == 0) {
-      vscode.window.showInformationMessage(`프로젝트가 없습니다.`)
+      vscode.window.showInformationMessage(`에픽이 없습니다.`)
       await this.templateService.createTemplate()
     }
     const treeText = await this.directoryTreeService.generateTree(uri.fsPath)

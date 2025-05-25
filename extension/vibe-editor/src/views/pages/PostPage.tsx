@@ -114,7 +114,7 @@ export function PostPage({ postMessageToExtension }: WebviewPageProps) {
               type="button"
               className="px-6 py-3 rounded-full text-base font-medium transition-all hover:scale-105 active:scale-100"
               onClick={navigateToTemplate}>
-              템플릿 페이지로 이동하기
+              스토리 페이지로 이동하기
             </button>
           </div>
         </div>
