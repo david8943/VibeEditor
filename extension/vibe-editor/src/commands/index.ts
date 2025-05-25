@@ -8,6 +8,7 @@ import {
 import {
   CaptureSnapshotCommand,
   DeleteSnapshotCommand,
+  InsertSnapshotToChatCommand,
   RenameSnapshotCommand,
   ViewCodeSnapshotCommand,
 } from './captureSnapshot'
@@ -84,4 +85,5 @@ export const allCommands = [
   CloseStartGuideCommand,
   OpenStartGuideCommand,
   ResetStartGuide,
+  InsertSnapshotToChatCommand,
 ]

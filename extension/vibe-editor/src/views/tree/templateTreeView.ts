@@ -32,7 +32,7 @@ export class SnapshotItem extends TreeItemBase {
     this.tooltip = `${snapshot.snapshotName}`
     this.command = {
       command: 'vibeEditor.viewCodeSnapshot',
-      title: 'View Code Snapshot',
+      title: '코드 스냅샷 보기',
       arguments: [{ snapshot, templateId }],
     }
     let iconPath = 'symbol-snippet'

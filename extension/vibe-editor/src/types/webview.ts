@@ -7,6 +7,7 @@ export const PageType = {
   LOADING: 'LOADING',
   POST_VIEWER: 'POST_VIEWER',
   STARTING_GUIDE: 'STARTING_GUIDE',
+  CHAT: 'CHAT',
 } as const
 
 export type PageType = (typeof PageType)[keyof typeof PageType]
@@ -73,6 +74,12 @@ export const MessageType = {
   START_GUIDE: 'START_GUIDE',
   GET_START_GUIDE_DATA: 'GET_START_GUIDE_DATA',
   START_GUIDE_LOADED: 'START_GUIDE_LOADED',
+
+  // 채팅 페이지
+  USER_MESSAGE: 'USER_MESSAGE',
+  AI_MESSAGE: 'AI_MESSAGE',
+  INSERT_SNAPSHOT_TO_CHAT: 'INSERT_SNAPSHOT_TO_CHAT',
+  SHOW_SNAPSHOT: 'SHOW_SNAPSHOT',
 } as const
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]

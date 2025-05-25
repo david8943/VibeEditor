@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 
+import { generateChat } from './apis/ai'
 import { setExtensionContext } from './apis/api'
 import { getCurrentUser } from './apis/user'
 import { allCommands } from './commands'
@@ -11,6 +12,10 @@ import {
   TemplateProvider,
   setTemplateProvider,
 } from './views/tree/templateTreeView'
+import {
+  ChatViewProvider,
+  setChatViewProvider,
+} from './views/webview/ChatViewProvider'
 import {
   SideViewProvider,
   setSideViewProvider,
@@ -53,6 +58,20 @@ async function registerCommand(context: vscode.ExtensionContext) {
     )
     context.subscriptions.push(disposable)
   })
+
+  // 채팅 화면을 여는 명령어 등록
+  const openChatDisposable = vscode.commands.registerCommand(
+    'vibeEditor.openChat',
+    async () => {
+      vscode.window.showInformationMessage(
+        '채팅 뷰를 사용하려면 사이드바에서 Chat 아이콘을 클릭하거나, 명령 팔레트(Ctrl+Shift+P)에서 "Chat: Focus Chat View"를 입력하세요.',
+      )
+      setTimeout(() => {
+        vscode.commands.executeCommand('vibeEditorAIChatView.focus')
+      }, 100)
+    },
+  )
+  context.subscriptions.push(openChatDisposable)
 }
 
 async function registerProvider(context: vscode.ExtensionContext) {
@@ -60,16 +79,19 @@ async function registerProvider(context: vscode.ExtensionContext) {
   const pp = new PostProvider(context)
   const svp = new SideViewProvider(context)
   const sgp = new StartGuideViewProvider(context)
+  const cvp = new ChatViewProvider(context)
 
   vscode.window.registerTreeDataProvider('vibeEditorTemplatePage', tp)
   vscode.window.registerTreeDataProvider('vibeEditorPostList', pp)
   vscode.window.registerWebviewViewProvider('vibeEditorSideView', svp)
   vscode.window.registerWebviewViewProvider('vibeEditorViewerPage', sgp)
+  vscode.window.registerWebviewViewProvider('vibeEditorAIChatView', cvp)
 
   setTemplateProvider(tp)
   setPostProvider(pp)
   setSideViewProvider(svp)
   setStartGuideViewProvider(sgp)
+  setChatViewProvider(cvp)
 }
 
 async function maybeShowReadme(context: vscode.ExtensionContext) {
@@ -99,6 +121,7 @@ export async function activate(
   await registerProvider(context)
   await maybeShowReadme(context)
   addStatusBarItem(context)
+  // 커스텀 AI 챗 웹뷰 등록
   context.subscriptions.push(Configuration.onDidChangeConfiguration(() => {}))
 }
 

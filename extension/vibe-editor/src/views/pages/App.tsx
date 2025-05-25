@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { DotLoader } from 'react-spinners'
 
 import '../../styles/global.css'
 import { Message, MessageType, PageType } from '../../types/webview'
+import { ChatPage } from './ChatPage'
 import { PostPage } from './PostPage'
 import { SettingPage } from './SettingPage'
 import { StartGuidePage } from './StartGuidePage'
@@ -62,6 +63,8 @@ export function App() {
         return (
           <StartGuidePage postMessageToExtension={postMessageToExtension} />
         )
+      case PageType.CHAT:
+        return <ChatPage postMessageToExtension={postMessageToExtension} />
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full gap-10">

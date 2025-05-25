@@ -296,17 +296,7 @@ export class SnapshotService {
     }
     return null
   }
-
-  public async viewCodeSnapshot(
-    snapshotId: number,
-    templateId: number,
-  ): Promise<void> {
-    setDraftData(DraftDataType.selectedTemplateId, templateId)
-    const snapshot = await this.updateCodeSnapshot(snapshotId, templateId)
-    if (!snapshot) {
-      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
-      return
-    }
+  public async viewUpdatedSnapshot(snapshot: Snapshot): Promise<void> {
     const panel = vscode.window.createWebviewPanel(
       'captureCodeSnapshot',
       `📸 ${snapshot.snapshotName}`,
@@ -317,6 +307,18 @@ export class SnapshotService {
       },
     )
     panel.webview.html = this.getCodeWebviewHTML(snapshot)
+  }
+  public async viewCodeSnapshot(
+    snapshotId: number,
+    templateId: number,
+  ): Promise<void> {
+    setDraftData(DraftDataType.selectedTemplateId, templateId)
+    const snapshot = await this.updateCodeSnapshot(snapshotId, templateId)
+    if (!snapshot) {
+      vscode.window.showInformationMessage('스냅샷을 찾을 수 없습니다.')
+      return
+    }
+    await this.viewUpdatedSnapshot(snapshot)
   }
 
   getCodeWebviewHTML(snapshot: Snapshot): string {

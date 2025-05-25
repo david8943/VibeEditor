@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { getDraftData } from '../configuration/draftData'
+import { ChatService } from '../services/chatService'
 import { SnapshotService } from '../services/snapshotService'
 import { TemplateService } from '../services/templateService'
 import { ICommand } from '../types/command'
@@ -116,5 +117,22 @@ export class RenameSnapshotCommand implements ICommand {
 
   public async execute(item: SnapshotItem): Promise<void> {
     await this.snapshotService.renameSnapshot(item)
+  }
+}
+
+export class InsertSnapshotToChatCommand implements ICommand {
+  public static readonly commandName = 'vibeEditor.insertSnapshotToChat'
+
+  private chatService: ChatService
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.chatService = new ChatService(context)
+  }
+  public get commandName(): string {
+    return InsertSnapshotToChatCommand.commandName
+  }
+
+  public async execute(item: SnapshotItem): Promise<void> {
+    await this.chatService.insertSnapshotToChat(item.snapshot)
   }
 }

@@ -195,7 +195,7 @@ export class TemplateService {
       prev,
     )
     if (!prompt) {
-      vscode.window.showInformationMessage('프롬프트를 찾을 수 없습니다.')
+      vscode.window.showInformationMessage('스토리를 찾을 수 없습니다.')
       return
     }
     const promptAttachList = prompt.promptAttachList
@@ -217,7 +217,7 @@ export class TemplateService {
       promptId: selectedPromptId,
     })
     if (success) {
-      vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
+      vscode.window.showInformationMessage(`스토리에 추가되었습니다`)
     }
   }
 
@@ -245,7 +245,7 @@ export class TemplateService {
           snapshot: promptAttach,
         },
       })
-      vscode.window.showInformationMessage(`프롬프트에 추가되었습니다`)
+      vscode.window.showInformationMessage(`스토리에 추가되었습니다`)
     } else {
       this.addAndSaveToPrompt(snapshot)
     }
@@ -278,7 +278,7 @@ export class TemplateService {
   async generatePost(prompt: Prompt): Promise<Post | null> {
     const ok = 'Ok'
     const selection = await vscode.window.showInformationMessage(
-      '프롬프트 기반으로 포스트를 생성하시겠습니까?',
+      '스토리 기반으로 포스트를 생성하시겠습니까?',
       {
         detail: '생성 시 포스트 페이지로 이동합니다.',
         modal: true,
@@ -288,7 +288,7 @@ export class TemplateService {
 
     if (selection === ok) {
       vscode.window.showInformationMessage(
-        `프롬프트로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
+        `스토리로 포스트를 생성하고 있습니다: ${prompt.promptName}`,
       )
 
       const loadingPost: PostDetail = {
@@ -379,7 +379,7 @@ export class TemplateService {
         }
         await this.updateTemplateToExtension(prev)
         vscode.window.showInformationMessage(
-          `프롬프트가 저장되었습니다: ${data.prompt.promptName}`,
+          `스토리가 저장되었습니다: ${data.prompt.promptName}`,
         )
         return true
       }
@@ -405,7 +405,7 @@ export class TemplateService {
       if (template?.promptList) {
         const newPrompt = template.promptList[0]
         vscode.window.showInformationMessage(
-          `프롬프트가 생성되었습니다: ${newPrompt.promptName}`,
+          `스토리가 생성되었습니다: ${newPrompt.promptName}`,
         )
         return {
           promptId: newPrompt.promptId,
@@ -435,7 +435,7 @@ export class TemplateService {
       await this.context.globalState.update('templates', prev)
       refreshTemplateProvider()
     }
-    vscode.window.showInformationMessage(`프롬프트가 삭제되었습니다:`)
+    vscode.window.showInformationMessage(`스토리가 삭제되었습니다:`)
   }
 
   async getLocalTemplates(): Promise<Template[]> {
@@ -609,7 +609,7 @@ export class TemplateService {
           ]
           await this.context.globalState.update('templates', prev)
           vscode.window.showInformationMessage(
-            `스냅샷이 프롬프트에서 삭제되었습니다.`,
+            `스냅샷이 스토리에서 삭제되었습니다.`,
           )
         }
       }

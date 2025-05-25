@@ -344,7 +344,7 @@ export class SettingViewLoader {
   private getTitle(page: string): string {
     switch (page) {
       case PageType.TEMPLATE:
-        return '프롬프트 생성기'
+        return '스토리 생성기'
       case PageType.POST:
         return '포스트 생성기'
       default:

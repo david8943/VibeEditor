@@ -1,5 +1,10 @@
-import { AIAPIKey, AIProvider } from '../types/ai'
-import { getRequest, postBooleanRequest, putBooleanRequest } from './api'
+import { AIAPIKey, AIProvider, ChatRequest, ChatResponse } from '../types/ai'
+import {
+  getRequest,
+  postBooleanRequest,
+  postRequest,
+  putBooleanRequest,
+} from './api'
 
 // 사용자 사용 가능 AI 조회
 export const getAiProviderList = async () =>
@@ -12,3 +17,7 @@ export const updateUserAPIKey = async (data: AIAPIKey) =>
 // 사용자 커스텀 AI 등록
 export const registerUserAPIKey = async (data: AIAPIKey) =>
   await postBooleanRequest('/user/ai', data)
+
+// 사용자 커스텀 AI 채팅
+export const generateChat = async (data: ChatRequest) =>
+  await postRequest<ChatResponse>('/chat/ai', data)
