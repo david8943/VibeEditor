@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { marked } from 'marked'
 
-import { StartPage } from '@/features/onboarding/StartPage'
+import { StartPage } from '../features/onboarding/StartPage'
 
 export default async function Page() {
   const readmePath = path.join(process.cwd(), 'public/docs/README.md')
