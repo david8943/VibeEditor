@@ -1,10 +1,23 @@
-// src/app/layout.tsx
-import { Metadata } from 'next'
-
-import { ClientProvider } from '@/providers/clientProvider'
-import { fontVariables } from '@/styles/fonts'
-
+import type { Metadata } from 'next'
+import localFont from 'next/font/local'
 import './globals.css'
+
+const paperlogy = localFont({
+  src: '../../public/fonts/Paperlogy-4Regular.ttf',
+  display: 'swap',
+  variable: '--font-paperlogy',
+})
+
+export const metadata: Metadata = {
+  title: 'Vibe Editor',
+  description: 'AI로 작성하는 기술 블로그 VSCode Extension',
+  icons: [
+    {
+      rel: 'icon',
+      url: '/favicon.ico',
+    },
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -12,21 +25,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={paperlogy.variable}>
       <head>
-        <link
-          rel="manifest"
-          href="/manifest.webmanifest"
-        />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={fontVariables}>
-        <ClientProvider>{children}</ClientProvider>
+      <body>
+          {children}
       </body>
     </html>
   )
-}
-
-export const metadata: Metadata = {
-  title: 'Vibe Editor',
-  description: 'AI로 작성하는 기술 블로그 VSCode Extension',
 }

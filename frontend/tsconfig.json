@@ -22,13 +22,12 @@
       "@/*": ["./src/*"]
     }
   },
-  "jsxImportSource": "@emotion/react",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/features/auth/SignUpPage/password/page2tsx"
-  ],
+, "next.config.js"  ],
   "exclude": ["node_modules"]
 }
