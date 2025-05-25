@@ -61,6 +61,17 @@ button {
   border: none;
 }
 
+button.sendButton {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+}
+
+button.sendButton:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
 button.selected {
   background: var(--vscode-button-background);
   color: var(--vscode-button-foreground);

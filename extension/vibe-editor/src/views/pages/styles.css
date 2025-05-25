@@ -1,0 +1,83 @@
+.markdown-content {
+  color: var(--markdown-color);
+}
+
+.markdown-content a {
+  color: var(--markdown-link-color);
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content code {
+  background-color: var(--markdown-code-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: var(--vscode-editor-font-family);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.markdown-content pre {
+  background-color: var(--markdown-code-bg);
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: visible;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid var(--markdown-border-color);
+  margin: 0;
+  padding-left: 1em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content pre,
+.markdown-content p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid var(--markdown-border-color);
+  padding: 0.5em;
+}
+
+.markdown-content th {
+  background-color: var(--markdown-code-bg);
+}
+
+/* Input box 스타일 */
+input[type='text'] {
+  background-color: var(--vscode-input-background) !important;
+  color: var(--vscode-input-foreground) !important;
+  border: 1px solid var(--vscode-input-border) !important;
+}
+
+input[type='text']:focus {
+  outline: none !important;
+  border-color: var(--vscode-focusBorder) !important;
+  box-shadow: none !important;
+}
+
+input[type='text']::placeholder {
+  color: var(--vscode-input-placeholderForeground) !important;
+}

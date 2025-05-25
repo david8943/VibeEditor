@@ -94,7 +94,7 @@ export function PostForm({
         {isViewer ? (
           <div
             className="markdown-viewer"
-            dangerouslySetInnerHTML={{ __html: marked(postContent) }}
+            dangerouslySetInnerHTML={{ __html: marked(postContent) as string }}
           />
         ) : (
           <TuiEditor
