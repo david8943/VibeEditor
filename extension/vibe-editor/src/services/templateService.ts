@@ -33,6 +33,7 @@ import { MessageType } from '../types/webview'
 import { refreshPostProvider } from '../views/tree/postTreeView'
 import { refreshTemplateProvider } from '../views/tree/templateTreeView'
 import { getSideViewProvider } from '../views/webview/SideViewProvider'
+import { PostService } from './postService'
 import { ViewService } from './viewService'
 
 export class TemplateService {
@@ -406,6 +407,12 @@ export class TemplateService {
         )
         refreshPostProvider()
         return newPost
+      } else {
+        await this.context.globalState.update(
+          'posts',
+          prev.filter((post) => post.postId !== loadingPost.postId),
+        )
+        refreshPostProvider()
       }
     }
     return null

@@ -36,8 +36,6 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
     console.log('로그인 스테이터스', loginStatus)
     if (loginStatus) {
       postMessageToExtension({ type: MessageType.GET_DATABASE })
-      postMesasgeTypeToExtension(MessageType.GET_USER)
-      postMessageToExtension({ type: MessageType.GET_OPTIONS })
       postMessageToExtension({ type: MessageType.GET_CONFIG })
     }
   }, [loginStatus])
@@ -51,8 +49,6 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
       const message = event.data
       if (message.type === MessageType.LOGIN_STATUS_LOADED) {
         setLoginStatus(message.payload)
-      } else if (message.type === MessageType.USER_LOADED) {
-        setUser(message.payload)
       } else if (message.type === MessageType.AI_MESSAGE) {
         setMessages((prev) => [
           ...prev,
@@ -164,7 +160,10 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
                   dangerouslySetInnerHTML={renderMarkdown(msg.content)}
                   style={
                     {
-                      '--markdown-color': 'var(--vscode-editor-foreground)',
+                      '--markdown-color':
+                        msg.role === 'user'
+                          ? 'var(--vscode-button-foreground)'
+                          : 'var(--vscode-editor-foreground)',
                       '--markdown-link-color':
                         'var(--vscode-textLink-foreground)',
                       '--markdown-code-bg':

@@ -1,7 +1,5 @@
 import * as vscode from 'vscode'
 
-import { getSnapshotList } from '@/apis/snapshot'
-
 import { retrieveNotionDatabases } from '../../apis/notion'
 import { getCurrentUser } from '../../apis/user'
 import { Configuration } from '../../configuration'
@@ -10,7 +8,6 @@ import { PostService } from '../../services/postService'
 import { SettingService } from '../../services/settingService'
 import { SnapshotService } from '../../services/snapshotService'
 import { TemplateService } from '../../services/templateService'
-import { ViewService } from '../../services/viewService'
 import { AIAPIKey } from '../../types/ai'
 import { DraftDataType } from '../../types/configuration'
 import { CreateDatabase, Database, UpdateDatabase } from '../../types/database'
@@ -23,6 +20,7 @@ import {
   Template,
 } from '../../types/template'
 import { Message, MessageType, PageType } from '../../types/webview'
+import { isLoading } from '../../utils/isLoading'
 
 export class SideViewProvider implements vscode.WebviewViewProvider {
   private templateService: TemplateService
@@ -117,6 +115,21 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
           type: MessageType.CURRENT_POST_LOADED,
           payload: { post },
         })
+      } else {
+        const posts = await this.postService.getLocalPosts()
+        if (!posts) return
+        const postId = posts.find((p) => p.uploadStatus != 'LOADING')?.postId
+        const selectedPostId = getDraftData<number>(
+          DraftDataType.selectedPostId,
+        )
+        if (postId && (!selectedPostId || isLoading(selectedPostId))) {
+          setDraftData(DraftDataType.selectedPostId, postId)
+          const post = await this.postService.getPost(postId)
+          this.postMessageToWebview({
+            type: MessageType.CURRENT_POST_LOADED,
+            payload: { post },
+          })
+        }
       }
     }
     this.stopLoading()
@@ -462,6 +475,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   }
   private async getAIProviders() {
     const aiProviderList = await this.settingService.getAIProviders()
+    aiProviderList.sort((a) => (a.isDefault ? -1 : 1))
     if (aiProviderList.length > 0) {
       await this.postMessageToWebview({
         type: MessageType.AI_PROVIDERS_LOADED,
@@ -470,7 +484,10 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     }
   }
   private async saveAIProvider(aiProvider: AIAPIKey) {
-    await this.settingService.saveAIProvider(aiProvider)
+    const success = await this.settingService.saveAIProvider(aiProvider)
+    if (success) {
+      this.getAIProviders()
+    }
   }
   private async getTemplates(webview: vscode.Webview) {
     try {
