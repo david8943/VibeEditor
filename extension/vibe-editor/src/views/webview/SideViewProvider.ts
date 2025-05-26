@@ -471,7 +471,10 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
     }
   }
   private async saveAIProvider(aiProvider: AIAPIKey) {
-    await this.settingService.saveAIProvider(aiProvider)
+    const success = await this.settingService.saveAIProvider(aiProvider)
+    if (success) {
+      this.getAIProviders()
+    }
   }
   private async getTemplates(webview: vscode.Webview) {
     try {
