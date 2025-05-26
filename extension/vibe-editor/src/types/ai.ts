@@ -1,8 +1,11 @@
-export const BrandType = {
-  Anthropic: 'Anthropic',
-  OpenAI: 'OpenAI',
+export const BrandList = ['Anthropic', 'OpenAI'] as const
+
+export type BrandType = (typeof BrandList)[number]
+
+export const BrandName: Record<BrandType, string> = {
+  Anthropic: 'Anthropic(Claude)',
+  OpenAI: 'OpenAI(ChatGPT)',
 }
-export type BrandType = (typeof BrandType)[keyof typeof BrandType]
 
 export interface AIAPIKey {
   brand: BrandType

@@ -57,6 +57,7 @@ export const DatabaseModal: React.FC<Props> = ({ onClose, saveDatabase }) => {
           className="w-full p-2 mb-4 bg-gray-800 border border-gray-600"
           placeholder="데이터베이스 ID"
           value={notionDatabaseModalUid}
+          type="password"
           onChange={(e) => handleNotionDatabaseUidChange(e.target.value)}
         />
         <div className="flex justify-end gap-2">
