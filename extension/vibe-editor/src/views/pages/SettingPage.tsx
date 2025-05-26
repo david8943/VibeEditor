@@ -94,7 +94,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
           <div className="text-2xl font-bold">Vibe Editor 설정</div>
           <button
             className="secondary-button transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
-            text-base font-medium px-3 py-1.5 rounded"
+            text-base font-medium px-3 py-1.5 rounded whitespace-pre-wrap"
             onClick={() =>
               postMessageToExtension({ type: MessageType.SHOW_README })
             }>
@@ -132,8 +132,8 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                         <div
                           className={
                             computedUser.notionActive
-                              ? 'notion-status-active text-xs'
-                              : 'notion-status-inactive text-xs'
+                              ? 'notion-status-active text-xs whitespace-pre-wrap'
+                              : 'notion-status-inactive text-xs whitespace-pre-wrap'
                           }>
                           {computedUser.notionActive ? '활성화' : '비활성화'}
                         </div>
@@ -187,7 +187,7 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                             width={16}
                             height={16}
                           />
-                          <h3 className="text-sm font-medium">시작 가이드</h3>
+                          <h3 className="text-sm font-medium">스타터</h3>
                         </div>
                         <button
                           type="button"
@@ -211,8 +211,8 @@ export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
                     )
                   }>
                   {computedUser?.notionActive
-                    ? 'Notion 프라이빗 API 통합 토큰 변경'
-                    : ' Notion 프라이빗 API 통합 토큰 등록'}
+                    ? 'Notion API 통합 토큰 변경'
+                    : ' Notion API 통합 토큰 등록'}
                 </button>
                 <h2 className="text-lg font-semibold border-b pb-4">
                   기본 설정
