@@ -52,6 +52,13 @@ textarea {
   font-family: var(--vscode-editor-font-family);
 }
 
+.profile {
+  border-radius: 9999px;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+}
+
 button {
   padding: 8px 16px;
   border-radius: 4px;
