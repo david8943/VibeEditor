@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import CheckIcon from '@/assets/icons/check.svg'
-import CheckListIcon from '@/assets/icons/checklist.svg'
-import LightBulbEmptyIcon from '@/assets/icons/lightbulb-empty.svg'
 
 import { AIProvider } from '../../types/ai'
 import { Database } from '../../types/database'
@@ -33,13 +31,12 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
     {
       id: StartGuideType.isLogin,
       title: '로그인 ',
-      description: '소셜 로그인 후 시작 가이드를 진행합니다.',
+      description: '소셜 로그인 후 스타터를 진행합니다.',
     },
     {
       id: StartGuideType.isNotionSecretKey,
-      title: 'Notion 프라이빗 API 통합 토큰 등록',
-      description:
-        'Notion의 프라이빗 API 통합 토큰을 복사해 시크릿 키를 등록해주세요.',
+      title: 'Notion API 통합 토큰 등록',
+      description: 'Notion의 API 통합 토큰을 복사해 시크릿 키를 등록해주세요.',
     },
     {
       id: StartGuideType.isNotionDatabase,
@@ -131,10 +128,10 @@ export function StartGuidePage({ postMessageToExtension }: WebviewPageProps) {
         <div className="rounded-lg shadow-sm p-2 mb-8">
           <div className="flex items-center gap-4 mb-8 border-b pb-6">
             <div className="text-lg font-bold flex items-center gap-2">
-              <span>Vibe Editor 시작 가이드</span>
+              <span>Vibe Editor 스타터</span>
             </div>
             <button
-              className="secondary-button text-base font-medium px-4 py-2 rounded-full transition-colors"
+              className="secondary-button text-base font-medium px-4 py-2 rounded-full transition-colors whitespace-pre-wrap"
               onClick={() =>
                 postMessageToExtension({ type: MessageType.SHOW_README })
               }>

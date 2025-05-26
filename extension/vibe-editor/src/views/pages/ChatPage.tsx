@@ -1,14 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { SyncLoader } from 'react-spinners'
 
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 
 import ArrowUpIcon from '@/assets/icons/arrow-up.svg'
 import MinusIcon from '@/assets/icons/circle-slash.svg'
+import BlockIcon from '@/assets/icons/code.svg'
+import DirIcon from '@/assets/icons/file-submodule.svg'
+import FileIcon from '@/assets/icons/file.svg'
+import LogoIcon from '@/assets/icons/icon.svg'
+import LogIcon from '@/assets/icons/terminal.svg'
 
-import { Database } from '../../types/database'
-import { Snapshot } from '../../types/snapshot'
-import type { Option } from '../../types/template'
+import { AIProvider } from '../../types/ai'
+import { Snapshot, SnapshotType } from '../../types/snapshot'
 import { User } from '../../types/user'
 import { MessageType, WebviewPageProps } from '../../types/webview'
 import './styles.css'
@@ -20,22 +25,51 @@ type ChatMessage = {
 }
 
 export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
+  const [isLoading, setIsLoading] = useState(false)
   const [loginStatus, setLoginStatus] = useState(false)
-  const [user, setUser] = useState<User>({
-    notionActive: false,
-    lastLoginAt: '',
-    updatedAt: '',
-    createdAt: '',
-  })
+  const [defaultUserAIProviderId, setDefaultUserAIProviderId] = useState(0)
+  const [defaultAIModel, setDefaultAIModel] = useState('')
+
+  const snapshotIcon = (snapshotType: SnapshotType) => {
+    switch (snapshotType) {
+      case SnapshotType.LOG:
+        return (
+          <LogIcon
+            width={12}
+            height={12}
+          />
+        )
+      case SnapshotType.DIRECTORY:
+        return (
+          <DirIcon
+            width={12}
+            height={12}
+          />
+        )
+      case SnapshotType.FILE:
+        return (
+          <FileIcon
+            width={12}
+            height={12}
+          />
+        )
+      default:
+        return (
+          <BlockIcon
+            width={12}
+            height={12}
+          />
+        )
+    }
+  }
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [snapshot, setSnapshot] = useState<Snapshot[]>([])
   const [input, setInput] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
-
+  const [aiList, setAiList] = useState<AIProvider[]>([])
   useEffect(() => {
-    console.log('로그인 스테이터스', loginStatus)
     if (loginStatus) {
-      postMessageToExtension({ type: MessageType.GET_DATABASE })
+      postMessageToExtension({ type: MessageType.GET_AI_PROVIDERS })
       postMessageToExtension({ type: MessageType.GET_CONFIG })
     }
   }, [loginStatus])
@@ -50,6 +84,7 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
       if (message.type === MessageType.LOGIN_STATUS_LOADED) {
         setLoginStatus(message.payload)
       } else if (message.type === MessageType.AI_MESSAGE) {
+        setIsLoading(false)
         setMessages((prev) => [
           ...prev,
           { role: 'assistant', content: message.payload.text },
@@ -61,12 +96,23 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
           )
           return isDuplicate ? prev : [...prev, message.payload]
         })
+      } else if (message.type === MessageType.CONFIG_LOADED) {
+        setDefaultUserAIProviderId(message.payload.defaultUserAIProviderId ?? 0)
+      } else if (message.type === MessageType.AI_PROVIDERS_LOADED) {
+        setAiList(message.payload)
       }
     }
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [])
+
+  useEffect(() => {
+    setDefaultAIModel(
+      aiList.find((ai) => ai.userAIProviderId == defaultUserAIProviderId)
+        ?.model ?? '',
+    )
+  }, [defaultUserAIProviderId, aiList])
 
   const removeSnapshot = (snapshotId: number) => {
     setSnapshot((prev) =>
@@ -112,6 +158,7 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
     }
 
     postMessageToExtension({ type: MessageType.USER_MESSAGE, payload: message })
+    setIsLoading(true)
     setInput('')
   }
 
@@ -132,29 +179,52 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
       </div>
     )
   }
+  if (!defaultUserAIProviderId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div>설정 페이지에서 기본 AI를 선택해주세요.</div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full bg-[var(--vscode-editor-background)] relative">
-      <div className="overflow-y-auto p-6 pb-24 h-full">
+      <div className="overflow-y-auto p-1 pb-24 h-full">
         {messages.length === 0 && (
           <div className="text-[var(--vscode-descriptionForeground)] text-center mt-10 text-lg font-light">
-            AI와 새로운 대화를 시작해보세요 ✨<br />
-            대화에 스냅샷을 추가할 수 있습니다.📸
+            <b>AI</b>와 새로운 대화✨를 시작해보세요 <br />
+            대화에 <b>스냅샷</b>📸을 추가할 수 있습니다.
           </div>
         )}
-
         {messages.map((msg, idx) => (
           <div
             key={idx}
             className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {msg.role == 'assistant' && (
+              <div className="profile flex-0 w-7 h-6 mr-1">
+                <LogoIcon
+                  width={24}
+                  height={24}
+                />
+              </div>
+            )}
             <div className="flex flex-col gap-2">
+              {msg.role === 'assistant' && (
+                <div className="text-[var(--vscode-button-background)] font-light">
+                  Vibe Editor AI Chat({defaultAIModel})
+                </div>
+              )}
               <div
-                className={`px-3 py-2 rounded-lg break-words w-fit ${
-                  msg.role === 'user'
-                    ? 'bg-[var(--vscode-button-background)] text-[var(--vscode-button-foreground)] self-end ml-auto max-w-[60%]'
-                    : 'bg-[var(--vscode-editor-inactiveSelectionBackground)] text-[var(--vscode-editor-foreground)] self-start max-w-[75%]'
-                }`}
-                style={{ minWidth: 'max(80px, 30vw)' }}>
+                className={`px-3 py-2 rounded-lg w-fit break-words
+    ${
+      msg.role === 'user'
+        ? 'bg-[var(--vscode-button-background)] text-[var(--vscode-button-foreground)] self-end ml-auto max-w-[60%]'
+        : 'bg-[var(--vscode-editor-inactiveSelectionBackground)] text-[var(--vscode-editor-foreground)] self-start max-w-[75%]'
+    }`}
+                style={{
+                  minWidth: 80,
+                  maxWidth: '60vw',
+                }}>
                 <div
                   className="markdown-content"
                   dangerouslySetInnerHTML={renderMarkdown(msg.content)}
@@ -173,16 +243,17 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
                   }
                 />
               </div>
-
               {msg.snapshot && (
                 <div className="flex flex-col flex-wrap gap-2 justify-end">
                   {msg.snapshot.map((snapshot) => (
                     <div
                       key={`${idx}-${snapshot.snapshotId}`}
                       className="flex items-center bg-[var(--vscode-badge-background)] border border-[var(--vscode-badge-foreground)] rounded-md px-2 py-1 mr-2 transition-all duration-200 hover:bg-[var(--vscode-badge-foreground)] hover:text-[var(--vscode-badge-background)] group">
+                      {snapshotIcon(snapshot.snapshotType)}
                       <span
-                        className="text-ellipsis text-xs font-medium cursor-pointer"
+                        className="text-ellipsis text-xs font-medium cursor-pointer ml-1"
                         style={{
+                          display: 'inline-block',
                           maxWidth: 120,
                           overflow: 'hidden',
                           whiteSpace: 'nowrap',
@@ -197,6 +268,20 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
             </div>
           </div>
         ))}
+        {messages.length > 0 && isLoading && (
+          <div className={`mb-4 flex justify-start`}>
+            <div className="flex flex-col gap-2">
+              <div
+                className={`px-5 py-5 rounded-lg break-words w-fit
+    bg-[var(--vscode-editor-inactiveSelectionBackground)] text-[var(--vscode-editor-foreground)] self-start max-w-[75%]
+    flex justify-center
+  `}
+                style={{ minWidth: 'max(80px, 30vw)' }}>
+                <SyncLoader color="var(--vscode-button-background)" />
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
       <div
@@ -206,10 +291,12 @@ export function ChatPage({ postMessageToExtension }: WebviewPageProps) {
           {snapshot.map((snapshot) => (
             <div
               key={snapshot.snapshotId}
-              className="flex items-center bg-[var(--vscode-badge-background)] border border-[var(--vscode-badge-foreground)] rounded-md px-3 py-1.5 mr-2 transition-all duration-200 hover:bg-[var(--vscode-badge-foreground)] hover:text-[var(--vscode-badge-background)] group">
+              className="flex items-center bg-[var(--vscode-badge-background)] border border-[var(--vscode-badge-foreground)] rounded-md px-1 py-1 mr-2 transition-all duration-200 hover:bg-[var(--vscode-badge-foreground)] hover:text-[var(--vscode-badge-background)] group">
+              {snapshotIcon(snapshot.snapshotType)}
               <span
-                className="text-ellipsis text-xs font-medium cursor-pointer"
+                className="text-ellipsis text-xs font-medium cursor-pointer ml-1"
                 style={{
+                  display: 'inline-block',
                   maxWidth: 120,
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',

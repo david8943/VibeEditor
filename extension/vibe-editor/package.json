@@ -4,7 +4,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -56,7 +56,7 @@
         {
           "type": "webview",
           "id": "vibeEditorViewerPage",
-          "name": "Vibe Editor 시작 가이드",
+          "name": "Vibe Editor 스타터",
           "when": "vibeEditor.showStartGuide == true",
           "icon": "media/icon.svg"
         },
@@ -144,7 +144,7 @@
       },
       {
         "command": "vibeEditor.setNotionApi",
-        "title": "Notion 프라이빗 API 통합 토큰 키 등록",
+        "title": "Notion API 통합 토큰 키 등록",
         "when": "vibeEditor.draftData.loginStatus == true",
         "category": "Vibe Editor"
       },
@@ -258,17 +258,17 @@
       },
       {
         "command": "vibeEditor.closeStartGuide",
-        "title": "시작 가이드 닫기",
+        "title": "스타터 닫기",
         "icon": "$(close)"
       },
       {
         "command": "vibeEditor.openStartGuide",
-        "title": "시작 가이드 열기",
+        "title": "스타터 열기",
         "icon": "$(rocket)"
       },
       {
         "command": "vibeEditor.resetStartGuide",
-        "title": "시작 가이드 새로고침",
+        "title": "스타터 새로고침",
         "icon": "$(refresh)"
       },
       {
@@ -453,7 +453,7 @@
         "vibeEditor.showStartGuide": {
           "type": "boolean",
           "default": true,
-          "description": "시작 가이드 보이기 여부"
+          "description": "스타터 보이기 여부"
         }
       }
     },

@@ -19,7 +19,7 @@ VS Code에서 코드/디렉토리/로그 스냅샷을 찍고, AI의 도움으로
 
 2. **Notion 데이터베이스 연결**
 
-   - 설정 페이지에서 `Notion 프라이빗 API 통합 토큰 등록`을 통해 토큰을 입력합니다.
+   - 설정 페이지에서 `Notion API 통합 토큰 등록`을 통해 토큰을 입력합니다.
    - Notion에서 [API 통합 생성](https://www.notion.so/my-integrations) → 새 페이지 생성 → 빈 데이터베이스 추가 → API 통합 연결
    - 설정 페이지의 `Notion 데이터베이스` 섹션에서 `+` 버튼 클릭 후 이름과 ID 입력
 
@@ -112,7 +112,7 @@ Vibe Editor를 통해 Notion에 글을 게시하려면 아래 순서를 따라 �
 1. [Notion API 통합 생성](https://www.notion.so/my-integrations)
 
    - `+ 새 API 통합` 버튼을 클릭해 새로운 통합을 생성합니다.
-   - 생성 후 발급된 **프라이빗 API 통합 시크릿**을 복사해둡니다.
+   - 생성 후 발급된 **API 통합 시크릿**을 복사해둡니다.
 
 2. Notion에서 빈 데이터베이스 생성
 
@@ -121,8 +121,8 @@ Vibe Editor를 통해 Notion에 글을 게시하려면 아래 순서를 따라 �
 
 3. Vibe Editor에 API 키 등록
 
-   - 설정 페이지에서 `Notion 프라이빗 API 통합 토큰 등록` 버튼 클릭하거나,
-   - 명령어 팔레트(`Ctrl + Shift + P`)에서 `Notion 프라이빗 API 통합 토큰 등록`을 실행해 토큰을 붙여넣습니다.
+   - 설정 페이지에서 `Notion API 통합 토큰 등록` 버튼 클릭하거나,
+   - 명령어 팔레트(`Ctrl + Shift + P`)에서 `Notion API 통합 토큰 등록`을 실행해 토큰을 붙여넣습니다.
 
 4. Notion 데이터베이스 등록
 

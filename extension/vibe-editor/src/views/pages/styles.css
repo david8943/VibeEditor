@@ -1,5 +1,7 @@
 .markdown-content {
   color: var(--markdown-color);
+  line-height: 1.25;
+  display: inline-block;
 }
 
 .markdown-content a {
@@ -45,8 +47,7 @@
 .markdown-content ol,
 .markdown-content pre,
 .markdown-content p {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin: 0;
 }
 
 .markdown-content table {
