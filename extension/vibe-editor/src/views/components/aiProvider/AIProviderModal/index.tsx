@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { AIAPIKey, BrandType } from '../../../../types/ai'
+import { AIAPIKey, BrandList, BrandName, BrandType } from '../../../../types/ai'
 
 interface Props {
   saveAIProvider: (aiProvider: AIAPIKey) => void
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
-  const [brandModal, setBrandModal] = useState(BrandType.Anthropic)
+  const [brandModal, setBrandModal] = useState<BrandType>(BrandList[0])
   const [apiKeyModal, setApiKeyModal] = useState('')
 
   const handleSubmit = () => {
@@ -29,13 +29,13 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
           className="w-full"
           value={brandModal}
           onChange={(e) => {
-            setBrandModal(e.target.value)
+            setBrandModal(e.target.value as BrandType)
           }}>
-          {Object.values(BrandType).map((brand) => (
+          {BrandList.map((brand) => (
             <option
               key={brand}
               value={brand}>
-              {brand}
+              {BrandName[brand]}
             </option>
           ))}
         </select>
@@ -44,6 +44,7 @@ export const AIProviderModal = ({ onClose, saveAIProvider }: Props) => {
           className="w-full p-2 mb-4 bg-gray-800 border border-gray-600"
           placeholder="AI Key ID"
           value={apiKeyModal}
+          type="password"
           onChange={(e) => setApiKeyModal(e.target.value)}
         />
         <div className="flex justify-end gap-2">
