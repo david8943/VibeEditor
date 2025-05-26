@@ -462,6 +462,7 @@ export class SideViewProvider implements vscode.WebviewViewProvider {
   }
   private async getAIProviders() {
     const aiProviderList = await this.settingService.getAIProviders()
+    aiProviderList.sort((a) => (a.isDefault ? -1 : 1))
     if (aiProviderList.length > 0) {
       await this.postMessageToWebview({
         type: MessageType.AI_PROVIDERS_LOADED,

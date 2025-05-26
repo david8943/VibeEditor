@@ -4,7 +4,7 @@
   "displayName": "vibeditor",
   "description": "add code snippet to notion",
   "publisher": "VibeEditor",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.99.0"
   },

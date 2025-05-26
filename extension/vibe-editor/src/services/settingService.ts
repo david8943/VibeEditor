@@ -130,7 +130,9 @@ export class SettingService {
     const aiProviders = await this.getAIProviders()
     console.log('ai privaiProviders', aiProviders, 'aiProvider', aiProvider)
     let success = false
-    if (aiProviders.find((ai) => ai.brand == aiProvider.brand)) {
+    if (
+      aiProviders.find((ai) => ai.brand == aiProvider.brand && !ai.isDefault)
+    ) {
       success = await updateUserAPIKey(aiProvider)
     } else {
       success = await registerUserAPIKey(aiProvider)

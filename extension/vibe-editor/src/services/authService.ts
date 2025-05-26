@@ -4,6 +4,7 @@ import { ConfigType, Configuration } from '../configuration'
 import { clearDraftData, setDraftData } from '../configuration/draftData'
 import { DraftDataType, SecretType } from '../types/configuration'
 import { MessageType } from '../types/webview'
+import { getChatViewProvider } from '../views/webview/ChatViewProvider'
 import { getSideViewProvider } from '../views/webview/SideViewProvider'
 import { getStartGuideViewProvider } from '../views/webview/StartGuideViewProvider'
 
@@ -129,6 +130,14 @@ export class AuthService {
                 })
               }
 
+              const chatViewProvider = getChatViewProvider()
+              if (chatViewProvider) {
+                chatViewProvider.postMessageToWebview({
+                  type: MessageType.LOGIN_STATUS_LOADED,
+                  payload: loginStatus,
+                })
+              }
+
               vscode.commands.executeCommand('vibeEditor.initFetchData')
             } else {
               res.statusCode = 400
@@ -167,6 +176,13 @@ export class AuthService {
     await vscode.commands.executeCommand('vibeEditor.resetPost')
     if (Configuration.get(ConfigType.showStartGuide)) {
       await vscode.commands.executeCommand('vibeEditor.resetStartGuide')
+    }
+    const chatViewProvider = getChatViewProvider()
+    if (chatViewProvider) {
+      chatViewProvider.postMessageToWebview({
+        type: MessageType.LOGIN_STATUS_LOADED,
+        payload: false,
+      })
     }
     vscode.window.withProgress(
       {
